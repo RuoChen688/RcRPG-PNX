@@ -11,10 +11,14 @@ import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.command.Command;
 import cn.nukkit.command.CommandSender;
+import cn.nukkit.command.data.CommandParamType;
+import cn.nukkit.command.data.CommandParameter;
 import cn.nukkit.item.Item;
 import cn.nukkit.item.customitem.ItemCustom;
 import cn.nukkit.utils.Config;
+import cn.nukkit.utils.StringUtils;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -22,6 +26,7 @@ public class Commands extends Command {
 
     public Commands() {
         super("rpg", "RPG指令", "/rpg help");
+        this.addCommandShow();
     }
 
     @Override
@@ -43,7 +48,6 @@ public class Commands extends Command {
                 sender.sendMessage("/rpg money help 金币指令");
                 sender.sendMessage("/rpg point help 点券指令");
                 sender.sendMessage("/rpg shop help 商店指令");
-                sender.sendMessage("/rpg py 切换交易模式");
                 break;
             case "guild":
                 guildForm.make_one((Player) sender);
@@ -429,7 +433,171 @@ public class Commands extends Command {
                         break;
                 }
                 break;
+            case "box":
+                switch(args.get(1)){
+                    case "help":
+                        sender.sendMessage("/rpg box add [Name] 创建一个名为Name的箱子配置");
+                        sender.sendMessage("/rpg box del [Name] 删除一个名为Name的箱子配置");
+                        sender.sendMessage("/rpg box give [Player] [Name] [Count] 给予玩家一定数量的箱子");
+                        break;
+                    case "add":
+                        if(args.size() != 3){
+                            sender.sendMessage("参数错误");
+                            return false;
+                        }
+                        Item item = ((Player) sender).getInventory().getItemInHand();
+                        String id;
+                        if(item.isNull()){
+                            id = "minecraft:egg";
+                        }else{
+                            id = item.getNamespaceId();
+                        }
+                        Config config;
+                        if((config = Box.addBoxConfig(args.get(2),id)) != null){
+                            Box box = Box.loadBox(args.get(2),config);
+                            Main.loadBox.put(args.get(2),box);
+                            sender.sendMessage("添加成功");
+                        }else{
+                            sender.sendMessage("添加失败");
+                        }
+                        break;
+                    case "del":
+                        if(args.size() != 3){
+                            sender.sendMessage("参数错误");
+                            return false;
+                        }
+                        if(Box.delBoxConfig(args.get(2))){
+                            Main.loadBox.remove(args.get(2));
+                            sender.sendMessage("删除成功");
+                        }else{
+                            sender.sendMessage("删除失败");
+                        }
+                        break;
+                    case "give":
+                        if(args.size() != 5){
+                            sender.sendMessage("参数错误");
+                            return false;
+                        }
+                        Player player = Main.instance.getServer().getPlayer(args.get(2));
+                        if(!player.isOnline()){
+                            sender.sendMessage("玩家不在线");
+                            return false;
+                        }
+                        if(Box.giveBox(player,args.get(3), Integer.parseInt(args.get(4)))){
+                            if(sender.isPlayer()) sender.sendMessage("给予成功");
+                        }else{
+                            if(sender.isPlayer()) sender.sendMessage("给予失败");
+                        }
+                        break;
+                }
+                break;
         }
         return false;
     }
+
+    public void addCommandShow(){
+        this.commandParameters.clear();
+        ArrayList<String> society = new ArrayList<>(){{
+            add("money");
+            add("point");
+        }};
+        ArrayList<String> item = new ArrayList<>(){{
+           add("weapon");
+           add("armour");
+           add("magic");
+           add("stone");
+           add("box");
+        }};
+        String[] list = new String[]{"weapon","armour","magic","stone","box","guild","prefix","money","point","exp","shop"};
+        this.addCommandParameters("help",new CommandParameter[]{
+                CommandParameter.newEnum("help",new String[]{"help"})
+        });
+        this.addCommandParameters("guild",new CommandParameter[]{
+                CommandParameter.newEnum("guild",new String[]{"guild"})
+        });
+        this.addCommandParameters("exp",new CommandParameter[]{
+                CommandParameter.newEnum("exp",new String[]{"exp"}),
+                CommandParameter.newEnum("give",new String[]{"give"}),
+                CommandParameter.newType("PlayerName",CommandParamType.STRING),
+                CommandParameter.newType("Exp",CommandParamType.INT)
+        });
+        this.addCommandParameters("shop",new CommandParameter[]{
+                CommandParameter.newEnum("shop",new String[]{"shop"}),
+                CommandParameter.newType("ShopName",CommandParamType.STRING)
+        });
+        for(String name : list){
+            if(item.contains(name)){
+                if(name.equals("weapon") || name.equals("armour")){
+                    this.addCommandParameters(name + "_inlay",new CommandParameter[]{
+                            CommandParameter.newEnum(name,new String[]{name}),
+                            CommandParameter.newEnum("inlay",new String[]{"inlay"})
+                    });
+                }
+                this.addCommandParameters(name + "_add",new CommandParameter[]{
+                        CommandParameter.newEnum(name,new String[]{name}),
+                        CommandParameter.newEnum("add",new String[]{"add"}),
+                        CommandParameter.newType(StringUtils.capitalize(name),CommandParamType.STRING)
+                });
+                this.addCommandParameters(name + "_del",new CommandParameter[]{
+                        CommandParameter.newEnum(name,new String[]{name}),
+                        CommandParameter.newEnum("del",new String[]{"del"}),
+                        CommandParameter.newType(StringUtils.capitalize(name),CommandParamType.STRING)
+                });
+                this.addCommandParameters(name + "_help",new CommandParameter[]{
+                        CommandParameter.newEnum(name,new String[]{name}),
+                        CommandParameter.newEnum("help",new String[]{"help"})
+                });
+                this.addCommandParameters(name + "_give",new CommandParameter[]{
+                        CommandParameter.newEnum(name,new String[]{name}),
+                        CommandParameter.newEnum("give",new String[]{"give"}),
+                        CommandParameter.newType("PlayerName",CommandParamType.STRING),
+                        CommandParameter.newType(StringUtils.capitalize(name),CommandParamType.STRING),
+                        CommandParameter.newType("Count",CommandParamType.INT)
+                });
+            }else if(name.equals("prefix")){
+                this.addCommandParameters(name + "_give",new CommandParameter[]{
+                        CommandParameter.newEnum(name,new String[]{name}),
+                        CommandParameter.newEnum("give",new String[]{"give"}),
+                        CommandParameter.newType("PlayerName",CommandParamType.STRING),
+                        CommandParameter.newType(StringUtils.capitalize(name),CommandParamType.STRING)
+                });
+                this.addCommandParameters(name + "_remove",new CommandParameter[]{
+                        CommandParameter.newEnum(name,new String[]{name}),
+                        CommandParameter.newEnum("remove",new String[]{"remove"}),
+                        CommandParameter.newType("PlayerName",CommandParamType.STRING),
+                        CommandParameter.newType(StringUtils.capitalize(name),CommandParamType.STRING)
+                });
+                this.addCommandParameters(name + "_help",new CommandParameter[]{
+                        CommandParameter.newEnum(name,new String[]{name}),
+                        CommandParameter.newEnum("help",new String[]{"help"})
+                });
+                this.addCommandParameters(name + "_my",new CommandParameter[]{
+                        CommandParameter.newEnum(name,new String[]{name}),
+                        CommandParameter.newEnum("my",new String[]{"my"})
+                });
+            }else if(society.contains(name)){
+                this.addCommandParameters(name + "_add",new CommandParameter[]{
+                        CommandParameter.newEnum(name,new String[]{name}),
+                        CommandParameter.newEnum("add",new String[]{"add"}),
+                        CommandParameter.newType("PlayerName",CommandParamType.STRING),
+                        CommandParameter.newType(StringUtils.capitalize(name),CommandParamType.INT)
+                });
+                this.addCommandParameters(name + "_del",new CommandParameter[]{
+                        CommandParameter.newEnum(name,new String[]{name}),
+                        CommandParameter.newEnum("del",new String[]{"del"}),
+                        CommandParameter.newType("PlayerName",CommandParamType.STRING),
+                        CommandParameter.newType(StringUtils.capitalize(name),CommandParamType.INT)
+                });
+                this.addCommandParameters(name + "_help",new CommandParameter[]{
+                        CommandParameter.newEnum(name,new String[]{name}),
+                        CommandParameter.newEnum("help",new String[]{"help"})
+                });
+                this.addCommandParameters(name + "_my",new CommandParameter[]{
+                        CommandParameter.newEnum(name,new String[]{name}),
+                        CommandParameter.newEnum("my",new String[]{"my"})
+                });
+            }
+        }
+    }
+
 }

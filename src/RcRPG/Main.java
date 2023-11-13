@@ -1,13 +1,12 @@
 package RcRPG;
 
-import RcRPG.RPG.Armour;
-import RcRPG.RPG.Magic;
-import RcRPG.RPG.Stone;
-import RcRPG.RPG.Weapon;
+import RcRPG.RPG.*;
 import RcRPG.Society.Shop;
+import RcRPG.Task.BoxTimeTask;
 import RcRPG.Task.Tip;
 import RcRPG.Task.loadHealth;
 import cn.nukkit.Server;
+import cn.nukkit.block.BlockCopperOxidized;
 import cn.nukkit.event.Listener;
 import cn.nukkit.item.Item;
 import cn.nukkit.plugin.PluginBase;
@@ -34,6 +33,8 @@ public class Main extends PluginBase implements Listener {
     public static LinkedHashMap<String, Magic> loadMagic = new LinkedHashMap<>();
     public static LinkedHashMap<String, Shop> loadShop = new LinkedHashMap<>();
 
+    public static LinkedHashMap<String, Box> loadBox = new LinkedHashMap<>();
+
     public Main(){}
 
     public void onEnable(){
@@ -44,6 +45,7 @@ public class Main extends PluginBase implements Listener {
         config = new Config(this.getDataFolder() + "/Config.yml");
         this.getServer().getPluginManager().registerEvents(new Events(),this);
         this.getServer().getScheduler().scheduleRepeatingTask(new Tip(this),20);
+        this.getServer().getScheduler().scheduleRepeatingTask(new BoxTimeTask(this),20);
         this.getServer().getScheduler().scheduleRepeatingTask(new loadHealth(this),10);
         this.getServer().getCommandMap().register("rpg", new Commands());
         if(Server.getInstance().getPluginManager().getPlugin("EconomyAPI") == null){
@@ -142,6 +144,22 @@ public class Main extends PluginBase implements Listener {
                 this.getLogger().warning(name+"商店数据读取失败");
             }
         }
+        this.getLogger().info("开始读取箱子信息");
+        for(String name: Handle.getDefaultFiles("Box")){
+            this.getLogger().info("读取 "+name+".yml");
+            Box box = null;
+            try {
+                box = Box.loadBox(name,new Config(this.getDataFolder()+"/Box/"+name+".yml",Config.YAML));
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            if(box != null){
+                loadBox.put(name,box);
+                this.getLogger().info(name+"箱子数据读取成功");
+            }else{
+                this.getLogger().warning(name+"箱子数据读取失败");
+            }
+        }
     }
 
     public File getPlayerFile() {
@@ -165,36 +183,47 @@ public class Main extends PluginBase implements Listener {
     public File getShopFile() {
         return new File(this.getDataFolder() + "/Shop");
     }
+    public File getBoxFile() {
+        return new File(this.getDataFolder() + "/Box");
+    }
 
     public void getNewFile(){
         File playerFile = this.getPlayerFile();
         if (!playerFile.exists() && !playerFile.mkdirs()) {
-            Server.getInstance().getLogger().info("/Players文件夹创建失败");
+            this.getLogger().info("/Players文件夹创建失败");
         }
         File weaponFile = this.getWeaponFile();
         if (!weaponFile.exists() && !weaponFile.mkdirs()) {
-            Server.getInstance().getLogger().info("/Weapon文件夹创建失败");
+            this.getLogger().info("/Weapon文件夹创建失败");
         }
         File armourFile = this.getArmourFile();
         if (!armourFile.exists() && !armourFile.mkdirs()) {
-            Server.getInstance().getLogger().info("/Armour文件夹创建失败");
+            this.getLogger().info("/Armour文件夹创建失败");
         }
         File magicFile = this.getMagicFile();
         if (!magicFile.exists() && !magicFile.mkdirs()) {
-            Server.getInstance().getLogger().info("/Magic文件夹创建失败");
+            this.getLogger().info("/Magic文件夹创建失败");
         }
         File stoneFile = this.getStoneFile();
         if (!stoneFile.exists() && !stoneFile.mkdirs()) {
-            Server.getInstance().getLogger().info("/Stone文件夹创建失败");
+            this.getLogger().info("/Stone文件夹创建失败");
         }
         File guildFile = this.getGuildFile();
         if (!guildFile.exists() && !guildFile.mkdirs()) {
-            Server.getInstance().getLogger().info("/Guild文件夹创建失败");
+            this.getLogger().info("/Guild文件夹创建失败");
         }
         File shopFile = this.getShopFile();
         if (!shopFile.exists() && !shopFile.mkdirs()) {
-            Server.getInstance().getLogger().info("/Shop文件夹创建失败");
+            this.getLogger().info("/Shop文件夹创建失败");
         }
+        File boxFile = this.getBoxFile();
+        if (!boxFile.exists() && !boxFile.mkdirs()) {
+            this.getLogger().info("/Box文件夹创建失败");
+        }
+    }
+
+    public static Main getInstance(){
+        return Main.instance;
     }
 
 }
