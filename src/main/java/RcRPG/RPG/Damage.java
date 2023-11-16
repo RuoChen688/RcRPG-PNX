@@ -84,9 +84,9 @@ public class Damage {
         return damage;
     }
 
-    public static void onDamage(Player damager,Entity entity){
+    public static void onDamage(Player damager, Entity entity){
         Item item = damager.getInventory().getItemInHand();
-        if(!item.isNull() && Weapon.isWeapon(item)){
+        if (!item.isNull() && Weapon.isWeapon(item)) {
             Weapon weapon = Main.loadWeapon.get(item.getNamedTag().getString("name"));
             if(weapon.getSuckRound() != 0){
                 if(Handle.random(1,100) <= weapon.getSuckRound()){

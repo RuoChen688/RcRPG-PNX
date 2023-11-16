@@ -15,8 +15,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-;
-
 public class Handle {
 
     public static Config getPlayerConfig(String name){
@@ -58,10 +56,6 @@ public class Handle {
     public static Effect StringToEffect(String s){
         String[] ss = s.split(":");
         return Effect.getEffect(Integer.parseInt(ss[0])).setAmplifier(Integer.parseInt(ss[1])-1).setDuration(Integer.parseInt(ss[2])*20);
-    }
-
-    public static void setEffect(Player player, Effect effect){
-        effect.add(player);
     }
 
     public static Stone getStoneByLabel(String label){
@@ -165,3 +159,4 @@ public class Handle {
 
 
 }
+

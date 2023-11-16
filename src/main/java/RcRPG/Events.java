@@ -45,8 +45,9 @@ public class Events implements Listener {
         Player player = event.getPlayer();
         Item item = event.getItem();
         Block block = event.getBlock();
-        if(!item.isNull() && Magic.isMagic(item) && Handle.getShopByPos(block) == null){
-            Magic.useMagic(player,item);
+        if(!item.isNull() && Handle.getShopByPos(block) == null){
+            if(Magic.isMagic(item)) Magic.useMagic(player,item);
+            else if(Box.isBox(item)) Box.useBox(player,item);
         }
         if(block instanceof BlockSignPost && Events.playerShop.containsKey(player)){
             Config config = Shop.addShopConfig(Events.playerShop.get(player),block.x + ":" + block.y + ":" + block.z + ":" +block.level.getName());
@@ -377,3 +378,4 @@ public class Events implements Listener {
     }
 
 }
+

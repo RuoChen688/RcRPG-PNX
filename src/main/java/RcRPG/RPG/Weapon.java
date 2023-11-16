@@ -1,5 +1,7 @@
 package RcRPG.RPG;
 
+import RcRPG.AttrManager.AttrManager;
+import RcRPG.AttrManager.AttrNameParse;
 import RcRPG.Handle;
 import RcRPG.Main;
 import cn.nukkit.Player;
@@ -14,6 +16,8 @@ import cn.nukkit.utils.Config;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Weapon extends AttrManager {
 
@@ -310,21 +314,35 @@ public class Weapon extends AttrManager {
     public static Item setWeaponLore(Item item){
         if(Weapon.isWeapon(item)){
             Weapon weapon = Main.loadWeapon.get(item.getNamedTag().getString("name"));
-            ArrayList<String> lore = (ArrayList<String>) weapon.getLoreList().clone();
-            for(int i = 0;i < lore.size();i++){
+            ArrayList<String> lore;
+            lore = (ArrayList<String>) weapon.getLoreList().clone();
+            for (int i = 0;i < lore.size();i++) {
                 String s = lore.get(i);
-                if(s.contains("@unBreak")) s = s.replace("@unBreak",weapon.unBreak ? "§a无限耐久" : (weapon.item.getMaxDurability() != -1 ? "§c会损坏" : "§a无耐久"));
+                if(s.contains("@unBreak")) s = s.replace("@unBreak", weapon.unBreak ? "§a无限耐久" : (weapon.item.getMaxDurability() != -1 ? "§c会损坏" : "§a无耐久"));
                 if(s.contains("@message")) s = s.replace("@message",weapon.getMessage());
-                if(s.contains("@minDamage")) s = s.replace("@minDamage",String.valueOf(weapon.getMinDamage()));
-                if(s.contains("@maxDamage")) s = s.replace("@maxDamage",String.valueOf(weapon.getMaxDamage()));
-                if(s.contains("@reDamage")) s = s.replace("@reDamage",String.valueOf(weapon.getReDamage()));
                 if(s.contains("@stoneDamage")) s = s.replace("@stoneDamage",String.valueOf(Weapon.getStoneDamage(item)));
                 if(s.contains("@stoneReDamage")) s = s.replace("@stoneReDamage",String.valueOf(Weapon.getStoneReDamage(item)));
-                lore.set(i,s);
+                s = weapon.replaceAttrTemplate(s);// 替换属性的值
+                lore.set(i, s);
             }
             item.setLore(lore.toArray(new String[0]));
         }
         return item;
+    }
+
+    public String replaceAttrTemplate(String str) {
+        Pattern pattern = Pattern.compile("\\{\\{(.*?)\\}\\}");
+        Matcher matcher = pattern.matcher(str);
+        StringBuffer sb = new StringBuffer();
+
+        while (matcher.find()) {
+            AttrNameParse attrName = AttrNameParse.processString(matcher.group(1));
+            String replacement = String.valueOf(getItemAttr(attrName.getResult(), attrName.getNumber()));
+            matcher.appendReplacement(sb, replacement);
+        }
+        matcher.appendTail(sb);
+
+        return sb.toString();
     }
 
     public Config getConfig() {
