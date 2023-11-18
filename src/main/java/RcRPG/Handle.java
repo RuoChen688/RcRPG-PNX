@@ -11,6 +11,7 @@ import cn.nukkit.potion.Effect;
 import cn.nukkit.utils.Config;
 
 import java.io.File;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -20,7 +21,7 @@ public class Handle {
     public static Config getPlayerConfig(String name){
         File file = new File(Main.instance.getDataFolder()+"/Players/"+name+".yml");
         if(file.exists()){
-            return new Config(file,Config.YAML);
+            return new Config(file, Config.YAML);
         }
         return null;
     }
@@ -157,6 +158,40 @@ public class Handle {
         return new Random().nextInt(b-a+1)+a;
     }
 
+    public static boolean getProbabilisticResults(double value) {
+        if (Double.isNaN(value)) {
+            return false;
+        } else {
+            DecimalFormat decimalFormat = new DecimalFormat("#.#####");
+            value = Double.parseDouble(decimalFormat.format(value));
+        }
+
+        int length = 0;
+        String strValue = String.valueOf(value);
+        if (value <= 0) {
+            return false;
+        } else if (value < 1) {
+            length = strValue.length() - 2;
+            value = value * Math.pow(10, length);
+        } else if (value >= 1) {
+            return true;
+        }
+
+        int randomValue = Integer.parseInt((String.valueOf(Math.random())).substring(3, length + 3));
+        return randomValue - 0 + 1 <= value;
+    }
+
+    /**
+     * 检查类是否存在
+     */
+    public static boolean classExists(final String classPath) {
+        try {
+            Class.forName(classPath);
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
+    }
 
 }
 

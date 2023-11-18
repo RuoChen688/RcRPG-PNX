@@ -157,7 +157,7 @@ public class Magic {
         if(!magic.getCommands().isEmpty()){
             for(String command : magic.getCommands()){
                 if(command.contains("@player")) command = command.replace("@player",player.getName());
-                Server.getInstance().dispatchCommand(new ConsoleCommandSender(),command);
+                Server.getInstance().dispatchCommand(new ConsoleCommandSender(), command);
             }
         }
         if(magic.isConsume()){

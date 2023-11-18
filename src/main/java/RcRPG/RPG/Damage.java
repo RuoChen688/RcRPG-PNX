@@ -8,7 +8,6 @@ import cn.nukkit.event.entity.EntityDamageEvent;
 import cn.nukkit.item.Item;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.network.protocol.AddEntityPacket;
-import cn.nukkit.potion.Effect;
 
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -29,75 +28,36 @@ public class Damage {
         Damage.playerMap.put(player,list);
     }
 
-    public static int getDamage(Player damager, Entity entity){
-        int damage = 0;
-
-        if(entity instanceof Player){
-            Player damaged = (Player) entity;
-            Damage.getItem(damager);
-            Damage.getItem(damaged);
-            LinkedList<Item> damagerItem = Damage.playerMap.get(damager);
-            for(Item item : damagerItem){
-                if(Weapon.isWeapon(item)){
-                    Weapon weapon = Main.loadWeapon.get(item.getNamedTag().getString("name"));
-                    damage += weapon.getDamage();
-                    if(weapon.getCritRound() != 0){
-                        if(Handle.random(1,100) <= weapon.getCritRound()){
-                            damage = (int) Math.round(damage * weapon.getCrit());
-                        }
-                    }
-                }else if(Armour.isArmour(item)){
-                    damage += Main.loadArmour.get(item.getNamedTag().getString("name")).getDamage();
-                }
-            }
-            LinkedList<Item> damagedItem = Damage.playerMap.get(damaged);
-            for(Item item : damagedItem){
-                if(Weapon.isWeapon(item)){
-                    Weapon weapon = Main.loadWeapon.get(item.getNamedTag().getString("name"));
-                    if(weapon.getReDamageRound() != 0){
-                        if(Handle.random(1,100) <= weapon.getReDamageRound()) damage -= weapon.getReDamage();
-                    }
-                }else if(Armour.isArmour(item)){
-                    damage -= Main.loadArmour.get(item.getNamedTag().getString("name")).getReDamage();
-                }
-            }
-        }else{
-            Damage.getItem(damager);
-            LinkedList<Item> damagerItem = Damage.playerMap.get(damager);
-            for(Item item : damagerItem){
-                if(Weapon.isWeapon(item)){
-                    Weapon weapon = Main.loadWeapon.get(item.getNamedTag().getString("name"));
-                    damage += weapon.getDamage();
-                    if(weapon.getCritRound() != 0){
-                        if(Handle.random(1,100) <= weapon.getCritRound()){
-                            damage = (int) Math.round(damage * weapon.getCrit());
-                        }
-                    }
-                }else if(Armour.isArmour(item)){
-                    damage += Main.loadArmour.get(item.getNamedTag().getString("name")).getDamage();
-                }
-            }
-        }
-
-        if(damage < 0) damage = 0;
-
-        return damage;
-    }
-
+    /**
+     * 效果处理
+     * @param damager 攻击者
+     * @param entity 受害者
+     */
     public static void onDamage(Player damager, Entity entity){
         Item item = damager.getInventory().getItemInHand();
         if (!item.isNull() && Weapon.isWeapon(item)) {
             Weapon weapon = Main.loadWeapon.get(item.getNamedTag().getString("name"));
-            if(weapon.getSuckRound() != 0){
-                if(Handle.random(1,100) <= weapon.getSuckRound()){
-                    if((damager.getMaxHealth() - damager.getHealth()) < weapon.getSuck()){
-                        damager.setHealth(damager.getMaxHealth());
-                    }else{
-                        damager.setHealth(damager.getHealth()+weapon.getSuck());
+            if(entity instanceof Player) {// 当受害者是玩家时
+                if (weapon.getFireRound() != 0) {// 火焰
+                    if (Handle.random(1, 100) <= weapon.getFireRound()) {
+                        entity.setOnFire(weapon.getFire());
+                    }
+                }
+                if (weapon.getLightRound() != 0) {// 雷击
+                    if (Handle.random(1, 100) <= weapon.getLightRound()) {
+                        Damage.light(entity, weapon.getLighting());
                     }
                 }
             }
-            if(weapon.getGroupRound() != 0){
+            /**
+            if(entity instanceof Player){// 当受害者是玩家时
+                if(!weapon.getDamagedEffect().isEmpty()){// 受害者药水效果
+                    for(Effect effect : weapon.getDamagedEffect()){
+                        effect.add(entity);
+                    }
+                }
+            }
+            if(weapon.getGroupRound() != 0){// 群体回血
                 if(Handle.random(1,100) <= weapon.getGroupRound()){
                     for(Player player:Damage.getPlayerAround(damager,5,true)){
                         if((player.getMaxHealth() - player.getHealth()) < weapon.getGroup()){
@@ -108,39 +68,27 @@ public class Damage {
                     }
                 }
             }
-            if(!weapon.getDamagerEffect().isEmpty()){
+            if(!weapon.getDamagerEffect().isEmpty()){// 攻击者药水效果
                 for(Effect effect : weapon.getDamagerEffect()){
                     effect.add(damager);
                 }
             }
-            if(!weapon.getGroupEffect().isEmpty()){
+            if(!weapon.getGroupEffect().isEmpty()){ // 群体药水效果
                 for(Player player:Damage.getPlayerAround(damager,5,true)){
                     for(Effect effect :weapon.getGroupEffect()){
                         effect.add(player);
                     }
                 }
-            }
-            if(entity instanceof Player){
-                if(weapon.getFireRound() != 0){
-                    if(Handle.random(1,100) <= weapon.getFireRound()){
-                        entity.setOnFire(weapon.getFire());
-                    }
-                }
-                if(weapon.getLightRound() != 0){
-                    if(Handle.random(1,100) <= weapon.getLightRound()){
-                        Damage.light(entity,weapon.getLighting());
-                    }
-                }
-                if(!weapon.getDamagedEffect().isEmpty()){
-                    for(Effect effect : weapon.getDamagedEffect()){
-                        effect.add(entity);
-                    }
-                }
-            }
+            }*/
         }
     }
 
-    public static void light(Entity entity,double damage){
+    /**
+     * 闪电技能
+     * @param entity
+     * @param damage
+     */
+    public static void light(Entity entity, double damage){
         AddEntityPacket pk = new AddEntityPacket();
 
         pk.type = 93;
@@ -166,6 +114,13 @@ public class Damage {
         return list;
     }
 
+    /**
+     * 用于计算浮空字跳跃的向量
+     * @param yaw
+     * @param pitch
+     * @param go
+     * @return
+     */
     public static Vector3 go(double yaw,double pitch,int go)
     {
         yaw = yaw % 360;

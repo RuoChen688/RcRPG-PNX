@@ -18,7 +18,7 @@ public class Tip extends PluginTask {
 
     @Override
     public void onRun(int i) {
-        for(Player player:Main.instance.getServer().getOnlinePlayers().values()){
+        for (Player player : Main.instance.getServer().getOnlinePlayers().values()) {
             if(Handle.getPlayerConfig(player.getName()) == null) return;
             if(player.getInventory().getItemInHand().isNull() || player.getInventory().getItemInHand().getNamedTag() == null){
                 String text = Main.instance.config.getString("底部显示");

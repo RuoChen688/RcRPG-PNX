@@ -3,17 +3,14 @@ package RcRPG;
 import RcRPG.RPG.*;
 import RcRPG.Society.Shop;
 import RcRPG.Task.BoxTimeTask;
+import RcRPG.Task.PlayerAttrUpdateTask;
 import RcRPG.Task.Tip;
 import RcRPG.Task.loadHealth;
 import cn.nukkit.Server;
-import cn.nukkit.block.BlockCopperOxidized;
 import cn.nukkit.event.Listener;
-import cn.nukkit.item.Item;
 import cn.nukkit.plugin.PluginBase;
 import cn.nukkit.utils.Config;
 
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
 import java.io.File;
 import java.util.LinkedHashMap;
 
@@ -47,6 +44,7 @@ public class Main extends PluginBase implements Listener {
         this.getServer().getScheduler().scheduleRepeatingTask(new Tip(this),20);
         this.getServer().getScheduler().scheduleRepeatingTask(new BoxTimeTask(this),20);
         this.getServer().getScheduler().scheduleRepeatingTask(new loadHealth(this),10);
+        this.getServer().getScheduler().scheduleRepeatingTask(new PlayerAttrUpdateTask(this),20);
         this.getServer().getCommandMap().register("rpg", new Commands());
         if(Server.getInstance().getPluginManager().getPlugin("EconomyAPI") == null){
             this.getLogger().info("检测到未安装核心，将使用默认的经济核心");

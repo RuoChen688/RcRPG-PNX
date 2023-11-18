@@ -1,5 +1,8 @@
 package RcRPG;
 
+import RcRPG.AttrManager.LittleMonsterAttr;
+import RcRPG.AttrManager.Manager;
+import RcRPG.AttrManager.PlayerAttr;
 import RcRPG.Form.guildForm;
 import RcRPG.Form.inlayForm;
 import RcRPG.RPG.*;
@@ -17,19 +20,29 @@ import cn.nukkit.event.EventHandler;
 import cn.nukkit.event.Listener;
 import cn.nukkit.event.block.BlockBreakEvent;
 import cn.nukkit.event.entity.EntityDamageByEntityEvent;
+import cn.nukkit.event.entity.EntityRegainHealthEvent;
 import cn.nukkit.event.player.*;
 import cn.nukkit.form.response.FormResponseCustom;
 import cn.nukkit.form.response.FormResponseData;
 import cn.nukkit.form.response.FormResponseSimple;
 import cn.nukkit.item.Item;
 import cn.nukkit.level.Location;
+import cn.nukkit.level.Sound;
 import cn.nukkit.math.Vector3;
+import cn.nukkit.potion.Effect;
 import cn.nukkit.utils.Config;
+import com.smallaswater.littlemonster.entity.LittleNpc;
+import com.smallaswater.npc.entitys.EntityRsNPC;
+import healthapi.PlayerHealth;
 
 import java.io.File;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
+
+import static RcRPG.Handle.classExists;
+import static RcRPG.Handle.getProbabilisticResults;
 
 public class Events implements Listener {
 
@@ -302,28 +315,270 @@ public class Events implements Listener {
     @EventHandler
     public void damageEvent(EntityDamageByEntityEvent event){
         Entity damager = event.getDamager();
-        Entity entity = event.getEntity();
-        if(damager instanceof Player){
-            int damage = Damage.getDamage((Player) damager,entity);
-            Damage.onDamage((Player) damager,entity);
-            if(damage >= entity.getHealth() && entity instanceof Player){
-                damage = (int) entity.getHealth();
+        Entity wounded = event.getEntity();
+
+        String damagerName = damager.getNameTag() != null ? damager.getNameTag() : damager.getName();
+        String woundedName = wounded.getNameTag() != null ? wounded.getNameTag() : wounded.getName();
+
+        final boolean damagerIsPlayer = damager instanceof Player;
+        final boolean woundedIsPlayer = wounded instanceof Player;
+
+        int damage = 1;
+
+        if (classExists("com.smallaswater.npc.entitys.EntityRsNPC") && wounded instanceof EntityRsNPC) {// 特判RsNPC
+            return;
+        }
+        final boolean hasHealthAPI = classExists("healthapi.PlayerHealth");
+
+        Manager DAttr;
+        Manager WAttr;
+        if (damager instanceof LittleNpc) {
+            DAttr = new LittleMonsterAttr(((LittleNpc) damager).getConfig().getMonsterAttrMap());
+        } else if (damagerIsPlayer) {
+            DAttr = PlayerAttr.getPlayerAttr((Player) damager);
+        } else {
+            DAttr = new Manager();
+        }
+
+        if (wounded instanceof LittleNpc) {
+            WAttr = new LittleMonsterAttr(((LittleNpc) wounded).getConfig().getMonsterAttrMap());
+        } else if (woundedIsPlayer) {
+            WAttr = PlayerAttr.getPlayerAttr((Player) wounded);
+        } else {
+            WAttr = new Manager();
+        }
+
+        DAttr.updateComp();
+        WAttr.updateComp();
+
+        // 实体名字格式化
+        if (damagerIsPlayer) {
+            damagerName = damager.getName();
+        } else {
+            if (damagerName.contains("\n")) {
+                damagerName = damagerName.split("\n")[0];
+            }
+        }
+
+        if (woundedIsPlayer) {
+            woundedName = wounded.getName();
+        } else {
+            if (damagerName.contains("\n")) {
+                damagerName = damagerName.split("\n")[0];
+            } else if (woundedName.contains(" §r")) {
+                woundedName = woundedName.split(" §r")[0];
+            }
+        }
+
+        // Debuff 处理
+        if (damager.hasEffect(18) && DAttr.checkFloatArray(DAttr.getCritChance())) {// 虚弱每级减10%暴击率,暴击倍率x50%
+            Effect weaknessEffect = damager.getEffect(18);
+            DAttr.pvpAttackPower -= ((weaknessEffect.getAmplifier() + 1) * 0.1);
+            DAttr.critChance *= 0.5;
+        }
+
+        if (damager.hasEffect(19) && DAttr.checkFloatArray(DAttr.getLifestealChance())) {// 中毒每级减10%吸血率,吸血倍率x50%
+            Effect poisonEffect = damager.getEffect(19);
+            DAttr.lifestealChance -= ((poisonEffect.getAmplifier() + 1) * 0.1);
+            DAttr.lifestealMultiplier *= 0.5;
+        }
+
+        // 闪避率处理
+        if (getProbabilisticResults(WAttr.dodgeChance - DAttr.hitChance)) {
+            if (woundedIsPlayer) {
+                wounded.getLevel().addSound(wounded, Sound.valueOf("GAME_PLAYER_ATTACK_NODAMAGE"));
+                ((Player) wounded).sendMessage("你闪避了 " + damagerName + " §r的攻击");
+            }
+            if (damagerIsPlayer) {
+                damager.getLevel().addSound(damager, Sound.valueOf("GAME_PLAYER_ATTACK_NODAMAGE"));
+                ((Player) damager).sendMessage(woundedName + " §r闪避了你的攻击");
+            }
+            event.setCancelled(true);
+            return;
+        }
+
+        // 生命上限处理
+        if (hasHealthAPI && woundedIsPlayer) {// 若存在血量核心
+            PlayerHealth playerHealth = PlayerHealth.getPlayerHealth((Player) wounded);
+            int max = playerHealth.getMaxHealth();
+            double h = playerHealth.getHealth();
+            if (h > max) {
+                playerHealth.setHealth(max);
+            }
+        } else if (woundedIsPlayer) {
+            float h = wounded.getHealth();
+            int max = (int) ((WAttr.hp + WAttr.maxHpMultiplier) * (1 + WAttr.hpRegenMultiplier));
+            wounded.setMaxHealth(max);// 为什么这里要设置血量上限呢？
+            if (h > max) {
+                wounded.setHealth(max);
+            }
+        }
+
+        int finalDamage = 0;
+        // 三大乘区: 攻击力 * 攻击加成 * 暴击倍率
+        double atkValue;
+        double atk;
+        if (woundedIsPlayer) {
+            atkValue = DAttr.pvpAttackPower;
+            atk = Double.parseDouble(new DecimalFormat("#.##").format(atkValue * (1 + DAttr.pvpAttackMultiplier)));
+        } else {
+            atkValue = DAttr.pveAttackPower;
+            atk = Double.parseDouble(new DecimalFormat("#.##").format(atkValue * (1 + DAttr.pveAttackMultiplier)));
+        }
+        double defensePenetrationValue = getProbabilisticResults(DAttr.defensePenetrationChance) ? DAttr.defensePenetrationValue : 0;
+        double armorPenetrationValue = getProbabilisticResults(DAttr.armorPenetrationChance) ? DAttr.armorPenetrationValue : 0;
+        WAttr.armorStrengthMultiplier = (float) (WAttr.armorStrengthMultiplier - armorPenetrationValue); // TODO: 未实验
+
+        atk = atk * (1 - WAttr.armorStrengthMultiplier);
+
+        double criticalStrikeMultiplier = 0;
+        double crtDamage = 0;
+        if (getProbabilisticResults(DAttr.critChance - WAttr.critDodgeChance)) {
+            //crtDamage = DAttr.爆伤力;
+            criticalStrikeMultiplier = DAttr.criticalStrikeMultiplier - WAttr.critResistance;
+            if (criticalStrikeMultiplier > 0) {
+                crtDamage += Double.parseDouble(new DecimalFormat("#.##").format(atkValue * criticalStrikeMultiplier));
+            }
+        }
+
+        double lifeSteal = 0;
+        double lifestealMultiplier = 0;
+        if (getProbabilisticResults(DAttr.lifestealChance)) {
+            lifestealMultiplier = DAttr.lifestealMultiplier - WAttr.lifestealResistance;
+            if (lifestealMultiplier > 0) {
+                //lifeSteal = Double.parseDouble(new DecimalFormat("#.##").format(DAttr.吸血力 + atk * lifestealMultiplier));
+                lifeSteal = Double.parseDouble(new DecimalFormat("#.##").format(atk * lifestealMultiplier));
+            }
+        }
+
+        atk = Double.parseDouble(new DecimalFormat("#.##").format(atk + crtDamage * (1 - WAttr.armorStrengthMultiplier)));
+
+        //double 治疗力 = DAttr.治疗力;
+
+        if (defensePenetrationValue <= atk) {
+            atk -= defensePenetrationValue;
+        } else {
+            defensePenetrationValue = atk;
+            atk = 1;
+        }
+        if (atk > 0) {
+            damage = (int) (atk - (WAttr.defense * (1 + WAttr.defenseMultiplier)));
+            if (damage < 1) {
+                damage = 0;
+            }
+            damage += defensePenetrationValue;
+
+            // 跳砍判断
+            if (!damager.onGround) {
+                double addDamage = Double.parseDouble(new DecimalFormat("#.#").format(damage * 0.1));// 跳砍增加0.1倍最终伤害，增益最多不超过3k
+                damage += addDamage > 3000 ? 3000 : addDamage;
+            }
+
+            finalDamage = damage;
+        }
+
+        // TODO: 增加反伤属性
+        /** 反伤处理
+        if (getProbabilisticResults(WAttr.反伤率)) {
+            let 反伤 = defineData(WAttr.反伤倍率 * FinalDamage) + defineData(WAttr.反伤力);
+            let WHealth = Wounded.getHealth();
+            if (isPlayer(WHealth)) {
+                let PlayerHealth = RSHealthAPI.getPlayerHealth(Wounded);
+                if (RSHealthAPI) {// 血量核心
+                    WHealth = PlayerHealth.getHealth();
+                }
+            }
+            // 反伤不超过受害者现有血量
+            if (WHealth < 反伤) 反伤 = WHealth;
+            if (isPlayer(Damager)) {
+                let PlayerHealth = RSHealthAPI.getPlayerHealth(Damager);
+                if (RSHealthAPI) {// 血量核心
+                    let H = PlayerHealth.getHealth() - 反伤;
+                    PlayerHealth.setHealth(H < 1 ? 0 : H);
+                } else {
+                    let h = Damager.getHealth() - 反伤;
+                    Damager.setHealth(h < 1 ? 0 : h);
+                }
+                Damager.getLevel().addSound(Damager, Sound.valueOf("ARMOR_EQUIP_CHAIN"));
+            }
+        }
+        if (治疗力 && isPlayer(Wounded)) {
+            if (治疗力 > 0) {
+                治疗力 = 0;
+            }
+            let WoundedHealth = Wounded.getHealth();
+            let WoundedMaxHealth = Wounded.getMaxHealth();
+            let PlayerHealth = RSHealthAPI.getPlayerHealth(Wounded);
+            if (RSHealthAPI) {
+                WoundedHealth = PlayerHealth.getHealth();
+                WoundedMaxHealth = PlayerHealth.getMaxHealth();
+            }
+            let health = WoundedHealth - 治疗力;
+            if (health > WoundedMaxHealth) {
+                PlayerHealth.setHealth(WoundedMaxHealth);
+            } else {
+                PlayerHealth.setHealth(health);
+            }
+            FinalDamage = 治疗力;
+            event.setDamage(0);
+        }*/
+
+        // 吸血处理
+        if (lifeSteal > 0) {
+            float wHealth = wounded.getHealth();
+            if (hasHealthAPI && woundedIsPlayer) {// 血量核心
+                    PlayerHealth playerHealth = PlayerHealth.getPlayerHealth((Player) wounded);
+                    wHealth = (float) playerHealth.getHealth();
+            }
+            // 吸血不超过受害者现有血量
+            if (wHealth < lifeSteal) lifeSteal = wHealth;
+            if (hasHealthAPI && damagerIsPlayer) {// 若存在血量核心
+                PlayerHealth playerHealth = PlayerHealth.getPlayerHealth((Player) damager);
+                int MaxH = playerHealth.getMaxHealth();
+                double H = playerHealth.getHealth() + lifeSteal;
+                playerHealth.setHealth(H > MaxH ? MaxH : H);
+            } else {
+                damager.heal(new EntityRegainHealthEvent(damager, (float) lifeSteal, 3));
+            }
+            if (damagerIsPlayer) {
+                ((Player) damager).sendMessage("你已汲取对方 §c§l" + lifeSteal + "§r 血量值");
+            }
+        }
+
+        //if (!治疗力 && finalDamage < 0) {// 没有治疗力但是 伤害为负 设置为0
+        //    finalDamage = 0;
+        //}
+
+        event.setDamage(finalDamage);
+
+        // 燃烧、冰冻、雷击 效果处理
+        Damage.onDamage((Player) damager, wounded);
+
+        if (damager instanceof Player) {
+            if (crtDamage > 0) {
+                ((Player) damager).sendMessage("你对" + woundedName + "§r造成了 §l" + crtDamage + "§r 点暴击伤害");
+            }
+
+            // 击杀提示
+            if(finalDamage >= wounded.getHealth() && wounded instanceof Player) {
+                finalDamage = (int) wounded.getHealth();
                 Item item = ((Player) damager).getInventory().getItemInHand();
-                if(!item.isNull() && Weapon.isWeapon(item)){
+                if (!item.isNull() && Weapon.isWeapon(item)) {
                     Weapon weapon = Main.loadWeapon.get(item.getNamedTag().getString("name"));
-                    if(!weapon.getKillMessage().equals("")){
+                    if (!weapon.getKillMessage().equals("")) {
                         String text = weapon.getKillMessage();
-                        if(text.contains("@damager"))  text = text.replace("@damager",damager.getName());
-                        if(text.contains("@player"))  text = text.replace("@player",entity.getName());
+                        if(text.contains("@damager"))  text = text.replace("@damager", damagerName);
+                        if(text.contains("@player"))  text = text.replace("@player", woundedName);
                         Server.getInstance().broadcastMessage(text);
                     }
                 }
             }
-            event.setDamage(damage);
-            Vector3 go = Damage.go(damager.yaw,damager.pitch,2);
-            FloatingText floatingText = new FloatingText(new Location(damager.x + go.x, damager.y+1, damager.z+ go.z, damager.level), "§c-"+damage);
+
+            // 伤害 浮空字
+            Vector3 go = Damage.go(damager.yaw, damager.pitch,2);
+            FloatingText floatingText = new FloatingText(new Location(damager.x + go.x, damager.y+1, damager.z+ go.z, damager.level), "§c-"+finalDamage);
             floatingText.spawnToAll();
-            Main.instance.getServer().getScheduler().scheduleDelayedTask(new removeFloatingText(Main.instance,floatingText),15);
+            Main.instance.getServer().getScheduler().scheduleDelayedTask(new removeFloatingText(Main.instance, floatingText),15);
         }
     }
 
@@ -350,6 +605,9 @@ public class Events implements Listener {
     public void joinEvent(PlayerJoinEvent event){
         Player player = event.getPlayer();
         String name = player.getName();
+
+        PlayerAttr.setPlayerAttr(player);
+
         File file = new File(Main.instance.getDataFolder()+"/Players/"+name+".yml");
         if(!file.exists()){
             Main.instance.saveResource("Player.yml","/Players/"+name+".yml",false);

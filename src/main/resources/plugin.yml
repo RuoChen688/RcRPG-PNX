@@ -2,5 +2,9 @@ name: RcRPG
 main: RcRPG.Main
 version: 1.0.0
 author: 若尘
+authors: ["若尘", "Mcayear"]
 api: 1.0.8
 load: POSTWORLD
+website: https://github.com/RuoChen688/RcRPG-PNX
+depend: ["EconomyAPI"]
+softdepend: ["RcNPC", "RsNPC", "PlayerPoint", "LittleMonster", "HealthAPI"]

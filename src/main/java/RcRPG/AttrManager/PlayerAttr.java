@@ -1,10 +1,40 @@
 package RcRPG.AttrManager;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import RcRPG.Main;
+import RcRPG.RPG.Weapon;
+import cn.nukkit.Player;
+import cn.nukkit.item.Item;
 
-public class AttrManager {
+import java.util.*;
+
+public class PlayerAttr extends Manager {
+
+    private final Player player;
+    private String[] beforLable;
+    public PlayerAttr(Player player) {
+        this.player = player;
+    }
+    public static LinkedHashMap<Player, PlayerAttr> playerslist = new LinkedHashMap<>();
+
+    public static PlayerAttr getPlayerAttr(Player player) {
+        if (!playerslist.containsKey(player)) {
+            return null;
+        }
+        return playerslist.get(player);
+    }
+    public static PlayerAttr setPlayerAttr(Player player) {
+        return playerslist.put(player, new PlayerAttr(player));
+    }
+    public void update() {
+        ArrayList<Item> itemList = new ArrayList<>();
+        itemList.add(player.getInventory().getItemInHand());// 主手
+        itemList.add(player.getOffhandInventory().getItem(0));// 副手
+        Collections.addAll(itemList, player.getInventory().getArmorContents());// 护甲
+        for (Item rcItem : itemList) {
+            Weapon weapon = Main.loadWeapon.get(rcItem.getNamedTag().getString("name"));
+            setItemAttrConfig(weapon.getLabel(), weapon.getMainAttr());
+        }
+    }
 
     /** 属性结构
      * {
@@ -33,12 +63,12 @@ public class AttrManager {
                 attrMap.put(key, floatValues);
             }
         }
-        if (!myAttr.containsKey("Main")) {
+        if (!getItemAttrMap().containsKey("Main")) {
             Map<String, float[]> mainAttrMap_ = new HashMap<>();
             myAttr.put("Main", mainAttrMap_);
         }
         Map<String, float[]> mainAttrMap = myAttr.get("Main");
-        for (Map.Entry<String, float[]> entry : mainAttrMap.entrySet()) {
+        for (Map.Entry<String, float[]> entry : mainAttrMap.entrySet()) {// 副作用回收
             String key = entry.getKey();
             if (attrMap.containsKey(key)) {
                 float[] mainValues = mainAttrMap.get(key);
@@ -83,11 +113,6 @@ public class AttrManager {
         myAttr.put(id, attrMap);
     }
 
-    /**
-     * 获取指定属性值（随机后）
-     * @param attrName 属性名
-     * @return
-     */
     public float getItemAttr(String attrName) {
         Map<String, float[]> mainAttrMap = myAttr.get("Main");
         float[] data;
@@ -106,10 +131,21 @@ public class AttrManager {
      * @return
      */
     public float getItemAttr(String attrName, int index) {
+        return getItemAttr("Main", attrName, index);
+    }
+
+    /**
+     * 获取指定属性的原始值
+     * @param label 标签名
+     * @param attrName 属性名
+     * @param index 索引，0为min，1为max。内部可能传入-1
+     * @return
+     */
+    public float getItemAttr(String label, String attrName, int index) {
         if (index == -1) {
             return getItemAttr(attrName);
         }
-        Map<String, float[]> mainAttrMap = myAttr.get("Main");
+        Map<String, float[]> mainAttrMap = myAttr.get(label);
         float[] data;
         if (mainAttrMap.containsKey(attrName)) {
             data = mainAttrMap.get(attrName);
@@ -123,211 +159,206 @@ public class AttrManager {
     public Map<String, float[]> getItemAttrMap() {
         return getItemAttrMap("Main");
     }
-    public Map<String, float[]> getItemAttrMap(String type) {
+    public Map<String, float[]> getItemAttrMap(String label) {
         Map<String, float[]> data;
-        data = myAttr.getOrDefault(type, null);
+        data = myAttr.getOrDefault(label, null);
         return data;
     }
 
-    /**
-     * 返回 [最小值, 最大值] 的随机值
-     * @param array
-     * @return
-     */
-    public static float getRandomNum(float[] array) {
-        int length = 0;
-        if (array.length == 1 || array[0] == array[1]) {
-            return array[0];
-        }
-        for (float v : array) {
-            String last = String.valueOf(v).split("\\.")[1];
-            if (last != null && length < last.length()) {
-                length = last.length();
-            }
-        }
-        length = (int) Math.pow(10, length + 2);
-        float minNum = array[0] * length;
-        float maxNum = array[1] * length;
-        return (float) (Math.random() * (maxNum - minNum + 1) + minNum) / length;
-    }
-
     //激进向 (9)
-
+    @Override
     public float[] getPvpAttackPower() {
-        if (myAttr.containsKey("PVP攻击力")) {
-            return myAttr.get("Main").get("PVP攻击力");
+        if (getItemAttrMap().containsKey("PVP攻击力")) {
+            return getItemAttrMap().get("PVP攻击力");
         }
-        return new float[0];
+        return new float[]{ 0.0f, 0.0f };
     }
 
+    @Override
     public float[] getPveAttackPower() {
-        if (myAttr.containsKey("PVE攻击力")) {
-            return myAttr.get("Main").get("PVE攻击力");
+        if (getItemAttrMap().containsKey("PVE攻击力")) {
+            return getItemAttrMap().get("PVE攻击力");
         }
-        return new float[0];
+        return new float[]{ 0.0f, 0.0f };
     }
 
+    @Override
     public float[] getCritChance() {
-        if (myAttr.containsKey("暴击率")) {
-            return myAttr.get("Main").get("暴击率");
+        if (getItemAttrMap().containsKey("暴击率")) {
+            return getItemAttrMap().get("暴击率");
         }
-        return new float[0];
+        return new float[]{ 0.0f, 0.0f };
     }
 
-    /**
-     * 暴击倍率
-     * @return
-     */
+    @Override
     public float[] getCriticalStrikeMultiplier() {
-        if (myAttr.containsKey("暴击倍率")) {
+        if (getItemAttrMap().containsKey("暴击倍率")) {
             return getItemAttrMap().get("暴击倍率");
         }
-        return new float[0];
+        return new float[]{ 0.0f, 0.0f };
     }
 
-    /**
-     * 吸血倍率
-     * @return
-     */
+    @Override
+    public float[] getLifestealChance() {
+        if (getItemAttrMap().containsKey("吸血率")) {
+            return getItemAttrMap().get("吸血率");
+        }
+        return new float[]{ 0.0f, 0.0f };
+    }
+
+    @Override
     public float[] getLifestealMultiplier() {
-        if (myAttr.containsKey("吸血倍率")) {
+        if (getItemAttrMap().containsKey("吸血倍率")) {
             return getItemAttrMap().get("吸血倍率");
         }
-        return new float[0];
+        return new float[]{ 0.0f, 0.0f };
     }
 
-    /**
-     * 破防率
-     * @return
-     */
-    public float[] getArmorPenetrationChance() {
-        if (myAttr.containsKey("破防率")) {
+    @Override
+    public float[] getDefensePenetrationChance() {
+        if (getItemAttrMap().containsKey("破防率")) {
             return getItemAttrMap().get("破防率");
         }
-        return new float[0];
+        return new float[]{ 0.0f, 0.0f };
     }
 
-    public float[] getArmorPenetrationValue() {
-        if (myAttr.containsKey("破防攻击")) {
+    @Override
+    public float[] getDefensePenetrationValue() {
+        if (getItemAttrMap().containsKey("破防攻击")) {
             return getItemAttrMap().get("破防攻击");
         }
-        return new float[0];
+        return new float[]{ 0.0f, 0.0f };
     }
 
-    public float[] getMagicResistancePenetrationChance() {
-        if (myAttr.containsKey("破甲率")) {
+    @Override
+    public float[] getArmorPenetrationChance() {
+        if (getItemAttrMap().containsKey("破甲率")) {
             return getItemAttrMap().get("破甲率");
         }
-        return new float[0];
+        return new float[]{ 0.0f, 0.0f };
     }
 
-    public float[] getMagicResistancePenetrationValue() {
-        if (myAttr.containsKey("破甲攻击")) {
+    @Override
+    public float[] getArmorPenetrationValue() {
+        if (getItemAttrMap().containsKey("破甲攻击")) {
             return getItemAttrMap().get("破甲攻击");
         }
-        return new float[0];
+        return new float[]{ 0.0f, 0.0f };
     }
 
+    @Override
     public float[] getHitChance() {
-        if (myAttr.containsKey("命中率")) {
+        if (getItemAttrMap().containsKey("命中率")) {
             return getItemAttrMap().get("命中率");
         }
-        return new float[0];
+        return new float[]{ 0.0f, 0.0f };
     }
 
+    @Override
     public float[] getDamageMultiplier() {
-        if (myAttr.containsKey("伤害加成")) {
+        if (getItemAttrMap().containsKey("伤害加成")) {
             return getItemAttrMap().get("伤害加成");
         }
-        return new float[0];
+        return new float[]{ 0.0f, 0.0f };
     }
 
-//保守向 (9)
-
+    //保守向 (9)
+    @Override
     public float[] getDodgeChance() {
-        if (myAttr.containsKey("闪避率")) {
+        if (getItemAttrMap().containsKey("闪避率")) {
             return getItemAttrMap().get("闪避率");
         }
-        return new float[0];
+        return new float[]{ 0.0f, 0.0f };
     }
 
+    @Override
     public float[] getCritResistance() {
-        if (myAttr.containsKey("暴击抵抗")) {
+        if (getItemAttrMap().containsKey("暴击抵抗")) {
             return getItemAttrMap().get("暴击抵抗");
         }
-        return new float[0];
+        return new float[]{ 0.0f, 0.0f };
     }
 
+    @Override
     public float[] getLifestealResistance() {
-        if (myAttr.containsKey("吸血抵抗")) {
+        if (getItemAttrMap().containsKey("吸血抵抗")) {
             return getItemAttrMap().get("吸血抵抗");
         }
-        return new float[0];
+        return new float[]{ 0.0f, 0.0f };
     }
 
+    @Override
     public float[] getHp() {
-        if (myAttr.containsKey("血量值")) {
+        if (getItemAttrMap().containsKey("血量值")) {
             return getItemAttrMap().get("血量值");
         }
-        return new float[0];
+        return new float[]{ 0.0f, 0.0f };
     }
 
+    @Override
     public float[] getDefense() {
-        if (myAttr.containsKey("防御力")) {
+        if (getItemAttrMap().containsKey("防御力")) {
             return getItemAttrMap().get("防御力");
         }
-        return new float[0];
+        return new float[]{ 0.0f, 0.0f };
     }
 
+    @Override
     public float[] getMaxHpMultiplier() {
-        if (myAttr.containsKey("血量加成")) {
+        if (getItemAttrMap().containsKey("血量加成")) {
             return getItemAttrMap().get("血量加成");
         }
-        return new float[0];
+        return new float[]{ 0.0f, 0.0f };
     }
 
+    @Override
     public float[] getDefenseMultiplier() {
-        if (myAttr.containsKey("防御加成")) {
+        if (getItemAttrMap().containsKey("防御加成")) {
             return getItemAttrMap().get("防御加成");
         }
-        return new float[0];
+        return new float[]{ 0.0f, 0.0f };
     }
 
+    @Override
     public float[] getHpRegenMultiplier() {
-        if (myAttr.containsKey("生命加成")) {
+        if (getItemAttrMap().containsKey("生命加成")) {
             return getItemAttrMap().get("生命加成");
         }
-        return new float[0];
+        return new float[]{ 0.0f, 0.0f };
     }
 
+    @Override
     public float[] getArmorStrengthMultiplier() {
-        if (myAttr.containsKey("护甲强度")) {
+        if (getItemAttrMap().containsKey("护甲强度")) {
             return getItemAttrMap().get("护甲强度");
         }
-        return new float[0];
+        return new float[]{ 0.0f, 0.0f };
     }
 
-//辅助增益向 (3)
-
+    //辅助增益向 (3)
+    @Override
     public float[] getExperienceGainMultiplier() {
-        if (myAttr.containsKey("经验加成")) {
+        if (getItemAttrMap().containsKey("经验加成")) {
             return getItemAttrMap().get("经验加成");
         }
-        return new float[0];
+        return new float[]{ 0.0f, 0.0f };
     }
 
+    @Override
     public float[] getHpPerSecond() {
-        if (myAttr.containsKey("每秒恢复")) {
+        if (getItemAttrMap().containsKey("每秒恢复")) {
             return getItemAttrMap().get("每秒恢复");
         }
-        return new float[0];
+        return new float[]{ 0.0f, 0.0f };
     }
 
+    @Override
     public float[] getMovementSpeedMultiplier() {
-        if (myAttr.containsKey("移速加成")) {
+        if (getItemAttrMap().containsKey("移速加成")) {
             return getItemAttrMap().get("移速加成");
         }
-        return new float[0];
+        return new float[]{ 0.0f, 0.0f };
     }
+
 
 }

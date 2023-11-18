@@ -1,7 +1,7 @@
 package RcRPG.RPG;
 
-import RcRPG.AttrManager.AttrManager;
 import RcRPG.AttrManager.AttrNameParse;
+import RcRPG.AttrManager.ItemAttr;
 import RcRPG.Handle;
 import RcRPG.Main;
 import cn.nukkit.Player;
@@ -19,7 +19,7 @@ import java.util.LinkedList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Weapon extends AttrManager {
+public class Weapon extends ItemAttr {
 
     private Config config;
 
@@ -35,7 +35,7 @@ public class Weapon extends AttrManager {
 
     private int level;
 
-    private int minDamage;
+    private int minDamage;// 属性 - 攻击力
 
     private int maxDamage;
 
@@ -65,7 +65,9 @@ public class Weapon extends AttrManager {
 
     private int lighting;
 
-    private int lightRound;
+    private int lightRound;// 属性 - 雷击
+
+    private Object attr;
 
     private int stone;
 
@@ -94,7 +96,7 @@ public class Weapon extends AttrManager {
 
     public static Weapon loadWeapon(String name, Config config){
         try{
-            Weapon weapon = new Weapon(name,config);
+            Weapon weapon = new Weapon(name, config);
 
             weapon.setLabel(config.getString("标签"));
             weapon.setItem(RuntimeItems.getRuntimeMapping().getItemByNamespaceId(config.getString("物品ID"),1));
@@ -103,25 +105,14 @@ public class Weapon extends AttrManager {
             weapon.setLevel(config.getInt("最低使用等级"));
 
             if (config.exists("属性")) {
-                weapon.setItemAttrConfig("Main", config.get("属性"));
-            } else {// TODO: 后期删掉
-                weapon.setMinDamage(config.getInt("min攻击"));
-                weapon.setMaxDamage(config.getInt("max攻击"));
-                weapon.setSuck(config.getInt("吸血"));
-                weapon.setSuckRound(config.getInt("吸血概率"));
-                weapon.setCrit(config.getDouble("暴击"));
-                weapon.setCritRound(config.getInt("暴击概率"));
-                weapon.setGroup(config.getInt("群回"));
-                weapon.setGroupRound(config.getInt("群回概率"));
-                weapon.setReDamage(config.getInt("减伤"));
-                weapon.setReDamageRound(config.getInt("减伤概率"));
-                weapon.setFire(config.getInt("燃烧时间"));
-                weapon.setFireRound(config.getInt("燃烧概率"));
-                weapon.setFrozen(config.getInt("冰冻时间"));
-                weapon.setFrozenRound(config.getInt("冰冻概率"));
-                weapon.setLighting(config.getInt("雷击"));
-                weapon.setLightRound(config.getInt("雷击概率"));
+                weapon.setAttr(config.get("属性"));
             }
+            weapon.setFire(config.getInt("燃烧时间"));
+            weapon.setFireRound(config.getInt("燃烧概率"));
+            weapon.setFrozen(config.getInt("冰冻时间"));
+            weapon.setFrozenRound(config.getInt("冰冻概率"));
+            weapon.setLighting(config.getInt("雷击"));
+            weapon.setLightRound(config.getInt("雷击概率"));
 
             weapon.setStone(config.getInt("宝石孔数"));
             weapon.setMessage(config.getString("介绍"));
@@ -237,8 +228,9 @@ public class Weapon extends AttrManager {
         return false;
     }
 
+
     public int getDamage(){
-        return Handle.random(this.getMinDamage(),this.getMaxDamage());
+        return 1;
     }
 
     public static LinkedList<Stone> getStones(Item item){
@@ -401,92 +393,6 @@ public class Weapon extends AttrManager {
         this.level = level;
     }
 
-    public int getMinDamage() {
-        if (myAttr.containsKey("攻击力")) {
-            return ((int) myAttr.get("Main").get("攻击力")[0]);
-        }
-        return 0;
-    }
-
-    public void setMinDamage(int minDamage) {
-        this.minDamage = minDamage;
-    }
-
-    public int getMaxDamage() {
-        if (myAttr.containsKey("攻击力")) {
-            return ((int) myAttr.get("Main").get("攻击力")[1]);
-        }
-        return 0;
-    }
-
-    public void setMaxDamage(int maxDamage) {
-        this.maxDamage = maxDamage;
-    }
-
-    public int getSuck() {
-        return suck;
-    }
-
-    public void setSuck(int suck) {
-        this.suck = suck;
-    }
-
-    public int getSuckRound() {
-        return suckRound;
-    }
-
-    public void setSuckRound(int suckRound) {
-        this.suckRound = suckRound;
-    }
-
-    public double getCrit() {
-        return crit;
-    }
-
-    public void setCrit(double crit) {
-        this.crit = crit;
-    }
-
-    public int getCritRound() {
-        return critRound;
-    }
-
-    public void setCritRound(int critRound) {
-        this.critRound = critRound;
-    }
-
-    public int getGroup() {
-        return group;
-    }
-
-    public void setGroup(int group) {
-        this.group = group;
-    }
-
-    public int getGroupRound() {
-        return groupRound;
-    }
-
-    public void setGroupRound(int groupRound) {
-        this.groupRound = groupRound;
-    }
-
-    public int getReDamage() {
-        return reDamage;
-    }
-
-    public void setReDamage(int reDamage) {
-        this.reDamage = reDamage;
-    }
-
-    public int getReDamageRound() {
-        return reDamageRound;
-    }
-
-    public void setReDamageRound(int reDamageRound) {
-        this.reDamageRound = reDamageRound;
-    }
-
     public int getFire() {
         return fire;
     }
@@ -533,6 +439,14 @@ public class Weapon extends AttrManager {
 
     public void setLightRound(int lightRound) {
         this.lightRound = lightRound;
+    }
+
+    public Object getAttr() {
+        return attr;
+    }
+    public void setAttr(Object attr) {
+        this.attr = attr;
+        setItemAttrConfig(attr);
     }
 
     public int getStone() {
