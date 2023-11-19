@@ -23,6 +23,8 @@ public class Armour {
 
     private String label;
 
+    private String showName;
+
     private Item item;
 
     private int health;
@@ -129,7 +131,7 @@ public class Armour {
             tag.putByte("Unbreakable",1);
             item.setNamedTag(tag);
             Armour.setArmourLore(item);
-            item.setCustomName(armour.getLabel());
+            item.setCustomName(armour.getShowName());
             player.getInventory().addItem(item);
             if(!armour.getMyMessage().equals("")){
                 String text = armour.getMyMessage();
@@ -280,8 +282,24 @@ public class Armour {
         return label;
     }
 
+    /**
+     * 仅作为属性分类的标识
+     * @param label
+     */
     public void setLabel(String label) {
         this.label = label;
+    }
+
+    /**
+     * 物品名，替代源label用法
+     * @return
+     */
+    public String getShowName() {
+        return showName;
+    }
+
+    public void setShowName(String showName) {
+        this.showName = showName;
     }
 
     public Item getItem() {

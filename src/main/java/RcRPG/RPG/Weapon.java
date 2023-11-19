@@ -27,6 +27,8 @@ public class Weapon extends ItemAttr {
 
     private String label;
 
+    private String showName;
+
     private Item item;
 
     private boolean unBreak;
@@ -99,6 +101,7 @@ public class Weapon extends ItemAttr {
             Weapon weapon = new Weapon(name, config);
 
             weapon.setLabel(config.getString("标签"));
+            weapon.setShowName(config.getString("显示名称"));
             weapon.setItem(RuntimeItems.getRuntimeMapping().getItemByNamespaceId(config.getString("物品ID"),1));
             weapon.setUnBreak(config.getBoolean("无限耐久"));
             weapon.setOffHand(config.getBoolean("可副手"));
@@ -198,7 +201,7 @@ public class Weapon extends ItemAttr {
             ListTag<StringTag> stoneList = new ListTag<>("stone");
             tag.putList(stoneList);
             item.setNamedTag(tag);
-            item.setCustomName(weapon.getLabel());
+            item.setCustomName(weapon.getShowName());
             Weapon.setWeaponLore(item);
             player.getInventory().addItem(item);
             if(!weapon.getMyMessage().equals("")){
@@ -357,8 +360,24 @@ public class Weapon extends ItemAttr {
         return label;
     }
 
+    /**
+     * 仅作为属性分类的标识
+     * @param label
+     */
     public void setLabel(String label) {
         this.label = label;
+    }
+
+    /**
+     * 物品名，替代源label用法
+     * @return
+     */
+    public String getShowName() {
+        return showName;
+    }
+
+    public void setShowName(String showName) {
+        this.showName = showName;
     }
 
     public Item getItem() {

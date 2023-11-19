@@ -10,7 +10,7 @@ import java.util.*;
 public class PlayerAttr extends Manager {
 
     private final Player player;
-    private String[] beforLable;
+    private ArrayList<String> labelList = new ArrayList<>();
     public PlayerAttr(Player player) {
         this.player = player;
     }
@@ -26,14 +26,23 @@ public class PlayerAttr extends Manager {
         return playerslist.put(player, new PlayerAttr(player));
     }
     public void update() {
+        ArrayList<String> beforLabel = labelList;
+        labelList.clear();
         ArrayList<Item> itemList = new ArrayList<>();
         itemList.add(player.getInventory().getItemInHand());// 主手
         itemList.add(player.getOffhandInventory().getItem(0));// 副手
         Collections.addAll(itemList, player.getInventory().getArmorContents());// 护甲
         for (Item rcItem : itemList) {
+            if (rcItem.getNamedTag() == null) continue;
             Weapon weapon = Main.loadWeapon.get(rcItem.getNamedTag().getString("name"));
+            if (weapon == null) continue;
             setItemAttrConfig(weapon.getLabel(), weapon.getMainAttr());
+            beforLabel.remove(weapon.getLabel());
+            labelList.add(weapon.getLabel());
         }
+        beforLabel.forEach(label -> {
+            setItemAttrConfig(label, new HashMap<String, float[]>());
+        });
     }
 
     /** 属性结构
@@ -63,7 +72,7 @@ public class PlayerAttr extends Manager {
                 attrMap.put(key, floatValues);
             }
         }
-        if (!getItemAttrMap().containsKey("Main")) {
+        if (!myAttr.containsKey("Main")) {
             Map<String, float[]> mainAttrMap_ = new HashMap<>();
             myAttr.put("Main", mainAttrMap_);
         }
