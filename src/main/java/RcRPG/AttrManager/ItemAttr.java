@@ -1,8 +1,12 @@
 package RcRPG.AttrManager;
 
+import RcRPG.Main;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static RcRPG.AttrManager.PlayerAttr.valueToString;
 
 public class ItemAttr extends Manager {
 
@@ -35,6 +39,16 @@ public class ItemAttr extends Manager {
                     }
                 }
                 attrMap.put(key, floatValues);
+            } else if (value instanceof float[]){
+                float[] floatValue = (float[]) value;
+                if (floatValue.length == 1) {
+                    float[] newValue = { floatValue[0], floatValue[0] };
+                    attrMap.put(key, newValue);
+                } else {
+                    attrMap.put(key, floatValue);
+                }
+            } else {
+                Main.instance.getLogger().warning(key + " ItemAttr中不知道是啥类型");
             }
         }
         mainAttr = attrMap;
@@ -289,6 +303,22 @@ public class ItemAttr extends Manager {
             return mainAttr.get("移速加成");
         }
         return new float[0];
+    }
+
+    @Override
+    public String toString(){
+        String str = "";
+        for (String i : mainAttr.keySet()) {
+            float[] value = mainAttr.get(i);
+            String valueString = valueToString(value, i);
+
+            if (valueString.equals("0")) {
+                continue;
+            }
+
+            str += " " + i + ": " + valueString + "\n";
+        }
+        return str;
     }
 
 }

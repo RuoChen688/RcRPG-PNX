@@ -1,6 +1,8 @@
 package RcRPG.AttrManager;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Manager implements AttrInterface {
     public Manager(){}
@@ -91,6 +93,19 @@ public class Manager implements AttrInterface {
         return (float) (Math.random() * (maxNum - minNum + 1) + minNum) / length;
     }
 
+    protected Map<String, float[]> deepCopyMap(Map<String, float[]> originalMap) {
+        Map<String, float[]> copiedMap = new HashMap<>();
+        if (originalMap == null) return copiedMap;
+
+        for (Map.Entry<String, float[]> entry : originalMap.entrySet()) {
+            String key = entry.getKey();
+            float[] value = entry.getValue();
+            float[] copiedValue = Arrays.copyOf(value, value.length);
+            copiedMap.put(key, copiedValue);
+        }
+
+        return copiedMap;
+    }
     /**
      * 检查 float[] 是否为空
      * @param array

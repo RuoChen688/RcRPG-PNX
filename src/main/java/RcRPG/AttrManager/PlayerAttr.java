@@ -3,8 +3,12 @@ package RcRPG.AttrManager;
 import RcRPG.Main;
 import RcRPG.RPG.Weapon;
 import cn.nukkit.Player;
+import cn.nukkit.form.element.Element;
+import cn.nukkit.form.element.ElementLabel;
+import cn.nukkit.form.window.FormWindowCustom;
 import cn.nukkit.item.Item;
 
+import java.text.DecimalFormat;
 import java.util.*;
 
 public class PlayerAttr extends Manager {
@@ -26,7 +30,7 @@ public class PlayerAttr extends Manager {
         return playerslist.put(player, new PlayerAttr(player));
     }
     public void update() {
-        ArrayList<String> beforLabel = labelList;
+        ArrayList<String> beforLabel = new ArrayList<>(labelList);
         labelList.clear();
         ArrayList<Item> itemList = new ArrayList<>();
         itemList.add(player.getInventory().getItemInHand());// 主手
@@ -70,6 +74,16 @@ public class PlayerAttr extends Manager {
                     }
                 }
                 attrMap.put(key, floatValues);
+            } else if (value instanceof float[]){
+                float[] floatValue = (float[]) value;
+                if (floatValue.length == 1) {
+                    float[] newValue = { floatValue[0], floatValue[0] };
+                    attrMap.put(key, newValue);
+                } else {
+                    attrMap.put(key, floatValue);
+                }
+            } else {
+                Main.instance.getLogger().warning(key + "不知道是啥类型");
             }
         }
         if (!myAttr.containsKey("Main")) {
@@ -77,19 +91,34 @@ public class PlayerAttr extends Manager {
             myAttr.put("Main", mainAttrMap_);
         }
         Map<String, float[]> mainAttrMap = myAttr.get("Main");
-        for (Map.Entry<String, float[]> entry : mainAttrMap.entrySet()) {// 副作用回收
+        Map<String, float[]> oldAttrMap = deepCopyMap(myAttr.get(id));
+        myAttr.put(id, attrMap);
+        // 处理newAttr属性
+        for (Map.Entry<String, float[]> entry : attrMap.entrySet()) {
             String key = entry.getKey();
-            if (attrMap.containsKey(key)) {
+            float[] mainValues = new float[]{ 0.0f, 0.0f };
+            if (mainAttrMap.containsKey(key)) {
+                mainValues = mainAttrMap.get(key);
+            }
+            float[] values = attrMap.get(key);
+            mainValues[0] = mainValues[0] - (oldAttrMap.containsKey(key) ? oldAttrMap.get(key)[0] : 0) + values[0];
+            mainValues[1] = mainValues[1] - (oldAttrMap.containsKey(key) ? oldAttrMap.get(key)[1] : 0) + values[1];
+
+            mainAttrMap.put(key, mainValues);
+        }
+
+        // 副作用回收
+        // 处理oldAttr有但是newAttr没有的属性
+        for (Map.Entry<String, float[]> entry : oldAttrMap.entrySet()) {
+            String key = entry.getKey();
+            if (!attrMap.containsKey(key)) {
                 float[] mainValues = mainAttrMap.get(key);
-                float[] values = attrMap.get(key);
-                mainValues[0] -= values[0];
-                mainValues[1] -= values[1];
+                float[] values = oldAttrMap.get(key);
+                mainValues[0] = mainValues[0] - values[0];
+                mainValues[1] = mainValues[1] - values[1];
                 mainAttrMap.put(key, mainValues);
-            } else {
-                mainAttrMap.remove(key);
             }
         }
-        myAttr.put(id, attrMap);
     }
     public void setItemAttr(String id, Object newAttr) {
         Map<String, float[]> attrMap = new HashMap<>();
@@ -104,6 +133,10 @@ public class PlayerAttr extends Manager {
                     floatValues[i] = values.get(i);
                 }
                 attrMap.put(key, floatValues);
+            } else if (value instanceof float[]){
+                attrMap.put(key, (float[]) value);
+            } else {
+                Main.instance.getLogger().warning(key + "不知道是啥类型");
             }
         }
         Map<String, float[]> mainAttrMap = myAttr.get("Main");
@@ -141,6 +174,126 @@ public class PlayerAttr extends Manager {
      */
     public float getItemAttr(String attrName, int index) {
         return getItemAttr("Main", attrName, index);
+    }
+
+    public void showAttrWindow(Player p) {
+        PlayerAttr pAttr = PlayerAttr.getPlayerAttr(p);
+
+        if (pAttr == null) {
+            player.sendMessage("[NWeapon] 没有玩家§8" + p.getName() + "§f的数据");
+            return;
+        }
+        /**  开始
+        Main.instance.getLogger().warning("属性结构:");
+        Main.instance.getLogger().warning("{");
+
+        for (Map.Entry<String, Map<String, float[]>> entry : myAttr.entrySet()) {
+            String outerKey = entry.getKey();
+            Map<String, float[]> innerMapValue = entry.getValue();
+
+            Main.instance.getLogger().warning("    \"" + outerKey + "\": {");
+
+            for (Map.Entry<String, float[]> innerEntry : innerMapValue.entrySet()) {
+                String innerKey = innerEntry.getKey();
+                float[] innerArray = innerEntry.getValue();
+
+                Main.instance.getLogger().warning("        \"" + innerKey + "\": " + "[" + innerArray[0] + ", " + innerArray[1] + "]");
+            }
+
+            Main.instance.getLogger().warning("    }");
+        }
+        Main.instance.getLogger().warning("}");
+        // 结束
+        */
+        String str = "";
+        Map<String, Map<String, float[]>> data = pAttr.myAttr;
+
+        ArrayList<Element> list = new ArrayList<>();
+
+        for (String i : data.get("Main").keySet()) {
+            float[] value = data.get("Main").get(i);
+            String valueString = valueToString(value, i);
+
+            if (valueString.equals("0")) {
+                continue;
+            }
+
+            str += " " + i + ": " + valueString + "\n";
+        }
+
+        list.add(new ElementLabel("§l§a### 总属性§r\n" + str));
+
+        for (String i : data.keySet()) {
+            if (i.equals("Effect") || i.equals("EffectSuit") || i.equals("Main")) {
+                continue;
+            }
+
+            str = "";
+
+            for (String n : data.get(i).keySet()) {
+                float[] value = data.get(i).get(n);
+                String valueString = valueToString(value, n);
+
+                if (valueString.equals("0")) {
+                    continue;
+                }
+
+                str += "  " + n + ": " + valueString + "\n";
+            }
+
+            if (!str.equals("")) {// 如果没有属性就不显示了
+                list.add(new ElementLabel(" §a# " + i + "§r\n" + str));
+            }
+        }
+
+        /**
+        str = "";
+        long nowTime = (System.currentTimeMillis() / 1000);
+        for (String i : data.get("Effect").keySet()) {
+            float[] effectData = data.get("Effect").get(i);
+            long time = (long) effectData[0];
+            int level = (int) effectData[1];
+            str += "  " + i + " (" + (time - nowTime) + "s): " + level + "\n";
+        }
+
+        if (!str.equals("")) {
+            list.add(new ElementLabel(" §a# 临时效果§r\n" + str));
+        }
+        */
+        FormWindowCustom win = new FormWindowCustom("玩家属性 - " + p.getName(), list);
+        player.showFormWindow(win);
+    }
+
+    /**
+     * 将数据可视化，输入data,属性输出min-max或x%
+      */
+
+    public static String valueToString(float[] data, String attribute) {
+        List<String> attrDisplayPercent = Main.instance.attrDisplayPercentConfig;
+        String back = "";
+        if (data.length == 2 && data[0] == data[1]) {
+            data = new float[]{data[0]};
+        } else if (data.length == 1) {
+            data = new float[]{data[0]};
+        } else {
+            return data[0] + " - " + data[1];
+        }
+        if (attrDisplayPercent.contains(attribute)) {
+            DecimalFormat decimalFormat = new DecimalFormat("0.00");
+            float formattedData = data[0] * 100;
+            if (decimalFormat.format(formattedData).endsWith(".00")) {
+                data = new float[]{(int) formattedData};
+            } else {
+                data = new float[]{formattedData};
+            }
+            back = data[0] + "%%";
+        } else {
+            back = Float.toString(data[0]);
+        }
+        if (data[0] == 0) {
+            back = "0";
+        }
+        return back;
     }
 
     /**

@@ -8,11 +8,14 @@ import RcRPG.Task.Tip;
 import RcRPG.Task.loadHealth;
 import cn.nukkit.Server;
 import cn.nukkit.event.Listener;
+import cn.nukkit.permission.Permission;
 import cn.nukkit.plugin.PluginBase;
 import cn.nukkit.utils.Config;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 
 public class Main extends PluginBase implements Listener {
 
@@ -20,6 +23,7 @@ public class Main extends PluginBase implements Listener {
 
     public Config config;
 
+    public List<String> attrDisplayPercentConfig;
     public static boolean money;
 
     public static boolean point;
@@ -37,15 +41,20 @@ public class Main extends PluginBase implements Listener {
     public void onEnable(){
         instance = this;
         this.getNewFile();
-        init();
         this.saveResource("Config.yml","/Config.yml",false);
         config = new Config(this.getDataFolder() + "/Config.yml");
+        initAttrDisplayPercent();
+        init();
         this.getServer().getPluginManager().registerEvents(new Events(),this);
         this.getServer().getScheduler().scheduleRepeatingTask(new Tip(this),20);
         this.getServer().getScheduler().scheduleRepeatingTask(new BoxTimeTask(this),20);
         this.getServer().getScheduler().scheduleRepeatingTask(new loadHealth(this),10);
         this.getServer().getScheduler().scheduleRepeatingTask(new PlayerAttrUpdateTask(this),20);
-        this.getServer().getCommandMap().register("rpg", new Commands());
+
+        Server.getInstance().getPluginManager().addPermission(new Permission("plugin.rcrpg", "rcrpg 命令权限", "true"));
+        Server.getInstance().getPluginManager().addPermission(new Permission("plugin.rcrpg.admin", "rcrpg 管理员命令权限", "op"));
+        Server.getInstance().getCommandMap().register("rpg", new Commands("rpg"));
+
         if(Server.getInstance().getPluginManager().getPlugin("EconomyAPI") == null){
             this.getLogger().info("检测到未安装核心，将使用默认的经济核心");
             money = false;
@@ -217,6 +226,42 @@ public class Main extends PluginBase implements Listener {
         File boxFile = this.getBoxFile();
         if (!boxFile.exists() && !boxFile.mkdirs()) {
             this.getLogger().info("/Box文件夹创建失败");
+        }
+    }
+
+    public void initAttrDisplayPercent () {
+        List<String> attrDisplayPercent = new ArrayList<>();
+
+        // 添加激进向 (12)的百分比属性
+        attrDisplayPercent.add("暴击率");
+        attrDisplayPercent.add("暴击倍率");
+        attrDisplayPercent.add("吸血率");
+        attrDisplayPercent.add("吸血倍率");
+        attrDisplayPercent.add("破防率");
+        attrDisplayPercent.add("破甲率");
+        attrDisplayPercent.add("命中率");
+        attrDisplayPercent.add("伤害加成");
+
+        // 添加保守向 (10)的百分比属性
+        attrDisplayPercent.add("闪避率");
+        attrDisplayPercent.add("暴击闪避");
+        attrDisplayPercent.add("暴击抵抗");
+        attrDisplayPercent.add("吸血抵抗");
+        attrDisplayPercent.add("血量加成");
+        attrDisplayPercent.add("防御加成");
+
+        // 添加辅助增益向 (4)的百分比属性
+        attrDisplayPercent.add("经验加成");
+        attrDisplayPercent.add("移速加成");
+
+        // 添加特殊效果 (6)的百分比属性
+        attrDisplayPercent.add("燃烧概率");
+        attrDisplayPercent.add("雷击概率");
+        attrDisplayPercent.add("冰冻概率");
+        if (Main.instance.config.exists("AttrDisplayPercent")) {
+            attrDisplayPercentConfig = Main.instance.config.getStringList("AttrDisplayPercent");
+        } else {
+            attrDisplayPercentConfig = attrDisplayPercent;
         }
     }
 

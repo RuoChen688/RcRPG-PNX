@@ -145,7 +145,6 @@ public class Weapon extends ItemAttr {
             weapon.setTipText(config.getString("底部显示"));
             weapon.setMyMessage(config.getString("个人通知"));
             weapon.setServerMessage(config.getString("全服通知"));
-
             return weapon;
         }catch(Exception e){
             Main.instance.getLogger().error("加载武器"+name+"配置文件失败");
