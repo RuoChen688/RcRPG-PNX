@@ -1,5 +1,7 @@
 package RcRPG.RPG;
 
+import RcRPG.AttrManager.AttrNameParse;
+import RcRPG.AttrManager.ItemAttr;
 import RcRPG.Handle;
 import RcRPG.Main;
 import cn.nukkit.Player;
@@ -14,8 +16,10 @@ import cn.nukkit.utils.Config;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-public class Armour {
+public class Armour extends ItemAttr {
 
     private Config config;
 
@@ -34,7 +38,9 @@ public class Armour {
     private int reDamage;
 
     private ArrayList<Effect> effects = new ArrayList<>();
-    
+
+    private Object attr;
+
     private int stone;
 
     private String tipText;
@@ -57,10 +63,11 @@ public class Armour {
             Armour armour = new Armour(name,config);
 
             armour.setLabel(config.getString("标签"));
+            armour.setShowName(config.getString("显示名称"));
             armour.setItem(RuntimeItems.getMapping().getItemByNamespaceId(config.getString("物品ID"),1));
-            armour.setHealth(config.getInt("血量"));
-            armour.setDamage(config.getInt("攻击"));
-            armour.setReDamage(config.getInt("减伤"));
+            if (config.exists("属性")) {
+                armour.setAttr(config.get("属性"));
+            }
             armour.setMessage(config.getString("介绍"));
             armour.setTipText(config.getString("底部显示"));
             armour.setMyMessage(config.getString("个人通知"));
@@ -249,12 +256,10 @@ public class Armour {
             for(int i = 0;i < lore.size();i++){
                 String s = lore.get(i);
                 if(s.contains("@message")) s = s.replace("@message",armour.getMessage());
-                if(s.contains("@Health")) s = s.replace("@Health",String.valueOf(armour.getHealth()));
-                if(s.contains("@Damage")) s = s.replace("@Damage",String.valueOf(armour.getDamage()));
-                if(s.contains("@reDamage")) s = s.replace("@reDamage",String.valueOf(armour.getReDamage()));
                 if(s.contains("@stoneHealth")) s = s.replace("@stoneHealth",String.valueOf(Armour.getStoneHealth(item)));
                 if(s.contains("@stoneDamage")) s = s.replace("@stoneDamage",String.valueOf(Armour.getStoneDamage(item)));
                 if(s.contains("@stoneReDamage")) s = s.replace("@stoneReDamage",String.valueOf(Armour.getStoneReDamage(item)));
+                s = armour.replaceAttrTemplate(s);// 替换属性的值
                 lore.set(i,s);
             }
             item.setLore(lore.toArray(new String[0]));
@@ -262,6 +267,20 @@ public class Armour {
         return item;
     }
 
+    public String replaceAttrTemplate(String str) {
+        Pattern pattern = Pattern.compile("\\{\\{(.*?)\\}\\}");
+        Matcher matcher = pattern.matcher(str);
+        StringBuffer sb = new StringBuffer();
+
+        while (matcher.find()) {
+            AttrNameParse attrName = AttrNameParse.processString(matcher.group(1));
+            String replacement = String.valueOf(getItemAttr(attrName.getResult(), attrName.getNumber()));
+            matcher.appendReplacement(sb, replacement);
+        }
+        matcher.appendTail(sb);
+
+        return sb.toString();
+    }
     public Config getConfig() {
         return config;
     }
@@ -364,6 +383,15 @@ public class Armour {
 
     public void setServerMessage(String serverMessage) {
         this.serverMessage = serverMessage;
+    }
+
+
+    public Object getAttr() {
+        return attr;
+    }
+    public void setAttr(Object attr) {
+        this.attr = attr;
+        setItemAttrConfig(attr);
     }
 
     public String getMessage() {

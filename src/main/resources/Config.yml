@@ -1,6 +1,8 @@
 聊天显示: "§e[@prefix§e][§bLV.@level§e]§6@name§d>>>§f@message"
 顶部显示: "§eLV.@level§6 @name"
-底部显示: "§a玩家:§e @name §f||§a 等级:§e @level§f ||§a 经验:§e @exp§c/§e@maxexp§f ||§a 公会:§e @guild@n§a血量:§e @hp§c/§e@maxhp§f ||§a 称号:§e @prefix§f ||§a 金币:§e @money§f ||§a 点券:§e @point"
+底部显示: ""
+# "§a玩家:§e @name §f||§a 等级:§e @level§f ||§a 经验:§e @exp§c/§e@maxexp§f ||§a 公会:§e @guild@n§a血量:§e @hp§c/§e@maxhp§f ||§a 称号:§e @prefix§f ||§a 金币:§e @money§f ||§a 点券:§e @point"
+
 经验增加提示: "你获得了@exp点经验"
 等级增加提示: "你提升了@level等级，达到了@newLevel"
 经验增量: 100

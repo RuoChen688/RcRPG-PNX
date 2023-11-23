@@ -1,6 +1,7 @@
 package RcRPG.AttrManager;
 
 import RcRPG.Main;
+import RcRPG.RPG.Armour;
 import RcRPG.RPG.Weapon;
 import cn.nukkit.Player;
 import cn.nukkit.form.element.Element;
@@ -17,6 +18,7 @@ public class PlayerAttr extends Manager {
     private ArrayList<String> labelList = new ArrayList<>();
     public PlayerAttr(Player player) {
         this.player = player;
+        myAttr.put("Main", new HashMap<>());
     }
     public static LinkedHashMap<Player, PlayerAttr> playerslist = new LinkedHashMap<>();
 
@@ -35,7 +37,6 @@ public class PlayerAttr extends Manager {
         ArrayList<Item> itemList = new ArrayList<>();
         itemList.add(player.getInventory().getItemInHand());// 主手
         itemList.add(player.getOffhandInventory().getItem(0));// 副手
-        Collections.addAll(itemList, player.getInventory().getArmorContents());// 护甲
         for (Item rcItem : itemList) {
             if (rcItem.getNamedTag() == null) continue;
             Weapon weapon = Main.loadWeapon.get(rcItem.getNamedTag().getString("name"));
@@ -43,6 +44,14 @@ public class PlayerAttr extends Manager {
             setItemAttrConfig(weapon.getLabel(), weapon.getMainAttr());
             beforLabel.remove(weapon.getLabel());
             labelList.add(weapon.getLabel());
+        }
+        for (Item rcItem : player.getInventory().getArmorContents()) {// 护甲栏
+            if (rcItem.getNamedTag() == null) continue;
+            Armour armour = Main.loadArmour.get(rcItem.getNamedTag().getString("name"));
+            if (armour == null) continue;
+            setItemAttrConfig(armour.getLabel(), armour.getMainAttr());
+            beforLabel.remove(armour.getLabel());
+            labelList.add(armour.getLabel());
         }
         beforLabel.forEach(label -> {
             setItemAttrConfig(label, new HashMap<String, float[]>());
@@ -86,10 +95,7 @@ public class PlayerAttr extends Manager {
                 Main.instance.getLogger().warning(key + "不知道是啥类型");
             }
         }
-        if (!myAttr.containsKey("Main")) {
-            Map<String, float[]> mainAttrMap_ = new HashMap<>();
-            myAttr.put("Main", mainAttrMap_);
-        }
+
         Map<String, float[]> mainAttrMap = myAttr.get("Main");
         Map<String, float[]> oldAttrMap = deepCopyMap(myAttr.get(id));
         myAttr.put(id, attrMap);

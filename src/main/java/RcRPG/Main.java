@@ -11,6 +11,8 @@ import cn.nukkit.event.Listener;
 import cn.nukkit.permission.Permission;
 import cn.nukkit.plugin.PluginBase;
 import cn.nukkit.utils.Config;
+import tip.utils.Api;
+import RcRPG.tips.TipsVariables;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -20,6 +22,8 @@ import java.util.List;
 public class Main extends PluginBase implements Listener {
 
     public static Main instance;
+
+    public boolean disableChatStyle;
 
     public Config config;
 
@@ -45,8 +49,12 @@ public class Main extends PluginBase implements Listener {
         config = new Config(this.getDataFolder() + "/Config.yml");
         initAttrDisplayPercent();
         init();
+        disableChatStyle = !config.exists("底部显示") || config.getString("底部显示").equals("");
+
         this.getServer().getPluginManager().registerEvents(new Events(),this);
-        this.getServer().getScheduler().scheduleRepeatingTask(new Tip(this),20);
+        if (config.exists("底部显示") && !config.getString("底部显示").equals("")) {
+            this.getServer().getScheduler().scheduleRepeatingTask(new Tip(this), 20);
+        }
         this.getServer().getScheduler().scheduleRepeatingTask(new BoxTimeTask(this),20);
         this.getServer().getScheduler().scheduleRepeatingTask(new loadHealth(this),10);
         this.getServer().getScheduler().scheduleRepeatingTask(new PlayerAttrUpdateTask(this),20);
@@ -66,6 +74,9 @@ public class Main extends PluginBase implements Listener {
             point = false;
         }else{
             point = true;
+        }
+        if(Server.getInstance().getPluginManager().getPlugin("playerPoints") != null){
+            Api.registerVariables("AyearTipsApi", TipsVariables.class);
         }
         this.getLogger().info("插件加载成功，作者：若尘");
     }
@@ -249,6 +260,7 @@ public class Main extends PluginBase implements Listener {
         attrDisplayPercent.add("吸血抵抗");
         attrDisplayPercent.add("血量加成");
         attrDisplayPercent.add("防御加成");
+        attrDisplayPercent.add("护甲强度");
 
         // 添加辅助增益向 (4)的百分比属性
         attrDisplayPercent.add("经验加成");

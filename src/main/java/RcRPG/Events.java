@@ -569,6 +569,7 @@ public class Events implements Listener {
                         String text = weapon.getKillMessage();
                         if(text.contains("@damager"))  text = text.replace("@damager", damagerName);
                         if(text.contains("@player"))  text = text.replace("@player", woundedName);
+                        if(text.contains("@name"))  text = text.replace("@name", weapon.getShowName());
                         Server.getInstance().broadcastMessage(text);
                     }
                 }
@@ -584,6 +585,7 @@ public class Events implements Listener {
 
     @EventHandler
     public void chatEvent(PlayerChatEvent event){
+        if (Main.instance.disableChatStyle) return;
         Player player = event.getPlayer();
         String name = player.getName();
         String message = event.getMessage();
@@ -620,18 +622,22 @@ public class Events implements Listener {
             config.set("称号列表",list);
             config.save();
         }
-        String text = Main.instance.config.getString("顶部显示");
-        if(text.contains("@name")) text = text.replace("@name", player.getName());
-        if(text.contains("@hp")) text = text.replace("@hp",String.valueOf(player.getHealth()));
-        if(text.contains("@maxhp")) text = text.replace("@maxhp",String.valueOf(player.getMaxHealth()));
-        if(text.contains("@exp")) text = text.replace("@exp", String.valueOf(Level.getExp(player)));
-        if(text.contains("@maxexp")) text = text.replace("@maxexp", String.valueOf(Level.getMaxExp(player)));
-        if(text.contains("@level")) text = text.replace("@level", String.valueOf(Level.getLevel(player)));
-        if(text.contains("@prefix")) text = text.replace("@prefix", String.valueOf(Handle.getPlayerConfig(name).getString("称号")));
-        if(text.contains("@guild")) text = text.replace("@guild", String.valueOf(Handle.getPlayerConfig(player.getName()).getString("公会")));
-        player.setNameTag(text);
-        player.setNameTagVisible();
-        player.setNameTagAlwaysVisible();
+        if (Main.instance.config.exists("顶部显示") && !Main.instance.config.getString("顶部显示").equals("")) {
+            String text = Main.instance.config.getString("顶部显示");
+            if (text.contains("@name")) text = text.replace("@name", player.getName());
+            if (text.contains("@hp")) text = text.replace("@hp", String.valueOf(player.getHealth()));
+            if (text.contains("@maxhp")) text = text.replace("@maxhp", String.valueOf(player.getMaxHealth()));
+            if (text.contains("@exp")) text = text.replace("@exp", String.valueOf(Level.getExp(player)));
+            if (text.contains("@maxexp")) text = text.replace("@maxexp", String.valueOf(Level.getMaxExp(player)));
+            if (text.contains("@level")) text = text.replace("@level", String.valueOf(Level.getLevel(player)));
+            if (text.contains("@prefix"))
+                text = text.replace("@prefix", String.valueOf(Handle.getPlayerConfig(name).getString("称号")));
+            if (text.contains("@guild"))
+                text = text.replace("@guild", String.valueOf(Handle.getPlayerConfig(player.getName()).getString("公会")));
+            player.setNameTag(text);
+            player.setNameTagVisible();
+            player.setNameTagAlwaysVisible();
+        }
         player.setMaxHealth(Handle.getMaxHealth(player));
     }
 
