@@ -75,7 +75,7 @@ public class Main extends PluginBase implements Listener {
         }else{
             point = true;
         }
-        if(Server.getInstance().getPluginManager().getPlugin("playerPoints") != null){
+        if(Server.getInstance().getPluginManager().getPlugin("Tips") != null){
             Api.registerVariables("AyearTipsApi", TipsVariables.class);
         }
         this.getLogger().info("插件加载成功，作者：若尘");

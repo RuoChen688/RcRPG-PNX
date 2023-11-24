@@ -371,10 +371,10 @@ public class Events implements Listener {
         }
 
         // Debuff 处理
-        if (damager.hasEffect(18) && DAttr.checkFloatArray(DAttr.getCritChance())) {// 虚弱每级减10%暴击率,暴击倍率x50%
+        if (damager.hasEffect(18) && DAttr.checkFloatArray(DAttr.getCritChance())) {// 虚弱每级减10%暴击率,暴击倍率减半
             Effect weaknessEffect = damager.getEffect(18);
-            DAttr.pvpAttackPower -= ((weaknessEffect.getAmplifier() + 1) * 0.1);
-            DAttr.critChance *= 0.5;
+            if (DAttr.critChance > 0) DAttr.critChance -= ((weaknessEffect.getAmplifier() + 1) * 0.1);
+            DAttr.criticalStrikeMultiplier *= 0.5;
         }
 
         if (damager.hasEffect(19) && DAttr.checkFloatArray(DAttr.getLifestealChance())) {// 中毒每级减10%吸血率,吸血倍率x50%
