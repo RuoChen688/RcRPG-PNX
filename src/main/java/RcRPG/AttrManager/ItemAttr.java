@@ -111,6 +111,9 @@ public class ItemAttr extends Manager {
 
     @Override
     public float[] getPvpAttackPower() {
+        if (mainAttr.containsKey("攻击力")) {
+            return mainAttr.get("攻击力");
+        }
         if (mainAttr.containsKey("PVP攻击力")) {
             return mainAttr.get("PVP攻击力");
         }
@@ -119,10 +122,32 @@ public class ItemAttr extends Manager {
 
     @Override
     public float[] getPveAttackPower() {
+        if (mainAttr.containsKey("攻击力")) {
+            return mainAttr.get("攻击力");
+        }
         if (mainAttr.containsKey("PVE攻击力")) {
             return mainAttr.get("PVE攻击力");
         }
         return new float[0];
+    }
+
+    @Override
+    public float[] getPvpAttackMultiplier() {
+        if (mainAttr.containsKey("攻击加成")) {
+            return mainAttr.get("攻击加成");
+        }
+        if (mainAttr.containsKey("PVP攻击加成")) {
+            return mainAttr.get("PVP攻击加成");
+        }
+        return new float[]{ 0.0f, 0.0f };
+    }
+
+    @Override
+    public float[] getPveAttackMultiplier() {
+        if (mainAttr.containsKey("PVE攻击加成")) {
+            return mainAttr.get("PVE攻击加成");
+        }
+        return new float[]{ 0.0f, 0.0f };
     }
 
     @Override

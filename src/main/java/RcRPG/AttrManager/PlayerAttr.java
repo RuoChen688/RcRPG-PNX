@@ -351,6 +351,22 @@ public class PlayerAttr extends Manager {
     }
 
     @Override
+    public float[] getPvpAttackMultiplier() {
+        if (getItemAttrMap().containsKey("PVP攻击加成")) {
+            return getItemAttrMap().get("PVP攻击加成");
+        }
+        return new float[]{ 0.0f, 0.0f };
+    }
+
+    @Override
+    public float[] getPveAttackMultiplier() {
+        if (getItemAttrMap().containsKey("PVE攻击加成")) {
+            return getItemAttrMap().get("PVE攻击加成");
+        }
+        return new float[]{ 0.0f, 0.0f };
+    }
+
+    @Override
     public float[] getCritChance() {
         if (getItemAttrMap().containsKey("暴击率")) {
             return getItemAttrMap().get("暴击率");

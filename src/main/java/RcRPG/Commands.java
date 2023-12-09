@@ -212,9 +212,10 @@ public class Commands extends VanillaCommand {
                     }
                     Player player = Server.getInstance().getPlayer((String) args.getResult(2));
                     if(player == null) return 0;
-                    if(Level.addExp(player,Integer.parseInt(args.getResult(3)))){
+                    int expValue = args.getResult(3);
+                    if(Level.addExp(player, expValue)){
                         if(sender.isPlayer()) sender.sendMessage("给予成功");
-                    }else{
+                    } else {
                         if(sender.isPlayer()) sender.sendMessage("给予失败");
                     }
                 } else if (arg1.equals("help")) {

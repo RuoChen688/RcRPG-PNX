@@ -81,7 +81,7 @@ public class Main extends PluginBase implements Listener {
         this.getLogger().info("插件加载成功，作者：若尘");
     }
 
-    public void init(){
+    public void init() {
         this.getLogger().info("开始读取武器信息");
         for(String name: Handle.getDefaultFiles("Weapon")){
             this.getLogger().info("读取 "+name+".yml");
@@ -91,7 +91,7 @@ public class Main extends PluginBase implements Listener {
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
-            if(weapon != null){
+            if(weapon != null) {
                 loadWeapon.put(name,weapon);
                 this.getLogger().info(name+"武器数据读取成功");
             }else{
@@ -252,6 +252,8 @@ public class Main extends PluginBase implements Listener {
         attrDisplayPercent.add("破甲率");
         attrDisplayPercent.add("命中率");
         attrDisplayPercent.add("伤害加成");
+        attrDisplayPercent.add("PVP攻击加成");
+        attrDisplayPercent.add("PVE攻击加成");
 
         // 添加保守向 (10)的百分比属性
         attrDisplayPercent.add("闪避率");
@@ -261,6 +263,7 @@ public class Main extends PluginBase implements Listener {
         attrDisplayPercent.add("血量加成");
         attrDisplayPercent.add("防御加成");
         attrDisplayPercent.add("护甲强度");
+        attrDisplayPercent.add("生命加成");
 
         // 添加辅助增益向 (4)的百分比属性
         attrDisplayPercent.add("经验加成");

@@ -2,6 +2,7 @@ package RcRPG.RPG;
 
 import RcRPG.AttrManager.AttrNameParse;
 import RcRPG.AttrManager.ItemAttr;
+import RcRPG.AttrManager.PlayerAttr;
 import RcRPG.Handle;
 import RcRPG.Main;
 import cn.nukkit.Player;
@@ -331,7 +332,7 @@ public class Weapon extends ItemAttr {
 
         while (matcher.find()) {
             AttrNameParse attrName = AttrNameParse.processString(matcher.group(1));
-            String replacement = String.valueOf(getItemAttr(attrName.getResult(), attrName.getNumber()));
+            String replacement = PlayerAttr.valueToString(new float[]{getItemAttr(attrName.getResult(), attrName.getState())}, attrName.getResult());
             matcher.appendReplacement(sb, replacement);
         }
         matcher.appendTail(sb);

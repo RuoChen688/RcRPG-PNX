@@ -141,7 +141,7 @@ public class Manager implements AttrInterface {
     }
 
     /**
-     * PVP攻击力加成
+     * PVP攻击加成
      * @return
      */
     @Override
@@ -150,7 +150,7 @@ public class Manager implements AttrInterface {
     }
 
     /**
-     * PVE攻击力加成
+     * PVE攻击加成
      * @return
      */
     @Override

@@ -147,6 +147,7 @@ public class Handle {
             for(Item armor : player.getInventory().getArmorContents()){
                 if(Armour.isArmour(armor)){
                     Armour a = Main.loadArmour.get(armor.getNamedTag().getString("name"));
+                    if (a == null) continue;// TODO: 可能要做无效装备的清除？
                     health2 += (a.getHealth() + Armour.getStoneHealth(armor));
                 }
             }

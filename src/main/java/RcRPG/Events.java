@@ -58,9 +58,9 @@ public class Events implements Listener {
         Player player = event.getPlayer();
         Item item = event.getItem();
         Block block = event.getBlock();
-        if(!item.isNull() && Handle.getShopByPos(block) == null){
-            if(Magic.isMagic(item)) Magic.useMagic(player,item);
-            else if(Box.isBox(item)) Box.useBox(player,item);
+        if (item != null && !item.isNull() && Handle.getShopByPos(block) == null) {
+            if (Magic.isMagic(item)) Magic.useMagic(player, item);
+            else if (Box.isBox(item)) Box.useBox(player, item);
         }
         if(block instanceof BlockSignPost && Events.playerShop.containsKey(player)){
             Config config = Shop.addShopConfig(Events.playerShop.get(player),block.x + ":" + block.y + ":" + block.z + ":" +block.level.getName());
@@ -107,6 +107,7 @@ public class Events implements Listener {
         Item item = event.getItem();
         if(!item.isNull() && Weapon.isWeapon(item)){
             Weapon weapon = Main.loadWeapon.get(item.getNamedTag().getString("name"));
+            if (weapon == null) return;// TODO: 可能要做无效装备的清除？
             if(Level.getLevel(player) < weapon.getLevel()){
                 player.sendMessage("等级不足武器使用等级");
                 event.setCancelled();
@@ -551,10 +552,11 @@ public class Events implements Listener {
 
         event.setDamage(finalDamage);
 
-        // 燃烧、冰冻、雷击 效果处理
-        Damage.onDamage((Player) damager, wounded);
 
         if (damager instanceof Player) {
+            // 燃烧、冰冻、雷击 效果处理
+            Damage.onDamage((Player) damager, wounded);
+
             if (crtDamage > 0) {
                 ((Player) damager).sendMessage("你对" + woundedName + "§r造成了 §l" + crtDamage + "§r 点暴击伤害");
             }
