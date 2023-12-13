@@ -2,19 +2,19 @@ package RcRPG.AttrManager;
 
 public class AttrNameParse {
     private String result;
-    private int number;
+    private int state;
 
     public AttrNameParse(String result, int number) {
         this.result = result;
-        this.number = number;
+        this.state = number;
     }
 
     public String getResult() {
         return result;
     }
 
-    public int getNumber() {
-        return number;
+    public int getState() {
+        return state;
     }
 
     public static AttrNameParse processString(String input) {

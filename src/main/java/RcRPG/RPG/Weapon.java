@@ -184,51 +184,56 @@ public class Weapon extends ItemAttr {
         return false;
     }
 
-    public static boolean giveWeapon(Player player,String name,int count){
-        if(Main.loadWeapon.containsKey(name)){
-            Weapon weapon = Main.loadWeapon.get(name);
-            Item item = Main.loadWeapon.get(name).getItem();
-            item.setCount(count);
-            CompoundTag tag = item.getNamedTag();
-            if(tag == null){
-                tag = new CompoundTag();
-            }
-            tag.putString("type","weapon");
-            tag.putString("name",name);
-            if(weapon.isUnBreak()){
-                tag.putByte("Unbreakable",1);
-            }
-            ListTag<StringTag> stoneList = new ListTag<>("stone");
-            tag.putList(stoneList);
-            item.setNamedTag(tag);
-            item.setCustomName(weapon.getShowName());
-            Weapon.setWeaponLore(item);
-            player.getInventory().addItem(item);
-            if(!weapon.getMyMessage().equals("")){
-                String text = weapon.getMyMessage();
-                if(text.contains("@player")) text = text.replace("@player", player.getName());
-                if(text.contains("@item")) text = text.replace("@item", weapon.getLabel());
-                player.sendMessage(text);
-            }
-            if(!weapon.getServerMessage().equals("")){
-                String text = weapon.getServerMessage();
-                if(text.contains("@player")) text = text.replace("@player", player.getName());
-                if(text.contains("@item")) text = text.replace("@item", weapon.getLabel());
-                Main.instance.getServer().broadcastMessage(text);
-            }
-            return true;
+    public static Item getItem(String name,int count) {
+        Weapon weapon = Main.loadWeapon.get(name);
+        Item item = Main.loadWeapon.get(name).getItem();
+        item.setCount(count);
+        CompoundTag tag = item.getNamedTag();
+        if(tag == null){
+            tag = new CompoundTag();
         }
-        return false;
+        tag.putString("type","weapon");
+        tag.putString("name",name);
+        if(weapon.isUnBreak()){
+            tag.putByte("Unbreakable",1);
+        }
+        ListTag<StringTag> stoneList = new ListTag<>("stone");
+        tag.putList(stoneList);
+        item.setNamedTag(tag);
+        item.setCustomName(weapon.getShowName());
+        Weapon.setWeaponLore(item);
+        return item;
+    }
+
+    public static boolean giveWeapon(Player player,String name,int count){
+        if(!Main.loadWeapon.containsKey(name)) {
+            return false;
+        }
+        Weapon weapon = Main.loadWeapon.get(name);
+        player.getInventory().addItem(getItem(name, count));
+        if(!weapon.getMyMessage().equals("")){
+            String text = weapon.getMyMessage();
+            if(text.contains("@player")) text = text.replace("@player", player.getName());
+            if(text.contains("@item")) text = text.replace("@item", weapon.getLabel());
+            player.sendMessage(text);
+        }
+        if(!weapon.getServerMessage().equals("")){
+            String text = weapon.getServerMessage();
+            if(text.contains("@player")) text = text.replace("@player", player.getName());
+            if(text.contains("@item")) text = text.replace("@item", weapon.getLabel());
+            Main.instance.getServer().broadcastMessage(text);
+        }
+        return true;
     }
 
     public static boolean isWeapon(Item item){
-        if(item.getNamedTag() != null){
-            if(item.getNamedTag().contains("type")){
-                return item.getNamedTag().getString("type").equals("weapon");
-            }
+        if(item.getNamedTag() == null) {
             return false;
         }
-        return false;
+        if(!item.getNamedTag().contains("type")){
+            return false;
+        }
+        return item.getNamedTag().getString("type").equals("weapon");
     }
 
 

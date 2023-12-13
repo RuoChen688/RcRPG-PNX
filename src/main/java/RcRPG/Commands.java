@@ -11,9 +11,9 @@ import RcRPG.Society.Prefix;
 import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.command.CommandSender;
+import cn.nukkit.command.PluginCommand;
 import cn.nukkit.command.data.CommandParamType;
 import cn.nukkit.command.data.CommandParameter;
-import cn.nukkit.command.defaults.VanillaCommand;
 import cn.nukkit.command.tree.ParamList;
 import cn.nukkit.command.tree.node.PlayersNode;
 import cn.nukkit.command.utils.CommandLogger;
@@ -25,10 +25,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class Commands extends VanillaCommand {
+public class Commands extends PluginCommand<Main> {
 
     public Commands(String cmdName) {
-        super(cmdName, "RPG指令", "/rpg help");
+        super(cmdName, "RPG指令", Main.getInstance());
         this.setPermission("plugin.rcrpg");
         this.commandParameters.clear();
         ArrayList<String> society = new ArrayList<>(){{

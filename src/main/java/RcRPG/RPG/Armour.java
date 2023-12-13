@@ -124,48 +124,51 @@ public class Armour extends ItemAttr {
         }
         return false;
     }
-
-    public static boolean giveArmour(Player player, String name, int count){
-        if(Main.loadArmour.get(name) != null){
-            Armour armour = Main.loadArmour.get(name);
-            Item item = armour.getItem();
-            item.setCount(count);
-            CompoundTag tag = item.getNamedTag();
-            if(tag == null){
-                tag = new CompoundTag();
-            }
-            tag.putString("type","armour");
-            tag.putString("name",name);
-            tag.putByte("Unbreakable",1);
-            item.setNamedTag(tag);
-            Armour.setArmourLore(item);
-            item.setCustomName(armour.getShowName());
-            player.getInventory().addItem(item);
-            if(!armour.getMyMessage().equals("")){
-                String text = armour.getMyMessage();
-                if(text.contains("@player")) text = text.replace("@player", player.getName());
-                if(text.contains("@item")) text = text.replace("@item", armour.getLabel());
-                player.sendMessage(text);
-            }
-            if(!armour.getServerMessage().equals("")){
-                String text = armour.getServerMessage();
-                if(text.contains("@player")) text = text.replace("@player", player.getName());
-                if(text.contains("@item")) text = text.replace("@item", armour.getLabel());
-                Main.instance.getServer().broadcastMessage(text);
-            }
-            return true;
+    public static Item getItem(String name, int count) {
+        Armour armour = Main.loadArmour.get(name);
+        Item item = armour.getItem();
+        item.setCount(count);
+        CompoundTag tag = item.getNamedTag();
+        if(tag == null){
+            tag = new CompoundTag();
         }
-        return false;
+        tag.putString("type","armour");
+        tag.putString("name",name);
+        tag.putByte("Unbreakable",1);
+        item.setNamedTag(tag);
+        item.setCustomName(armour.getShowName());
+        Armour.setArmourLore(item);
+        return item;
+    }
+    public static boolean giveArmour(Player player, String name, int count){
+        if(!Main.loadArmour.containsKey(name)) {
+            return false;
+        }
+        Armour armour = Main.loadArmour.get(name);
+        player.getInventory().addItem(getItem(name, count));
+        if(!armour.getMyMessage().equals("")){
+            String text = armour.getMyMessage();
+            if(text.contains("@player")) text = text.replace("@player", player.getName());
+            if(text.contains("@item")) text = text.replace("@item", armour.getLabel());
+            player.sendMessage(text);
+        }
+        if(!armour.getServerMessage().equals("")){
+            String text = armour.getServerMessage();
+            if(text.contains("@player")) text = text.replace("@player", player.getName());
+            if(text.contains("@item")) text = text.replace("@item", armour.getLabel());
+            Main.instance.getServer().broadcastMessage(text);
+        }
+        return true;
     }
 
     public static boolean isArmour(Item item){
-        if(item.getNamedTag() != null){
-            if(item.getNamedTag().contains("type")){
-                return item.getNamedTag().getString("type").equals("armour");
-            }
+        if(item.getNamedTag() == null) {
             return false;
         }
-        return false;
+        if(!item.getNamedTag().contains("type")){
+            return false;
+        }
+        return item.getNamedTag().getString("type").equals("armour");
     }
 
     public static LinkedList<Stone> getStones(Item item){
