@@ -2,7 +2,7 @@ package RcRPG.Form;
 
 import RcRPG.Handle;
 import RcRPG.Main;
-import RcRPG.Society.Guild;
+import RcRPG.guild.Guild;
 import cn.nukkit.Player;
 import cn.nukkit.form.element.*;
 import cn.nukkit.form.window.FormWindowCustom;

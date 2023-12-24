@@ -222,7 +222,7 @@ public class Manager implements AttrInterface {
     }
 
     /**
-     * 破甲攻击 - 百分比
+     * 破甲强度 - 百分比
      * @return
      */
     @Override

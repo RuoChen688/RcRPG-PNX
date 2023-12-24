@@ -1,5 +1,6 @@
 package RcRPG.RPG;
 
+import RcRPG.AttrManager.ItemAttr;
 import RcRPG.Main;
 import cn.nukkit.Player;
 import cn.nukkit.item.Item;
@@ -11,7 +12,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
-public class Stone {
+public class Stone extends ItemAttr {
 
     private Config config;
 
@@ -27,6 +28,8 @@ public class Stone {
 
     private int reDamage;
 
+    private Object attr;
+
     private String tipText;
 
     private String myMessage;
@@ -34,6 +37,8 @@ public class Stone {
     private String serverMessage;
 
     private String message;
+
+    private ArrayList<String> loreList = new ArrayList<>();
 
     public Stone(String name,Config config){
         this.name = name;
@@ -46,13 +51,20 @@ public class Stone {
 
             stone.setLabel(config.getString("标签"));
             stone.setItem(RuntimeItems.getMapping().getItemByNamespaceId(config.getString("物品ID"),1));
-            stone.setHealth(config.getInt("血量"));
-            stone.setDamage(config.getInt("攻击"));
-            stone.setReDamage(config.getInt("减伤"));
+            if (config.exists("属性")) {
+                stone.setAttr(config.get("属性"));
+            }
+
             stone.setMessage(config.getString("介绍"));
             stone.setTipText(config.getString("底部显示"));
             stone.setMyMessage(config.getString("个人通知"));
             stone.setServerMessage(config.getString("全服通知"));
+
+            ArrayList<String> list4 = new ArrayList<>();
+            for(String lore : config.getStringList("显示")){
+                list4.add(lore);
+            }
+            stone.setLoreList(list4);
 
             return stone;
         }catch(Exception e){
@@ -92,37 +104,63 @@ public class Stone {
         return false;
     }
 
-    public static boolean giveStone(Player player, String name, int count){
-        if(Main.loadStone.containsKey(name)){
+    public static Item setStoneLore(Item item) {
+        if (Stone.isStone(item)) {
+            Stone stone = Main.loadStone.get(item.getNamedTag().getString("name"));
+            ArrayList<String> lore;
+            lore = (ArrayList<String>) stone.getLoreList().clone();
+            for (int i = 0;i < lore.size();i++) {
+                String s = lore.get(i);
+                if(s.contains("@message")) s = s.replace("@message",stone.getMessage());
+                s = stone.replaceAttrTemplate(s);// 替换属性的值
+                lore.set(i, s);
+            }
+            item.setLore(lore.toArray(new String[0]));
+        }
+        return item;
+    }
+    public static Item getItem(String name, int count) {
+        if(Main.loadStone.containsKey(name)) {
             Stone stone = Main.loadStone.get(name);
             Item item = Main.loadStone.get(name).getItem();
             item.setCount(count);
-            item.setLore(stone.lore());
             CompoundTag tag = item.getNamedTag();
-            if(tag == null){
+            if (tag == null) {
                 tag = new CompoundTag();
             }
-            tag.putString("type","stone");
-            tag.putString("name",name);
-            tag.putByte("Unbreakable",1);
+            tag.putString("type", "stone");
+            tag.putString("name", name);
+            tag.putByte("Unbreakable", 1);
             item.setNamedTag(tag);
             item.setCustomName(stone.getLabel());
-            player.getInventory().addItem(item);
-            if(!stone.getMyMessage().equals("")){
-                String text = stone.getMyMessage();
-                if(text.contains("@player")) text = text.replace("@player", player.getName());
-                if(text.contains("@item")) text = text.replace("@item", stone.getLabel());
-                player.sendMessage(text);
-            }
-            if(!stone.getServerMessage().equals("")){
-                String text = stone.getServerMessage();
-                if(text.contains("@player")) text = text.replace("@player", player.getName());
-                if(text.contains("@item")) text = text.replace("@item", stone.getLabel());
-                Main.instance.getServer().broadcastMessage(text);
-            }
-            return true;
+            Stone.setStoneLore(item);
+            return item;
         }
-        return false;
+        return null;
+    }
+    public static boolean giveStone(Player player, String name, int count){
+        if (!Main.loadStone.containsKey(name)) {
+            return false;
+        }
+        Item item = getItem(name, count);
+        if (item == null) {
+            return false;
+        }
+        Stone stone = Main.loadStone.get(name);
+        player.getInventory().addItem(item);
+        if(!stone.getMyMessage().equals("")){
+            String text = stone.getMyMessage();
+            if(text.contains("@player")) text = text.replace("@player", player.getName());
+            if(text.contains("@item")) text = text.replace("@item", stone.getLabel());
+            player.sendMessage(text);
+        }
+        if(!stone.getServerMessage().equals("")){
+            String text = stone.getServerMessage();
+            if(text.contains("@player")) text = text.replace("@player", player.getName());
+            if(text.contains("@item")) text = text.replace("@item", stone.getLabel());
+            Main.instance.getServer().broadcastMessage(text);
+        }
+        return true;
     }
 
     public static boolean isStone(Item item){
@@ -147,20 +185,6 @@ public class Stone {
             }
         }
         return list;
-    }
-
-    public String[] lore() {
-        ArrayList<String> lore = new ArrayList();
-        lore.add("§r§f═§7╞════════════╡§f═");
-        lore.add("§r§6◈§7类型§6◈§a " + "宝石");
-        lore.add("§r§f═§7╞════════════╡§f═");
-        lore.add("§r§6◈§7介绍§6◈ §a" + this.message);
-        lore.add("§r§f═§7╞════════════╡§f═");
-        lore.add("§r§6◈§7血量§6◈ §a" + this.health);
-        lore.add("§r§6◈§7攻击§6◈ §a" + this.damage);
-        lore.add("§r§6◈§7减伤§6◈ §a" + this.reDamage);
-        lore.add("§r§6◈§f═§7╞════════════╡§f═");
-        return (String[])lore.toArray(new String[0]);
     }
 
     public Config getConfig() {
@@ -199,17 +223,14 @@ public class Stone {
         return damage;
     }
 
-    public void setDamage(int damage) {
-        this.damage = damage;
-    }
-
     public int getReDamage() {
         return reDamage;
     }
 
-    public void setReDamage(int reDamage) {
-        this.reDamage = reDamage;
+    public int getHealth() {
+        return health;
     }
+
 
     public String getTipText() {
         return tipText;
@@ -235,6 +256,15 @@ public class Stone {
         this.serverMessage = serverMessage;
     }
 
+
+    public Object getAttr() {
+        return attr;
+    }
+    public void setAttr(Object attr) {
+        this.attr = attr;
+        setItemAttrConfig(attr);
+    }
+
     public String getMessage() {
         return message;
     }
@@ -243,11 +273,12 @@ public class Stone {
         this.message = message;
     }
 
-    public int getHealth() {
-        return health;
+
+    public ArrayList<String> getLoreList() {
+        return loreList;
     }
 
-    public void setHealth(int health) {
-        this.health = health;
+    public void setLoreList(ArrayList<String> loreList) {
+        this.loreList = loreList;
     }
 }

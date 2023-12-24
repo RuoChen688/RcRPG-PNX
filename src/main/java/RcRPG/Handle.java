@@ -1,6 +1,6 @@
 package RcRPG;
 
-import RcRPG.RPG.Armour;
+import RcRPG.AttrManager.PlayerAttr;
 import RcRPG.RPG.Level;
 import RcRPG.RPG.Stone;
 import RcRPG.Society.Shop;
@@ -143,19 +143,17 @@ public class Handle {
         String s = Main.instance.config.getString("等级增加血量");
         int health1 = Level.getLevel(player) / Integer.parseInt(s.split(":")[0]) * Integer.parseInt(s.split(":")[1]);
         int health2 = 0;
-        if(player.getInventory().getArmorContents().length != 0){
-            for(Item armor : player.getInventory().getArmorContents()){
-                if(Armour.isArmour(armor)){
-                    Armour a = Main.loadArmour.get(armor.getNamedTag().getString("name"));
-                    if (a == null) continue;// TODO: 可能要做无效装备的清除？
-                    health2 += (a.getHealth() + Armour.getStoneHealth(armor));
-                }
-            }
+        if (PlayerAttr.playerlist.containsKey(player)) {
+            PlayerAttr pAttr = PlayerAttr.playerlist.get(player);
+            int hp = (int) pAttr.getHp()[0];
+            float hpMulti = pAttr.getHpRegenMultiplier()[0];
+            int hpAdd = (int) (hpMulti * hp);
+            health2 = hp + hpAdd;
         }
         return health2 + health1 + 20;
     }
 
-    public static int random(int a,int b){
+    public static int random(int a,int b) {
         return new Random().nextInt(b-a+1)+a;
     }
 
@@ -179,7 +177,7 @@ public class Handle {
         }
 
         int randomValue = Integer.parseInt((String.valueOf(Math.random())).substring(3, length + 3));
-        return randomValue - 0 + 1 <= value;
+        return randomValue + 1 <= value;
     }
 
     /**

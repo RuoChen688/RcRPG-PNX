@@ -1,4 +1,4 @@
-package RcRPG.Society;
+package RcRPG.guild;
 
 import RcRPG.Handle;
 import RcRPG.Main;

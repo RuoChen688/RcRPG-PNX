@@ -5,14 +5,13 @@ import RcRPG.Society.Shop;
 import RcRPG.Task.BoxTimeTask;
 import RcRPG.Task.PlayerAttrUpdateTask;
 import RcRPG.Task.Tip;
-import RcRPG.Task.loadHealth;
+import RcRPG.tips.TipsVariables;
 import cn.nukkit.Server;
 import cn.nukkit.event.Listener;
 import cn.nukkit.permission.Permission;
 import cn.nukkit.plugin.PluginBase;
 import cn.nukkit.utils.Config;
 import tip.utils.Api;
-import RcRPG.tips.TipsVariables;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -24,6 +23,7 @@ public class Main extends PluginBase implements Listener {
     public static Main instance;
 
     public boolean disableChatStyle;
+    public static boolean disablePrefix = false;
 
     public Config config;
 
@@ -31,6 +31,7 @@ public class Main extends PluginBase implements Listener {
     public static boolean money;
 
     public static boolean point;
+
 
     public static LinkedHashMap<String, Weapon> loadWeapon = new LinkedHashMap<>();
     public static LinkedHashMap<String, Armour> loadArmour = new LinkedHashMap<>();
@@ -51,12 +52,16 @@ public class Main extends PluginBase implements Listener {
         init();
         disableChatStyle = !config.exists("底部显示") || config.getString("底部显示").equals("");
 
+        if (config.exists("称号.disable") && config.getBoolean("称号.disable")) {
+            disablePrefix = true;
+        }
+
         this.getServer().getPluginManager().registerEvents(new Events(),this);
         if (config.exists("底部显示") && !config.getString("底部显示").equals("")) {
             this.getServer().getScheduler().scheduleRepeatingTask(new Tip(this), 20);
         }
         this.getServer().getScheduler().scheduleRepeatingTask(new BoxTimeTask(this),20);
-        this.getServer().getScheduler().scheduleRepeatingTask(new loadHealth(this),10);
+        //this.getServer().getScheduler().scheduleRepeatingTask(new loadHealth(this), 10);
         this.getServer().getScheduler().scheduleRepeatingTask(new PlayerAttrUpdateTask(this),20);
 
         Server.getInstance().getPluginManager().addPermission(new Permission("plugin.rcrpg", "rcrpg 命令权限", "true"));
@@ -84,7 +89,6 @@ public class Main extends PluginBase implements Listener {
     public void init() {
         this.getLogger().info("开始读取武器信息");
         for(String name: Handle.getDefaultFiles("Weapon")){
-            this.getLogger().info("读取 "+name+".yml");
             Weapon weapon = null;
             try {
                 weapon = Weapon.loadWeapon(name,new Config(this.getDataFolder()+"/Weapon/"+name+".yml",Config.YAML));
@@ -93,14 +97,13 @@ public class Main extends PluginBase implements Listener {
             }
             if(weapon != null) {
                 loadWeapon.put(name,weapon);
-                this.getLogger().info(name+"武器数据读取成功");
-            }else{
-                this.getLogger().warning(name+"武器数据读取失败");
+                this.getLogger().info(name+".yml 武器数据读取成功");
+            } else {
+                this.getLogger().warning(name+".yml 武器数据读取失败");
             }
         }
         this.getLogger().info("开始读取盔甲信息");
         for(String name: Handle.getDefaultFiles("Armour")){
-            this.getLogger().info("读取 "+name+".yml");
             Armour armour = null;
             try {
                 armour = Armour.loadArmour(name,new Config(this.getDataFolder()+"/Armour/"+name+".yml",Config.YAML));
@@ -109,14 +112,13 @@ public class Main extends PluginBase implements Listener {
             }
             if(armour != null){
                 loadArmour.put(name,armour);
-                this.getLogger().info(name+"盔甲数据读取成功");
+                this.getLogger().info(name+".yml 盔甲数据读取成功");
             }else{
-                this.getLogger().warning(name+"盔甲数据读取失败");
+                this.getLogger().warning(name+".yml 盔甲数据读取失败");
             }
         }
         this.getLogger().info("开始读取宝石信息");
         for(String name: Handle.getDefaultFiles("Stone")){
-            this.getLogger().info("读取 "+name+".yml");
             Stone stone = null;
             try {
                 stone = Stone.loadStone(name,new Config(this.getDataFolder()+"/Stone/"+name+".yml",Config.YAML));
@@ -125,14 +127,13 @@ public class Main extends PluginBase implements Listener {
             }
             if(stone != null){
                 loadStone.put(name,stone);
-                this.getLogger().info(name+"宝石数据读取成功");
+                this.getLogger().info(name+".yml 宝石数据读取成功");
             }else{
-                this.getLogger().warning(name+"宝石数据读取失败");
+                this.getLogger().warning(name+".yml 宝石数据读取失败");
             }
         }
         this.getLogger().info("开始读取魔法物品信息");
         for(String name: Handle.getDefaultFiles("Magic")){
-            this.getLogger().info("读取 "+name+".yml");
             Magic magic = null;
             try {
                 magic = Magic.loadMagic(name,new Config(this.getDataFolder()+"/Magic/"+name+".yml",Config.YAML));
@@ -141,14 +142,13 @@ public class Main extends PluginBase implements Listener {
             }
             if(magic != null){
                 loadMagic.put(name,magic);
-                this.getLogger().info(name+"魔法物品数据读取成功");
+                this.getLogger().info(name+".yml 魔法物品数据读取成功");
             }else{
-                this.getLogger().warning(name+"魔法物品数据读取失败");
+                this.getLogger().warning(name+".yml 魔法物品数据读取失败");
             }
         }
         this.getLogger().info("开始读取商店信息");
         for(String name: Handle.getDefaultFiles("Shop")){
-            this.getLogger().info("读取 "+name+".yml");
             Shop shop = null;
             try {
                 shop = Shop.loadShop(name,new Config(this.getDataFolder()+"/Shop/"+name+".yml",Config.YAML));
@@ -157,14 +157,13 @@ public class Main extends PluginBase implements Listener {
             }
             if(shop != null){
                 loadShop.put(name,shop);
-                this.getLogger().info(name+"商店数据读取成功");
+                this.getLogger().info(name+".yml 商店数据读取成功");
             }else{
-                this.getLogger().warning(name+"商店数据读取失败");
+                this.getLogger().warning(name+".yml 商店数据读取失败");
             }
         }
         this.getLogger().info("开始读取箱子信息");
         for(String name: Handle.getDefaultFiles("Box")){
-            this.getLogger().info("读取 "+name+".yml");
             Box box = null;
             try {
                 box = Box.loadBox(name,new Config(this.getDataFolder()+"/Box/"+name+".yml",Config.YAML));
@@ -173,9 +172,9 @@ public class Main extends PluginBase implements Listener {
             }
             if(box != null){
                 loadBox.put(name,box);
-                this.getLogger().info(name+"箱子数据读取成功");
+                this.getLogger().info(name+".yml 箱子数据读取成功");
             }else{
-                this.getLogger().warning(name+"箱子数据读取失败");
+                this.getLogger().warning(name+".yml 箱子数据读取失败");
             }
         }
     }
@@ -250,6 +249,7 @@ public class Main extends PluginBase implements Listener {
         attrDisplayPercent.add("吸血倍率");
         attrDisplayPercent.add("破防率");
         attrDisplayPercent.add("破甲率");
+        attrDisplayPercent.add("破甲强度");
         attrDisplayPercent.add("命中率");
         attrDisplayPercent.add("伤害加成");
         attrDisplayPercent.add("PVP攻击加成");

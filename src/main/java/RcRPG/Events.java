@@ -3,10 +3,11 @@ package RcRPG;
 import RcRPG.AttrManager.LittleMonsterAttr;
 import RcRPG.AttrManager.Manager;
 import RcRPG.AttrManager.PlayerAttr;
+import RcRPG.AttrManager.RcEntityAttr;
 import RcRPG.Form.guildForm;
 import RcRPG.Form.inlayForm;
 import RcRPG.RPG.*;
-import RcRPG.Society.Guild;
+import RcRPG.guild.Guild;
 import RcRPG.Society.Money;
 import RcRPG.Society.Prefix;
 import RcRPG.Society.Shop;
@@ -41,7 +42,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 
-import static RcRPG.Handle.classExists;
 import static RcRPG.Handle.getProbabilisticResults;
 
 public class Events implements Listener {
@@ -49,6 +49,11 @@ public class Events implements Listener {
     public static LinkedHashMap<Player,String> playerShop = new LinkedHashMap<>();
 
     public static LinkedHashMap<Player,Boolean> playerMessage = new LinkedHashMap<>();
+
+    public static final boolean hasHealthAPI = Server.getInstance().getPluginManager().getPlugin("HealthAPI") != null;
+    public static final boolean hasRsNPC = Server.getInstance().getPluginManager().getPlugin("RsNPC") != null;
+    public static final boolean hasLittleMonster = Server.getInstance().getPluginManager().getPlugin("LittleMonster") != null;
+    public static final boolean hasRcEntity = Server.getInstance().getPluginManager().getPlugin("RcEntity") != null;
 
     public Events(){
     }
@@ -326,22 +331,35 @@ public class Events implements Listener {
 
         int damage = 1;
 
-        if (classExists("com.smallaswater.npc.entitys.EntityRsNPC") && wounded instanceof EntityRsNPC) {// 特判RsNPC
+        if (hasRsNPC && wounded instanceof EntityRsNPC) {// 特判RsNPC
             return;
         }
-        final boolean hasHealthAPI = classExists("healthapi.PlayerHealth");
 
         Manager DAttr;
         Manager WAttr;
-        if (damager instanceof LittleNpc) {
+        if (hasLittleMonster && damager instanceof LittleNpc) {
             DAttr = new LittleMonsterAttr(((LittleNpc) damager).getConfig().getMonsterAttrMap());
+        } else if (hasRcEntity && damager instanceof RcEntity.entity.entity.BaseEntity) {
+            String name = ((RcEntity.entity.entity.BaseEntity) damager).getName();
+            if (RcEntity.Main.getInstance().loadEntity.containsKey(name)) {
+                DAttr = new RcEntityAttr(RcEntity.Main.getInstance().loadEntity.get(name).getMonsterAttrMap());
+            } else {
+                DAttr = new Manager();
+            }
+        } else if (hasRcEntity && damager instanceof RcEntity.entity.npc.NPC) {
+            String name = ((RcEntity.entity.npc.NPC) damager).getName();
+            if (RcEntity.Main.getInstance().loadEntity.containsKey(name)) {
+                DAttr = new RcEntityAttr(RcEntity.Main.getInstance().loadEntity.get(name).getMonsterAttrMap());
+            } else {
+                DAttr = new Manager();
+            }
         } else if (damagerIsPlayer) {
             DAttr = PlayerAttr.getPlayerAttr((Player) damager);
         } else {
             DAttr = new Manager();
         }
 
-        if (wounded instanceof LittleNpc) {
+        if (hasLittleMonster && wounded instanceof LittleNpc) {
             WAttr = new LittleMonsterAttr(((LittleNpc) wounded).getConfig().getMonsterAttrMap());
         } else if (woundedIsPlayer) {
             WAttr = PlayerAttr.getPlayerAttr((Player) wounded);
@@ -584,6 +602,15 @@ public class Events implements Listener {
             Main.instance.getServer().getScheduler().scheduleDelayedTask(new removeFloatingText(Main.instance, floatingText),15);
         }
     }
+    @EventHandler
+    public void toggleSprintEvent(PlayerToggleSprintEvent event) {
+        if (event.isCancelled()) return;
+        Player player = event.getPlayer();
+        PlayerAttr attr = PlayerAttr.getPlayerAttr(player);
+        if (attr == null) return;
+        float speedAddition = attr.movementSpeedMultiplier;
+        if (speedAddition > 0) player.sendMovementSpeed(speedAddition);
+    }
 
     @EventHandler
     public void chatEvent(PlayerChatEvent event){
@@ -640,8 +667,22 @@ public class Events implements Listener {
             player.setNameTagVisible();
             player.setNameTagAlwaysVisible();
         }
-        player.setMaxHealth(Handle.getMaxHealth(player));
+        if (hasHealthAPI) {
+            Handle.getMaxHealth(player);
+        } else {
+            player.setMaxHealth(Handle.getMaxHealth(player));
+        }
     }
 
+
+    @EventHandler
+    public void deathEvent(PlayerDeathEvent event) {
+        if (event.getTranslationDeathMessage().getText() == "death.attack.mob") {
+            if (event.getTranslationDeathMessage().getParameter(1).isEmpty()) {
+                return;
+            }
+            event.getTranslationDeathMessage().setParameter(1, event.getTranslationDeathMessage().getParameter(1).split("\n")[0]+"§r§f");
+        }
+    }
 }
 

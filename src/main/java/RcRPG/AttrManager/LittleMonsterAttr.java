@@ -167,8 +167,8 @@ public class LittleMonsterAttr extends Manager {
 
     @Override
     public float[] getArmorPenetrationValue() {
-        if (mainAttr.containsKey("破甲攻击")) {
-            return mainAttr.get("破甲攻击");
+        if (mainAttr.containsKey("破甲强度")) {
+            return mainAttr.get("破甲强度");
         }
         return new float[]{ 0.0f, 0.0f };
     }

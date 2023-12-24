@@ -57,16 +57,19 @@ public class Level {
 
     public static int getLevel(Player player){
         Config config = Handle.getPlayerConfig(player.getName());
+        if (config == null) return 0;
         return config.getInt("等级");
     }
 
     public static int getExp(Player player){
         Config config = Handle.getPlayerConfig(player.getName());
+        if (config == null) return 0;
         return config.getInt("经验");
     }
 
     public static int getMaxExp(Player player){
         Config config = Handle.getPlayerConfig(player.getName());
+        if (config == null) return 0;
         int level = config.getInt("等级");
         return level * Main.instance.config.getInt("经验增量");
     }

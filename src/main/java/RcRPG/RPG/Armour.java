@@ -1,8 +1,6 @@
 package RcRPG.RPG;
 
-import RcRPG.AttrManager.AttrNameParse;
 import RcRPG.AttrManager.ItemAttr;
-import RcRPG.AttrManager.PlayerAttr;
 import RcRPG.Handle;
 import RcRPG.Main;
 import cn.nukkit.Player;
@@ -17,8 +15,6 @@ import cn.nukkit.utils.Config;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class Armour extends ItemAttr {
 
@@ -170,18 +166,23 @@ public class Armour extends ItemAttr {
         }
         return item.getNamedTag().getString("type").equals("armour");
     }
-
+    public LinkedList<Stone> getStones() {
+        LinkedList<Stone> list = new LinkedList<>();
+        if (!isArmour(item) || item.getNamedTag() == null) return list;
+        ListTag<StringTag> tags = item.getNamedTag().getList("stone",StringTag.class);
+        for(StringTag tag : tags.getAll()){
+            list.add(Handle.getStoneByLabel(tag.parseValue()));
+        }
+        while(list.size() < getStone()){
+            list.add(null);
+        }
+        return list;
+    }
     public static LinkedList<Stone> getStones(Item item){
         LinkedList<Stone> list = new LinkedList<>();
         if(Armour.isArmour(item)){
             Armour armour = Main.loadArmour.get(item.getNamedTag().getString("name"));
-            ListTag<StringTag> tags = item.getNamedTag().getList("stone",StringTag.class);
-            for(StringTag tag : tags.getAll()){
-                list.add(Handle.getStoneByLabel(tag.parseValue()));
-            }
-            while(list.size() < armour.getStone()){
-                list.add(null);
-            }
+            return armour.getStones();
         }
         return list;
     }
@@ -222,7 +223,8 @@ public class Armour extends ItemAttr {
             LinkedList<Stone> list = Armour.getStones(item);
             int damage = 0;
             for(Stone stone : list){
-                if(stone != null) damage += stone.getHealth();
+                if(stone == null) continue;
+                damage += stone.getItemAttr("血量值");
             }
             return damage;
         }
@@ -234,7 +236,8 @@ public class Armour extends ItemAttr {
             LinkedList<Stone> list = Armour.getStones(item);
             int damage = 0;
             for(Stone stone : list){
-                if(stone != null) damage += stone.getDamage();
+                if(stone == null) continue;
+                damage += stone.getItemAttr("PVE攻击力");
             }
             return damage;
         }
@@ -246,7 +249,8 @@ public class Armour extends ItemAttr {
             LinkedList<Stone> list = Armour.getStones(item);
             int damage = 0;
             for(Stone stone : list){
-                if(stone != null) damage += stone.getReDamage();
+                if(stone == null) continue;
+                damage += stone.getItemAttr("防御力");
             }
             return damage;
         }
@@ -271,20 +275,6 @@ public class Armour extends ItemAttr {
         return item;
     }
 
-    public String replaceAttrTemplate(String str) {
-        Pattern pattern = Pattern.compile("\\{\\{(.*?)\\}\\}");
-        Matcher matcher = pattern.matcher(str);
-        StringBuffer sb = new StringBuffer();
-
-        while (matcher.find()) {
-            AttrNameParse attrName = AttrNameParse.processString(matcher.group(1));
-            String replacement = PlayerAttr.valueToString(new float[]{getItemAttr(attrName.getResult(), attrName.getState())}, attrName.getResult());
-            matcher.appendReplacement(sb, replacement);
-        }
-        matcher.appendTail(sb);
-
-        return sb.toString();
-    }
     public Config getConfig() {
         return config;
     }

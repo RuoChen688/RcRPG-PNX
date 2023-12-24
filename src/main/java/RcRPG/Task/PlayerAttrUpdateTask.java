@@ -1,6 +1,7 @@
 package RcRPG.Task;
 
 import RcRPG.AttrManager.PlayerAttr;
+import RcRPG.Events;
 import RcRPG.Main;
 import cn.nukkit.Player;
 import cn.nukkit.potion.Effect;
@@ -8,8 +9,6 @@ import cn.nukkit.scheduler.PluginTask;
 import healthapi.PlayerHealth;
 
 import java.util.Objects;
-
-import static RcRPG.Handle.classExists;
 
 public class PlayerAttrUpdateTask extends PluginTask {
     public PlayerAttrUpdateTask(Main main){
@@ -21,7 +20,7 @@ public class PlayerAttrUpdateTask extends PluginTask {
         for (Player player : Main.instance.getServer().getOnlinePlayers().values()) {
             if (!player.isAlive()) continue;
             int addHealth = 0;
-            if (!PlayerAttr.playerslist.containsKey(player)) continue;
+            if (!PlayerAttr.playerlist.containsKey(player)) continue;
             Objects.requireNonNull(PlayerAttr.getPlayerAttr(player)).update();
             PlayerAttr pAttr = PlayerAttr.getPlayerAttr(player);
             if (pAttr == null) continue;
@@ -31,8 +30,6 @@ public class PlayerAttrUpdateTask extends PluginTask {
             } else {
                 maxh = 20 * (1 + (int) pAttr.hpRegenMultiplier);
             }
-
-
 
             addHealth += pAttr.hpPerSecond;
 
@@ -54,14 +51,11 @@ public class PlayerAttrUpdateTask extends PluginTask {
             if (addHealth != 0) {
                 player.heal(addHealth);
             }
-            if (classExists("healthapi.PlayerHealth")) {// 若存在血量核心
+            if (Events.hasHealthAPI) {// 若存在血量核心
                 PlayerHealth playerHealth = PlayerHealth.getPlayerHealth(player);
                 playerHealth.setMaxHealth("rcrpg", maxh);
-                double H = playerHealth.getHealth();
-                int MaxH = playerHealth.getMaxHealth();
-                if (H != 0 && H < MaxH && (int) player.getHealth() == player.getMaxHealth()) {
-                    player.setHealth((float) Math.floor(40 * H / MaxH));
-                }
+            } else {
+                player.setMaxHealth(maxh);
             }
         }
     }

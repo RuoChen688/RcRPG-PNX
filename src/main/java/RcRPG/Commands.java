@@ -8,6 +8,9 @@ import RcRPG.RPG.*;
 import RcRPG.Society.Money;
 import RcRPG.Society.Points;
 import RcRPG.Society.Prefix;
+import RcRPG.window.SendArmourAdminWin;
+import RcRPG.window.SendStoneAdminWin;
+import RcRPG.window.SendWeaponAdminWin;
 import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.command.CommandSender;
@@ -24,6 +27,8 @@ import cn.nukkit.utils.StringUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import static RcRPG.Main.disablePrefix;
 
 public class Commands extends PluginCommand<Main> {
 
@@ -72,6 +77,10 @@ public class Commands extends PluginCommand<Main> {
                             CommandParameter.newEnum("inlay",new String[]{"inlay"})
                     });
                 }
+                this.addCommandParameters(name + "_admin",new CommandParameter[]{
+                        CommandParameter.newEnum(name,new String[]{name}),
+                        CommandParameter.newEnum("admin",new String[]{"admin"})
+                });
                 this.addCommandParameters(name + "_add",new CommandParameter[]{
                         CommandParameter.newEnum(name,new String[]{name}),
                         CommandParameter.newEnum("add",new String[]{"add"}),
@@ -88,7 +97,7 @@ public class Commands extends PluginCommand<Main> {
                 });
                 this.addCommandParameters(name + "_give",new CommandParameter[]{
                         CommandParameter.newEnum(name,new String[]{name}),
-                        CommandParameter.newEnum("give",new String[]{"give"}),
+                        CommandParameter.newEnum("give",new String[]{"give", "drop"}),
                         CommandParameter.newType("PlayerName",CommandParamType.STRING),
                         CommandParameter.newType(StringUtils.capitalize(name),CommandParamType.STRING),
                         CommandParameter.newType("Count",CommandParamType.INT)
@@ -307,6 +316,10 @@ public class Commands extends PluginCommand<Main> {
                 if (!args.hasResult(1)) {
                     return 0;
                 }
+                if (disablePrefix) {
+                    log.addError("RcRPG 称号已被禁用").output();
+                    return 0;
+                }
                 String arg = args.getResult(1);
                 Player player = null;
                 if (args.hasResult(2)) {
@@ -345,9 +358,9 @@ public class Commands extends PluginCommand<Main> {
                             return 0;
                         }
                         if (Prefix.delPrefix(player, prefix)) {
-                            sender.sendMessage("给予成功");
+                            sender.sendMessage("移除成功");
                         } else {
-                            sender.sendMessage("给予失败");
+                            sender.sendMessage("移除失败");
                         }
                     }
                     case "my" -> prefixForm.makeForm((Player) sender);
@@ -358,10 +371,18 @@ public class Commands extends PluginCommand<Main> {
                 String arg = args.getResult(1);
                 switch (arg) {
                     case "help" -> {
+                        sender.sendMessage("/rpg weapon admin 管理武器列表");
                         sender.sendMessage("/rpg weapon add [Name] 创建一个名为Name的武器配置");
                         sender.sendMessage("/rpg weapon del [Name] 删除一个名为Name的武器配置");
                         sender.sendMessage("/rpg weapon give [Player] [Name] [Count] 给予玩家一定数量的武器");
                         sender.sendMessage("/rpg weapon inlay 打开武器镶嵌面板");
+                    }
+                    case "admin" -> {
+                        if (!sender.isPlayer()) {
+                            log.addError("本命令必须是玩家执行").output();
+                            return 0;
+                        }
+                        new SendWeaponAdminWin((Player) sender);
                     }
                     case "add" -> {
                         if (args.size() != 3) {
@@ -398,7 +419,7 @@ public class Commands extends PluginCommand<Main> {
                             sender.sendMessage("删除失败");
                         }
                     }
-                    case "give" -> {
+                    case "drop", "give" -> {
                         if (args.size() != 5) {
                             sender.sendMessage("参数错误");
                             return 0;
@@ -411,10 +432,19 @@ public class Commands extends PluginCommand<Main> {
                             sender.sendMessage("玩家不在线");
                             return 0;
                         }
-                        if (Weapon.giveWeapon(player, weaponName, count)) {
-                            if (sender.isPlayer()) sender.sendMessage("给予成功");
+                        if (arg.equals("drop")) {
+                            Item item = Weapon.getItem(weaponName, count);
+                            if (item == null) {
+                                Main.getInstance().getLogger().warning("weapon drop失败："+weaponName);
+                            } else {
+                                player.getLevel().dropItem(player.getPosition(), item);
+                            }
                         } else {
-                            if (sender.isPlayer()) sender.sendMessage("给予失败");
+                            if (Weapon.giveWeapon(player, weaponName, count)) {
+                                if (sender.isPlayer()) sender.sendMessage("给予成功");
+                            } else {
+                                if (sender.isPlayer()) sender.sendMessage("给予失败");
+                            }
                         }
                     }
                     case "inlay" -> {
@@ -438,10 +468,18 @@ public class Commands extends PluginCommand<Main> {
                 String arg = args.getResult(1);
                 switch (arg) {
                     case "help" -> {
+                        sender.sendMessage("/rpg armour admin 管理盔甲列表");
                         sender.sendMessage("/rpg armour add [Name] 创建一个名为Name的盔甲配置");
                         sender.sendMessage("/rpg armour del [Name] 删除一个名为Name的盔甲配置");
                         sender.sendMessage("/rpg armour give [Player] [Name] [Count] 给予玩家一定数量的盔甲");
                         sender.sendMessage("/rpg armour inlay 打开盔甲镶嵌面板");
+                    }
+                    case "admin" -> {
+                        if (!sender.isPlayer()) {
+                            log.addError("本命令必须是玩家执行").output();
+                            return 0;
+                        }
+                        new SendArmourAdminWin((Player) sender);
                     }
                     case "add" -> {
                         if (args.size() != 3) {
@@ -478,7 +516,7 @@ public class Commands extends PluginCommand<Main> {
                             sender.sendMessage("删除失败");
                         }
                     }
-                    case "give" -> {
+                    case "drop", "give" -> {
                         if (args.size() != 5) {
                             sender.sendMessage("参数错误");
                             return 0;
@@ -491,10 +529,19 @@ public class Commands extends PluginCommand<Main> {
                             sender.sendMessage("玩家不在线");
                             return 0;
                         }
-                        if (Armour.giveArmour(player, armorName, count)) {
-                            if (sender.isPlayer()) sender.sendMessage("给予成功");
+                        if (arg.equals("drop")) {
+                            Item item = Armour.getItem(armorName, count);
+                            if (item == null) {
+                                Main.getInstance().getLogger().warning("armour drop失败："+armorName);
+                            } else {
+                                player.getLevel().dropItem(player.getPosition(), item);
+                            }
                         } else {
-                            if (sender.isPlayer()) sender.sendMessage("给予失败");
+                            if (Armour.giveArmour(player, armorName, count)) {
+                                if (sender.isPlayer()) sender.sendMessage("给予成功");
+                            } else {
+                                if (sender.isPlayer()) sender.sendMessage("给予失败");
+                            }
                         }
                     }
                     case "inlay" -> {
@@ -518,9 +565,17 @@ public class Commands extends PluginCommand<Main> {
                 String arg = args.getResult(1);
                 switch (arg) {
                     case "help" -> {
+                        sender.sendMessage("/rpg stone admin 管理宝石列表");
                         sender.sendMessage("/rpg stone add [Name] 创建一个名为Name的宝石配置");
                         sender.sendMessage("/rpg stone del [Name] 删除一个名为Name的宝石配置");
                         sender.sendMessage("/rpg stone give [Player] [Name] [Count] 给予玩家一定数量的宝石");
+                    }
+                    case "admin" -> {
+                        if (!sender.isPlayer()) {
+                            log.addError("本命令必须是玩家执行").output();
+                            return 0;
+                        }
+                        new SendStoneAdminWin((Player) sender);
                     }
                     case "add" -> {
                         if (args.size() != 3) {
@@ -583,6 +638,7 @@ public class Commands extends PluginCommand<Main> {
                 String arg = args.getResult(1);
                 switch (arg) {
                     case "help" -> {
+                        sender.sendMessage("/rpg magic admin 管理魔法物品");
                         sender.sendMessage("/rpg magic add [Name] 创建一个名为Name的魔法物品配置");
                         sender.sendMessage("/rpg magic del [Name] 删除一个名为Name的魔法物品配置");
                         sender.sendMessage("/rpg magic give [Player] [Name] [Count] 给予玩家一定数量的魔法物品");

@@ -2,6 +2,7 @@ package RcRPG.AttrManager;
 
 import RcRPG.Main;
 import RcRPG.RPG.Armour;
+import RcRPG.RPG.Stone;
 import RcRPG.RPG.Weapon;
 import cn.nukkit.Player;
 import cn.nukkit.form.element.Element;
@@ -20,16 +21,16 @@ public class PlayerAttr extends Manager {
         this.player = player;
         myAttr.put("Main", new HashMap<>());
     }
-    public static LinkedHashMap<Player, PlayerAttr> playerslist = new LinkedHashMap<>();
+    public static LinkedHashMap<Player, PlayerAttr> playerlist = new LinkedHashMap<>();
 
     public static PlayerAttr getPlayerAttr(Player player) {
-        if (!playerslist.containsKey(player)) {
+        if (!playerlist.containsKey(player)) {
             return null;
         }
-        return playerslist.get(player);
+        return playerlist.get(player);
     }
     public static PlayerAttr setPlayerAttr(Player player) {
-        return playerslist.put(player, new PlayerAttr(player));
+        return playerlist.put(player, new PlayerAttr(player));
     }
     public void update() {
         ArrayList<String> beforLabel = new ArrayList<>(labelList);
@@ -42,6 +43,8 @@ public class PlayerAttr extends Manager {
             Weapon weapon = Main.loadWeapon.get(rcItem.getNamedTag().getString("name"));
             if (weapon == null) continue;
             setItemAttrConfig(weapon.getLabel(), weapon.getMainAttr());
+            checkItemStoneAttr(weapon.getLabel(), weapon.getStones(), beforLabel, labelList);
+
             beforLabel.remove(weapon.getLabel());
             labelList.add(weapon.getLabel());
         }
@@ -50,12 +53,23 @@ public class PlayerAttr extends Manager {
             Armour armour = Main.loadArmour.get(rcItem.getNamedTag().getString("name"));
             if (armour == null) continue;
             setItemAttrConfig(armour.getLabel(), armour.getMainAttr());
+            checkItemStoneAttr(armour.getLabel(), armour.getStones(), beforLabel, labelList);
+
             beforLabel.remove(armour.getLabel());
             labelList.add(armour.getLabel());
         }
         beforLabel.forEach(label -> {
             setItemAttrConfig(label, new HashMap<String, float[]>());
         });
+    }
+
+    public void checkItemStoneAttr(String mainItemName, LinkedList<Stone> list, ArrayList<String> beforLabel, ArrayList<String> labelList) {
+        for(Stone stone : list){
+            if(stone == null) continue;
+            setItemAttrConfig(stone.getLabel(), stone.getMainAttr());
+            beforLabel.remove(mainItemName + " -> " + stone.getLabel());
+            labelList.add(mainItemName + " -> " + stone.getLabel());
+        }
     }
 
     /** 属性结构
@@ -424,8 +438,8 @@ public class PlayerAttr extends Manager {
 
     @Override
     public float[] getArmorPenetrationValue() {
-        if (getItemAttrMap().containsKey("破甲攻击")) {
-            return getItemAttrMap().get("破甲攻击");
+        if (getItemAttrMap().containsKey("破甲强度")) {
+            return getItemAttrMap().get("破甲强度");
         }
         return new float[]{ 0.0f, 0.0f };
     }
