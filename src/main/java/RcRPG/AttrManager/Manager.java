@@ -106,6 +106,7 @@ public class Manager implements AttrInterface {
 
         return copiedMap;
     }
+
     /**
      * 检查 float[] 是否为空
      * @param array

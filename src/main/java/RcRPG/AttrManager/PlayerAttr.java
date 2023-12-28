@@ -203,28 +203,6 @@ public class PlayerAttr extends Manager {
             player.sendMessage("[NWeapon] 没有玩家§8" + p.getName() + "§f的数据");
             return;
         }
-        /**  开始
-        Main.instance.getLogger().warning("属性结构:");
-        Main.instance.getLogger().warning("{");
-
-        for (Map.Entry<String, Map<String, float[]>> entry : myAttr.entrySet()) {
-            String outerKey = entry.getKey();
-            Map<String, float[]> innerMapValue = entry.getValue();
-
-            Main.instance.getLogger().warning("    \"" + outerKey + "\": {");
-
-            for (Map.Entry<String, float[]> innerEntry : innerMapValue.entrySet()) {
-                String innerKey = innerEntry.getKey();
-                float[] innerArray = innerEntry.getValue();
-
-                Main.instance.getLogger().warning("        \"" + innerKey + "\": " + "[" + innerArray[0] + ", " + innerArray[1] + "]");
-            }
-
-            Main.instance.getLogger().warning("    }");
-        }
-        Main.instance.getLogger().warning("}");
-        // 结束
-        */
         String str = "";
         Map<String, Map<String, float[]>> data = pAttr.myAttr;
 
@@ -284,6 +262,30 @@ public class PlayerAttr extends Manager {
         player.showFormWindow(win);
     }
 
+    public String toString() {
+        StringBuilder result = new StringBuilder();
+        result.append("属性结构:\n");
+        result.append("{\n");
+
+        for (Map.Entry<String, Map<String, float[]>> entry : myAttr.entrySet()) {
+            String outerKey = entry.getKey();
+            Map<String, float[]> innerMapValue = entry.getValue();
+
+            result.append("    \"" + outerKey + "\": {\n");
+
+            for (Map.Entry<String, float[]> innerEntry : innerMapValue.entrySet()) {
+                String innerKey = innerEntry.getKey();
+                float[] innerArray = innerEntry.getValue();
+
+                result.append("        \"" + innerKey + "\": " + "[" + innerArray[0] + ", " + innerArray[1] + "]\n");
+            }
+
+            result.append("    }\n");
+        }
+        result.append("}\n");
+
+        return result.toString();
+    }
     /**
      * 将数据可视化，输入data,属性输出min-max或x%
       */

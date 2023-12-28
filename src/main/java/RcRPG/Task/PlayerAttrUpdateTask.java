@@ -24,11 +24,18 @@ public class PlayerAttrUpdateTask extends PluginTask {
             Objects.requireNonNull(PlayerAttr.getPlayerAttr(player)).update();
             PlayerAttr pAttr = PlayerAttr.getPlayerAttr(player);
             if (pAttr == null) continue;
-            int maxh;
-            if (pAttr.hp != 0) {
-                maxh = (int) (pAttr.hp * (1 + pAttr.hpRegenMultiplier));
+
+            pAttr.updateComp();
+
+            int maxh = 20;// 默认血量上限
+            if (Events.hasHealthAPI) {// 若存在血量核心
+                maxh = 0;
+            }
+
+            if (pAttr.hp > 0) {
+                maxh = (int) ((maxh + pAttr.hp) * (1 + pAttr.hpRegenMultiplier));
             } else {
-                maxh = 20 * (1 + (int) pAttr.hpRegenMultiplier);
+                maxh = maxh * (1 + (int) pAttr.hpRegenMultiplier);
             }
 
             addHealth += pAttr.hpPerSecond;

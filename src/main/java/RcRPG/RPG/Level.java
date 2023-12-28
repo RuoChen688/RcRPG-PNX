@@ -8,6 +8,7 @@ import cn.nukkit.utils.Config;
 public class Level {
 
     public static Level instance;
+    public static boolean enable = true;
 
     public Level(){
         instance = this;

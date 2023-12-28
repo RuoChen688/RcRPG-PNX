@@ -55,6 +55,9 @@ public class Main extends PluginBase implements Listener {
         if (config.exists("称号.disable") && config.getBoolean("称号.disable")) {
             disablePrefix = true;
         }
+        if (config.exists("RcRPG经验.disable") && config.getBoolean("RcRPG经验.disable")) {
+            Level.enable = false;
+        }
 
         this.getServer().getPluginManager().registerEvents(new Events(),this);
         if (config.exists("底部显示") && !config.getString("底部显示").equals("")) {

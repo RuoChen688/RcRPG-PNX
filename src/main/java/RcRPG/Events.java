@@ -110,13 +110,16 @@ public class Events implements Listener {
     public void onHeld(PlayerItemHeldEvent event){
         Player player = event.getPlayer();
         Item item = event.getItem();
-        if(!item.isNull() && Weapon.isWeapon(item)){
-            Weapon weapon = Main.loadWeapon.get(item.getNamedTag().getString("name"));
-            if (weapon == null) return;// TODO: 可能要做无效装备的清除？
-            if(Level.getLevel(player) < weapon.getLevel()){
-                player.sendMessage("等级不足武器使用等级");
-                event.setCancelled();
-            }
+        if (item.isNull() || !Weapon.isWeapon(item)) {
+            return;
+        }
+        Weapon weapon = Main.loadWeapon.get(item.getNamedTag().getString("name"));
+
+        if (weapon == null) return;// TODO: 可能要做无效装备的清除？
+
+        if (Level.enable ? Level.getLevel(player) < weapon.getLevel() : player.getExperienceLevel() < weapon.getLevel()) {
+            player.sendMessage("等级不足武器使用等级");
+            event.setCancelled();
         }
     }
 
@@ -544,23 +547,32 @@ public class Events implements Listener {
 
         // 吸血处理
         if (lifeSteal > 0) {
-            float wHealth = wounded.getHealth();
-            if (hasHealthAPI && woundedIsPlayer) {// 血量核心
+            float dHealth = damager.getHealth();
+            if (hasHealthAPI && damagerIsPlayer) {// 血量核心
+                PlayerHealth playerHealth = PlayerHealth.getPlayerHealth((Player) damager);
+                dHealth = (float) playerHealth.getHealth();
+            }
+            if (dHealth - finalDamage < 1) {// 这似乎不需要减去 finalDamage
+                // 不处理吸血，因为这会导致血量陷入假死
+            } else {
+                float wHealth = wounded.getHealth();
+                if (hasHealthAPI && woundedIsPlayer) {// 血量核心
                     PlayerHealth playerHealth = PlayerHealth.getPlayerHealth((Player) wounded);
                     wHealth = (float) playerHealth.getHealth();
-            }
-            // 吸血不超过受害者现有血量
-            if (wHealth < lifeSteal) lifeSteal = wHealth;
-            if (hasHealthAPI && damagerIsPlayer) {// 若存在血量核心
-                PlayerHealth playerHealth = PlayerHealth.getPlayerHealth((Player) damager);
-                int MaxH = playerHealth.getMaxHealth();
-                double H = playerHealth.getHealth() + lifeSteal;
-                playerHealth.setHealth(H > MaxH ? MaxH : H);
-            } else {
-                damager.heal(new EntityRegainHealthEvent(damager, (float) lifeSteal, 3));
-            }
-            if (damagerIsPlayer) {
-                ((Player) damager).sendMessage("你已汲取对方 §c§l" + lifeSteal + "§r 血量值");
+                }
+                // 吸血不超过受害者现有血量
+                if (wHealth < lifeSteal) lifeSteal = wHealth;
+                if (hasHealthAPI && damagerIsPlayer) {// 若存在血量核心
+                    PlayerHealth playerHealth = PlayerHealth.getPlayerHealth((Player) damager);
+                    int MaxH = playerHealth.getMaxHealth();
+                    double H = playerHealth.getHealth() + lifeSteal;
+                    playerHealth.setHealth(H > MaxH ? MaxH : H);
+                } else {
+                    damager.heal(new EntityRegainHealthEvent(damager, (float) lifeSteal, 3));
+                }
+                if (damagerIsPlayer) {
+                    ((Player) damager).sendMessage("你已汲取对方 §c§l" + lifeSteal + "§r 血量值");
+                }
             }
         }
 
@@ -633,7 +645,7 @@ public class Events implements Listener {
     }
 
     @EventHandler
-    public void joinEvent(PlayerJoinEvent event){
+    public void joinEvent(PlayerPreLoginEvent event){
         Player player = event.getPlayer();
         String name = player.getName();
 
