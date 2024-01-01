@@ -112,7 +112,7 @@ public class ItemAttr extends Manager {
     public String replaceAttrTemplate(String str) {
         Pattern pattern = Pattern.compile("\\{\\{(.*?)\\}\\}");
         Matcher matcher = pattern.matcher(str);
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
 
         while (matcher.find()) {
             AttrNameParse attrName = AttrNameParse.processString(matcher.group(1));

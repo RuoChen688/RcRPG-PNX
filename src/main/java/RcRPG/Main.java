@@ -27,6 +27,8 @@ public class Main extends PluginBase implements Listener {
 
     public Config config;
 
+    public Config ornamentConfig;
+
     public List<String> attrDisplayPercentConfig;
     public static boolean money;
 
@@ -41,6 +43,8 @@ public class Main extends PluginBase implements Listener {
 
     public static LinkedHashMap<String, Box> loadBox = new LinkedHashMap<>();
 
+    public static LinkedHashMap<String, Ornament> loadOrnament = new LinkedHashMap<>();
+
     public Main(){}
 
     public void onEnable(){
@@ -48,6 +52,8 @@ public class Main extends PluginBase implements Listener {
         this.getNewFile();
         this.saveResource("Config.yml","/Config.yml",false);
         config = new Config(this.getDataFolder() + "/Config.yml");
+        this.saveResource("PlayerOrnament.yml","/OrnamentConfig.yml",false);
+        ornamentConfig = new Config(this.getDataFolder() + "/OrnamentConfig.yml");
         initAttrDisplayPercent();
         init();
         disableChatStyle = !config.exists("底部显示") || config.getString("底部显示").equals("");
@@ -180,6 +186,21 @@ public class Main extends PluginBase implements Listener {
                 this.getLogger().warning(name+".yml 箱子数据读取失败");
             }
         }
+        this.getLogger().info("开始读取饰品信息");
+        for(String name: Handle.getDefaultFiles("Ornament")){
+            Ornament ornament = null;
+            try {
+                ornament = Ornament.loadOrnament(name,new Config(this.getDataFolder()+"/Ornament/"+name+".yml",Config.YAML));
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            if(ornament != null){
+                loadOrnament.put(name,ornament);
+                this.getLogger().info(name+".yml 饰品数据读取成功");
+            }else{
+                this.getLogger().warning(name+".yml 饰品数据读取失败");
+            }
+        }
     }
 
     public File getPlayerFile() {
@@ -205,6 +226,9 @@ public class Main extends PluginBase implements Listener {
     }
     public File getBoxFile() {
         return new File(this.getDataFolder() + "/Box");
+    }
+    public File getOrnamentFile() {
+        return new File(this.getDataFolder() + "/Ornament");
     }
 
     public void getNewFile(){
@@ -239,6 +263,10 @@ public class Main extends PluginBase implements Listener {
         File boxFile = this.getBoxFile();
         if (!boxFile.exists() && !boxFile.mkdirs()) {
             this.getLogger().info("/Box文件夹创建失败");
+        }
+        File ornamentFile = this.getOrnamentFile();
+        if (!ornamentFile.exists() && !ornamentFile.mkdirs()) {
+            this.getLogger().info("/Ornament文件夹创建失败");
         }
     }
 

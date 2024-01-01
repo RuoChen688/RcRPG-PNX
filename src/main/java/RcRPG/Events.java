@@ -12,6 +12,7 @@ import RcRPG.Society.Money;
 import RcRPG.Society.Prefix;
 import RcRPG.Society.Shop;
 import RcRPG.Task.removeFloatingText;
+import RcRPG.panel.OrnamentInventory;
 import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.block.Block;
@@ -22,10 +23,16 @@ import cn.nukkit.event.Listener;
 import cn.nukkit.event.block.BlockBreakEvent;
 import cn.nukkit.event.entity.EntityDamageByEntityEvent;
 import cn.nukkit.event.entity.EntityRegainHealthEvent;
+import cn.nukkit.event.inventory.InventoryClickEvent;
+import cn.nukkit.event.inventory.InventoryTransactionEvent;
 import cn.nukkit.event.player.*;
 import cn.nukkit.form.response.FormResponseCustom;
 import cn.nukkit.form.response.FormResponseData;
 import cn.nukkit.form.response.FormResponseSimple;
+import cn.nukkit.inventory.Inventory;
+import cn.nukkit.inventory.PlayerInventory;
+import cn.nukkit.inventory.transaction.InventoryTransaction;
+import cn.nukkit.inventory.transaction.action.InventoryAction;
 import cn.nukkit.item.Item;
 import cn.nukkit.level.Location;
 import cn.nukkit.level.Sound;
@@ -696,5 +703,26 @@ public class Events implements Listener {
             event.getTranslationDeathMessage().setParameter(1, event.getTranslationDeathMessage().getParameter(1).split("\n")[0]+"§r§f");
         }
     }
+
+    @EventHandler
+    public void onOrnament(InventoryTransactionEvent event){
+        InventoryTransaction transaction = event.getTransaction();
+        for (InventoryAction action : transaction.getActions()) {
+            Item sourceItem = action.getSourceItem();
+            Item targetItem = action.getTargetItem();
+            for (Inventory inventory : transaction.getInventories()) {
+                if (inventory instanceof OrnamentInventory) {
+                    if(Ornament.isOrnament(sourceItem)){
+                        if(sourceItem.count != 1) event.setCancelled();
+                    } else if (Ornament.isOrnament(targetItem)) {
+                        if(targetItem.count != 1) event.setCancelled();
+                    } else if (!Ornament.isOrnament(sourceItem) && !Ornament.isOrnament(targetItem)) {
+                        event.setCancelled();
+                    }
+                }
+            }
+        }
+    }
+
 }
 

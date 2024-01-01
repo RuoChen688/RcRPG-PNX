@@ -8,6 +8,7 @@ import RcRPG.RPG.*;
 import RcRPG.Society.Money;
 import RcRPG.Society.Points;
 import RcRPG.Society.Prefix;
+import RcRPG.panel.Panel;
 import RcRPG.window.SendArmourAdminWin;
 import RcRPG.window.SendStoneAdminWin;
 import RcRPG.window.SendWeaponAdminWin;
@@ -46,8 +47,9 @@ public class Commands extends PluginCommand<Main> {
             add("magic");
             add("stone");
             add("box");
+            add("ornament");
         }};
-        String[] list = new String[]{"weapon","armour","magic","stone","box","guild","prefix","money","point","exp","shop"};
+        String[] list = new String[]{"weapon","armour","magic","stone","box","ornament","guild","prefix","money","point","exp","shop"};
         this.addCommandParameters("help",new CommandParameter[]{
                 CommandParameter.newEnum("help",new String[]{"help"})
         });
@@ -75,6 +77,12 @@ public class Commands extends PluginCommand<Main> {
                     this.addCommandParameters(name + "_inlay",new CommandParameter[]{
                             CommandParameter.newEnum(name,new String[]{name}),
                             CommandParameter.newEnum("inlay",new String[]{"inlay"})
+                    });
+                }
+                if(name.equals("ornament")){
+                    this.addCommandParameters(name + "_my",new CommandParameter[]{
+                            CommandParameter.newEnum(name,new String[]{name}),
+                            CommandParameter.newEnum("my",new String[]{"my"})
                     });
                 }
                 this.addCommandParameters(name + "_admin",new CommandParameter[]{
@@ -167,6 +175,8 @@ public class Commands extends PluginCommand<Main> {
                 sender.sendMessage("/rpg armour help   盔甲指令");
                 sender.sendMessage("/rpg stone help   宝石指令");
                 sender.sendMessage("/rpg magic help   魔法物品指令");
+                sender.sendMessage("/rpg box help   箱子指令");
+                sender.sendMessage("/rpg ornament help   饰品指令");
                 sender.sendMessage("/rpg prefix help   称号指令");
                 sender.sendMessage("/rpg guild   公会指令");
                 sender.sendMessage("/rpg exp help   经验指令");
@@ -757,6 +767,80 @@ public class Commands extends PluginCommand<Main> {
                             return 0;
                         }
                         if (Box.giveBox(player, boxName, count)) {
+                            if (sender.isPlayer()) sender.sendMessage("给予成功");
+                        } else {
+                            if (sender.isPlayer()) sender.sendMessage("给予失败");
+                        }
+                    }
+                }
+                break;
+            }
+            case "ornament": {
+                String arg = args.getResult(1);
+                switch (arg) {
+                    case "help" -> {
+                        sender.sendMessage("/rpg ornament add [Name] 创建一个名为Name的饰品配置");
+                        sender.sendMessage("/rpg ornament del [Name] 删除一个名为Name的饰品配置");
+                        sender.sendMessage("/rpg ornament give [Player] [Name] [Count] 给予玩家一定数量的饰品");
+                        sender.sendMessage("/rpg ornament my 打开自己的饰品背包");
+                    }
+                    case "my" -> {
+                        if (args.size() != 2) {
+                            sender.sendMessage("参数错误");
+                            return 0;
+                        }
+                        Panel panel = new Panel();
+                        panel.sendPanel((Player) sender);
+                    }
+                    case "add" -> {
+                        if (args.size() != 3) {
+                            sender.sendMessage("参数错误");
+                            return 0;
+                        }
+                        Item item = ((Player) sender).getInventory().getItemInHand();
+                        String id;
+                        if (item.isNull()) {
+                            id = "minecraft:emerald";
+                        } else {
+                            id = item.getNamespaceId();
+                        }
+                        String ornamentName = args.getResult(2);
+                        Config config;
+                        if ((config = Ornament.addOrnamentConfig(ornamentName,id)) != null) {
+                            Ornament ornament = Ornament.loadOrnament(ornamentName,config);
+                            Main.loadOrnament.put(ornamentName,ornament);
+                            sender.sendMessage("添加成功");
+                        } else {
+                            sender.sendMessage("添加失败");
+                        }
+                    }
+                    case "del" -> {
+                        if (args.size() != 3) {
+                            sender.sendMessage("参数错误");
+                            return 0;
+                        }
+                        String ornamentName = args.getResult(2);
+                        if (Ornament.delOrnamentConfig(ornamentName)) {
+                            Main.loadOrnament.remove(ornamentName);
+                            sender.sendMessage("删除成功");
+                        } else {
+                            sender.sendMessage("删除失败");
+                        }
+                    }
+                    case "give" -> {
+                        if (args.size() != 5) {
+                            sender.sendMessage("参数错误");
+                            return 0;
+                        }
+                        String playerName = args.getResult(2);
+                        String ornamentName = args.getResult(3);
+                        int count = args.getResult(4);
+                        Player player = Main.instance.getServer().getPlayer(playerName);
+                        if (!player.isOnline()) {
+                            sender.sendMessage("玩家不在线");
+                            return 0;
+                        }
+                        if (Ornament.giveOrnament(player, ornamentName, count)) {
                             if (sender.isPlayer()) sender.sendMessage("给予成功");
                         } else {
                             if (sender.isPlayer()) sender.sendMessage("给予失败");

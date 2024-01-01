@@ -103,7 +103,7 @@
             <artifactId>RcEntity</artifactId>
             <version>1.0.0</version>
             <scope>system</scope>
-            <systemPath>${pom.basedir}/lib/RcEntity-1.0-SNAPSHOT.jar</systemPath>
+            <systemPath>${pom.basedir}/lib/RcEntity.jar</systemPath>
         </dependency>
 
         <dependency>
@@ -121,6 +121,12 @@
             <version>2.1.8</version>
             <scope>system</scope>
             <systemPath>${pom.basedir}/lib/Tips-2.1.8.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.24</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 </project>

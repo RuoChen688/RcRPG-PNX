@@ -2,8 +2,10 @@ package RcRPG.AttrManager;
 
 import RcRPG.Main;
 import RcRPG.RPG.Armour;
+import RcRPG.RPG.Ornament;
 import RcRPG.RPG.Stone;
 import RcRPG.RPG.Weapon;
+import RcRPG.panel.Panel;
 import cn.nukkit.Player;
 import cn.nukkit.form.element.Element;
 import cn.nukkit.form.element.ElementLabel;
@@ -57,6 +59,17 @@ public class PlayerAttr extends Manager {
 
             beforLabel.remove(armour.getLabel());
             labelList.add(armour.getLabel());
+        }
+        Map<Integer,Item> map = Panel.getPanel(player);
+        if(!map.isEmpty()){
+            for(int i = 0;i < Math.min(Main.getInstance().ornamentConfig.getInt("饰品生效格数"),map.size());i++){
+                Ornament ornament = Main.loadOrnament.get(map.get(i).getNamedTag().getString("name"));
+                if(ornament== null) continue;
+                setItemAttrConfig(ornament.getLabel(), ornament.getMainAttr());
+
+                beforLabel.remove(ornament.getLabel());
+                labelList.add(ornament.getLabel());
+            }
         }
         beforLabel.forEach(label -> {
             setItemAttrConfig(label, new HashMap<String, float[]>());
