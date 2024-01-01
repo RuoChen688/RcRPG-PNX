@@ -11,11 +11,15 @@ import cn.nukkit.nbt.tag.ListTag;
 import cn.nukkit.nbt.tag.StringTag;
 import cn.nukkit.potion.Effect;
 import cn.nukkit.utils.Config;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
+@Getter
+@Setter
 public class Weapon extends ItemAttr {
 
     private Config config;
@@ -162,7 +166,7 @@ public class Weapon extends ItemAttr {
 
     public static Item getItem(String name,int count) {
         Weapon weapon = Main.loadWeapon.get(name);
-        Item item = Main.loadWeapon.get(name).getItem();
+        Item item = weapon.getItem();
         item.setCount(count);
         CompoundTag tag = item.getNamedTag();
         if(tag == null){
@@ -310,26 +314,6 @@ public class Weapon extends ItemAttr {
         return item;
     }
 
-    public Config getConfig() {
-        return config;
-    }
-
-    public void setConfig(Config config) {
-        this.config = config;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getLabel() {
-        return label;
-    }
-
     /**
      * 仅作为属性分类的标识
      * @param label
@@ -346,90 +330,6 @@ public class Weapon extends ItemAttr {
         return showName;
     }
 
-    public void setShowName(String showName) {
-        this.showName = showName;
-    }
-
-    public Item getItem() {
-        return item;
-    }
-
-    public void setItem(Item item) {
-        this.item = item;
-    }
-
-    public boolean isUnBreak() {
-        return unBreak;
-    }
-
-    public void setUnBreak(boolean unBreak) {
-        this.unBreak = unBreak;
-    }
-
-    public boolean isOffHand() {
-        return offHand;
-    }
-
-    public void setOffHand(boolean offHand) {
-        this.offHand = offHand;
-    }
-
-    public int getLevel() {
-        return level;
-    }
-
-    public void setLevel(int level) {
-        this.level = level;
-    }
-
-    public int getFire() {
-        return fire;
-    }
-
-    public void setFire(int fire) {
-        this.fire = fire;
-    }
-
-    public int getFireRound() {
-        return fireRound;
-    }
-
-    public void setFireRound(int fireRound) {
-        this.fireRound = fireRound;
-    }
-
-    public int getFrozen() {
-        return frozen;
-    }
-
-    public void setFrozen(int frozen) {
-        this.frozen = frozen;
-    }
-
-    public int getFrozenRound() {
-        return frozenRound;
-    }
-
-    public void setFrozenRound(int frozenRound) {
-        this.frozenRound = frozenRound;
-    }
-
-    public int getLighting() {
-        return lighting;
-    }
-
-    public void setLighting(int lighting) {
-        this.lighting = lighting;
-    }
-
-    public int getLightRound() {
-        return lightRound;
-    }
-
-    public void setLightRound(int lightRound) {
-        this.lightRound = lightRound;
-    }
-
     public Object getAttr() {
         return attr;
     }
@@ -438,83 +338,4 @@ public class Weapon extends ItemAttr {
         setItemAttrConfig(attr);
     }
 
-    public int getStone() {
-        return stone;
-    }
-
-    public void setStone(int stone) {
-        this.stone = stone;
-    }
-
-    public ArrayList<Effect> getDamagerEffect() {
-        return damagerEffect;
-    }
-
-    public void setDamagerEffect(ArrayList<Effect> damagerEffect) {
-        this.damagerEffect = damagerEffect;
-    }
-
-    public ArrayList<Effect> getDamagedEffect() {
-        return damagedEffect;
-    }
-
-    public void setDamagedEffect(ArrayList<Effect> damagedEffect) {
-        this.damagedEffect = damagedEffect;
-    }
-
-    public ArrayList<Effect> getGroupEffect() {
-        return groupEffect;
-    }
-
-    public void setGroupEffect(ArrayList<Effect> groupEffect) {
-        this.groupEffect = groupEffect;
-    }
-
-    public String getKillMessage() {
-        return killMessage;
-    }
-
-    public void setKillMessage(String killMessage) {
-        this.killMessage = killMessage;
-    }
-
-    public String getTipText() {
-        return tipText;
-    }
-
-    public void setTipText(String tipText) {
-        this.tipText = tipText;
-    }
-
-    public String getMyMessage() {
-        return myMessage;
-    }
-
-    public void setMyMessage(String myMessage) {
-        this.myMessage = myMessage;
-    }
-
-    public String getServerMessage() {
-        return serverMessage;
-    }
-
-    public void setServerMessage(String serverMessage) {
-        this.serverMessage = serverMessage;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    public ArrayList<String> getLoreList() {
-        return loreList;
-    }
-
-    public void setLoreList(ArrayList<String> loreList) {
-        this.loreList = loreList;
-    }
 }

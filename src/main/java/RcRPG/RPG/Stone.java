@@ -7,11 +7,15 @@ import cn.nukkit.item.Item;
 import cn.nukkit.item.RuntimeItems;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.utils.Config;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
+@Getter
+@Setter
 public class Stone extends ItemAttr {
 
     private Config config;
@@ -187,76 +191,6 @@ public class Stone extends ItemAttr {
         return list;
     }
 
-    public Config getConfig() {
-        return config;
-    }
-
-    public void setConfig(Config config) {
-        this.config = config;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getLabel() {
-        return label;
-    }
-
-    public void setLabel(String label) {
-        this.label = label;
-    }
-
-    public Item getItem() {
-        return item;
-    }
-
-    public void setItem(Item item) {
-        this.item = item;
-    }
-
-    public int getDamage() {
-        return damage;
-    }
-
-    public int getReDamage() {
-        return reDamage;
-    }
-
-    public int getHealth() {
-        return health;
-    }
-
-
-    public String getTipText() {
-        return tipText;
-    }
-
-    public void setTipText(String tipText) {
-        this.tipText = tipText;
-    }
-
-    public String getMyMessage() {
-        return myMessage;
-    }
-
-    public void setMyMessage(String myMessage) {
-        this.myMessage = myMessage;
-    }
-
-    public String getServerMessage() {
-        return serverMessage;
-    }
-
-    public void setServerMessage(String serverMessage) {
-        this.serverMessage = serverMessage;
-    }
-
-
     public Object getAttr() {
         return attr;
     }
@@ -265,20 +199,4 @@ public class Stone extends ItemAttr {
         setItemAttrConfig(attr);
     }
 
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-
-    public ArrayList<String> getLoreList() {
-        return loreList;
-    }
-
-    public void setLoreList(ArrayList<String> loreList) {
-        this.loreList = loreList;
-    }
 }

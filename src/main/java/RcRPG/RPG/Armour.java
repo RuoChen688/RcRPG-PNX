@@ -11,11 +11,15 @@ import cn.nukkit.nbt.tag.ListTag;
 import cn.nukkit.nbt.tag.StringTag;
 import cn.nukkit.potion.Effect;
 import cn.nukkit.utils.Config;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.LinkedList;
 
+@Getter
+@Setter
 public class Armour extends ItemAttr {
 
     private Config config;
@@ -275,26 +279,6 @@ public class Armour extends ItemAttr {
         return item;
     }
 
-    public Config getConfig() {
-        return config;
-    }
-
-    public void setConfig(Config config) {
-        this.config = config;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getLabel() {
-        return label;
-    }
-
     /**
      * 仅作为属性分类的标识
      * @param label
@@ -311,75 +295,6 @@ public class Armour extends ItemAttr {
         return showName;
     }
 
-    public void setShowName(String showName) {
-        this.showName = showName;
-    }
-
-    public Item getItem() {
-        return item;
-    }
-
-    public void setItem(Item item) {
-        this.item = item;
-    }
-
-    public int getDamage() {
-        return damage;
-    }
-
-    public void setDamage(int damage) {
-        this.damage = damage;
-    }
-
-    public int getReDamage() {
-        return reDamage;
-    }
-
-    public void setReDamage(int reDamage) {
-        this.reDamage = reDamage;
-    }
-
-    public ArrayList<Effect> getEffects() {
-        return effects;
-    }
-
-    public void setEffects(ArrayList<Effect> effects) {
-        this.effects = effects;
-    }
-
-    public int getStone() {
-        return stone;
-    }
-
-    public void setStone(int stone) {
-        this.stone = stone;
-    }
-
-    public String getTipText() {
-        return tipText;
-    }
-
-    public void setTipText(String tipText) {
-        this.tipText = tipText;
-    }
-
-    public String getMyMessage() {
-        return myMessage;
-    }
-
-    public void setMyMessage(String myMessage) {
-        this.myMessage = myMessage;
-    }
-
-    public String getServerMessage() {
-        return serverMessage;
-    }
-
-    public void setServerMessage(String serverMessage) {
-        this.serverMessage = serverMessage;
-    }
-
-
     public Object getAttr() {
         return attr;
     }
@@ -388,27 +303,4 @@ public class Armour extends ItemAttr {
         setItemAttrConfig(attr);
     }
 
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    public ArrayList<String> getLoreList() {
-        return loreList;
-    }
-
-    public void setLoreList(ArrayList<String> loreList) {
-        this.loreList = loreList;
-    }
-
-    public int getHealth() {
-        return health;
-    }
-
-    public void setHealth(int health) {
-        this.health = health;
-    }
 }
