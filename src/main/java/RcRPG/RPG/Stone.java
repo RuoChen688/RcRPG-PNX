@@ -24,6 +24,8 @@ public class Stone extends ItemAttr {
 
     private String label;
 
+    private String showName;
+
     private Item item;
 
     private int health;
@@ -54,6 +56,7 @@ public class Stone extends ItemAttr {
             Stone stone = new Stone(name,config);
 
             stone.setLabel(config.getString("标签"));
+            stone.setShowName(config.getString("显示名称"));
             stone.setItem(RuntimeItems.getMapping().getItemByNamespaceId(config.getString("物品ID"),1));
             if (config.exists("属性")) {
                 stone.setAttr(config.get("属性"));
@@ -136,7 +139,7 @@ public class Stone extends ItemAttr {
             tag.putString("name", name);
             tag.putByte("Unbreakable", 1);
             item.setNamedTag(tag);
-            item.setCustomName(stone.getLabel());
+            item.setCustomName(stone.getShowName());
             Stone.setStoneLore(item);
             return item;
         }

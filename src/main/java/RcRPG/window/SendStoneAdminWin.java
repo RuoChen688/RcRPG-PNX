@@ -31,7 +31,8 @@ public class SendStoneAdminWin implements Listener { //一般实际开发中不�
         Stone stone = Main.loadStone.get(stoneKey);
 
         FormWindowSimple form = new FormWindowSimple("RcRPG管理 - " + stoneKey,
-                        "标签: " + stone.getLabel() +
+                "显示名称: " + stone.getShowName() +
+                        "\n§r标签: " + stone.getLabel() +
                         "\n§r物品ID: " + stone.getConfig().get("物品ID") +
                         "\n§r介绍: " + stone.getMessage());
         form.addButton(new ElementButton("获取"));
