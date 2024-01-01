@@ -21,7 +21,8 @@ public class Panel implements InventoryHolder {
         if(Main.getInstance().ornamentConfig.exists(name)){
             ArrayList<String> list = (ArrayList<String>) Main.getInstance().ornamentConfig.getStringList(name);
             for(int i = 0;i < list.size();i++){
-                Item item = Ornament.getItem(list.get(i),1);
+                String[] s = list.get(i).split(":");
+                Item item = Ornament.getItem(s[0], Integer.parseInt(s[1]));
                 panel.put(i,item);
             }
         }
@@ -34,7 +35,7 @@ public class Panel implements InventoryHolder {
     }
 
     public void displayPlayer(Player player,Map<Integer, Item> itemMap){
-        OrnamentInventory ornamentInventory = new OrnamentInventory(this,"饰品");
+        OrnamentInventory ornamentInventory = new OrnamentInventory(this,"饰品背包");
         ornamentInventory.setContents(itemMap);
         ornamentInventory.id = Entity.entityCount++;
         player.addWindow(ornamentInventory);

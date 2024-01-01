@@ -712,11 +712,7 @@ public class Events implements Listener {
             Item targetItem = action.getTargetItem();
             for (Inventory inventory : transaction.getInventories()) {
                 if (inventory instanceof OrnamentInventory) {
-                    if(Ornament.isOrnament(sourceItem)){
-                        if(sourceItem.count != 1) event.setCancelled();
-                    } else if (Ornament.isOrnament(targetItem)) {
-                        if(targetItem.count != 1) event.setCancelled();
-                    } else if (!Ornament.isOrnament(sourceItem) && !Ornament.isOrnament(targetItem)) {
+                    if (!Ornament.isOrnament(sourceItem) && !Ornament.isOrnament(targetItem)) {
                         event.setCancelled();
                     }
                 }

@@ -62,10 +62,12 @@ public class PlayerAttr extends Manager {
         }
         Map<Integer,Item> map = Panel.getPanel(player);
         if(!map.isEmpty()){
-            for(int i = 0;i < Math.min(Main.getInstance().ornamentConfig.getInt("饰品生效格数"),map.size());i++){
+            Map<String, float[]> attr = new HashMap<>();
+            for(int i = 0;i < Math.min(Main.getInstance().config.getInt("饰品生效格数"),map.size());i++){
                 Ornament ornament = Main.loadOrnament.get(map.get(i).getNamedTag().getString("name"));
-                if(ornament== null) continue;
-                setItemAttrConfig(ornament.getLabel(), ornament.getMainAttr());
+                if(ornament == null) continue;
+                OrnamentOverAttr(attr,ornament.getMainAttr());
+                setItemAttrConfig(ornament.getLabel(), attr);
 
                 beforLabel.remove(ornament.getLabel());
                 labelList.add(ornament.getLabel());
@@ -74,6 +76,22 @@ public class PlayerAttr extends Manager {
         beforLabel.forEach(label -> {
             setItemAttrConfig(label, new HashMap<String, float[]>());
         });
+    }
+
+    public void OrnamentOverAttr(Map<String, float[]> map1,Map<String, float[]> map2){
+        for(Map.Entry<String,float[]> entry : map2.entrySet()){
+            String key = entry.getKey();
+            float[] value = entry.getValue();
+            if(value.length == 1){
+                value = new float[]{value[0],value[0]};
+            }
+            if(!map1.containsKey(key)){
+                map1.put(key,value);
+            }
+            else{
+                map1.put(key,new float[]{map1.get(key)[0] + value[0],map1.get(key)[1] + value[1]});
+            }
+        }
     }
 
     public void checkItemStoneAttr(String mainItemName, LinkedList<Stone> list, ArrayList<String> beforLabel, ArrayList<String> labelList) {

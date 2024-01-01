@@ -41,7 +41,7 @@ public class OrnamentInventory extends DoubleChestFakeInventory {
         who.dataPacket(pk);
         super.onClose(who);
         Map<Integer, Item> content = this.getContents();
-        List<String> list = content.values().stream().map(item -> item.getNamedTag().getString("name")).toList();
+        List<String> list = content.values().stream().map(item -> item.getNamedTag().getString("name") + ":" + item.getCount()).toList();
         String name = who.getName();
         if(Main.getInstance().ornamentConfig.exists(name)){
             Main.getInstance().ornamentConfig.set(name,list);
