@@ -170,23 +170,17 @@ public class Armour extends ItemAttr {
         }
         return item.getNamedTag().getString("type").equals("armour");
     }
-    public LinkedList<Stone> getStones() {
+
+    public static LinkedList<Stone> getStones(Item item){
         LinkedList<Stone> list = new LinkedList<>();
         if (!isArmour(item) || item.getNamedTag() == null) return list;
         ListTag<StringTag> tags = item.getNamedTag().getList("stone",StringTag.class);
         for(StringTag tag : tags.getAll()){
             list.add(Handle.getStoneByLabel(tag.parseValue()));
         }
-        while(list.size() < getStone()){
+        Armour armour = Main.loadArmour.get(item.getNamedTag().getString("name"));
+        while(list.size() < armour.getStone()){
             list.add(null);
-        }
-        return list;
-    }
-    public static LinkedList<Stone> getStones(Item item){
-        LinkedList<Stone> list = new LinkedList<>();
-        if(Armour.isArmour(item)){
-            Armour armour = Main.loadArmour.get(item.getNamedTag().getString("name"));
-            return armour.getStones();
         }
         return list;
     }

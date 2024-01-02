@@ -5,13 +5,12 @@ import RcRPG.AttrManager.Manager;
 import RcRPG.AttrManager.PlayerAttr;
 import RcRPG.AttrManager.RcEntityAttr;
 import RcRPG.Form.guildForm;
-import RcRPG.Form.inlayForm;
 import RcRPG.RPG.*;
-import RcRPG.guild.Guild;
 import RcRPG.Society.Money;
 import RcRPG.Society.Prefix;
 import RcRPG.Society.Shop;
 import RcRPG.Task.removeFloatingText;
+import RcRPG.guild.Guild;
 import RcRPG.panel.OrnamentInventory;
 import cn.nukkit.Player;
 import cn.nukkit.Server;
@@ -23,14 +22,12 @@ import cn.nukkit.event.Listener;
 import cn.nukkit.event.block.BlockBreakEvent;
 import cn.nukkit.event.entity.EntityDamageByEntityEvent;
 import cn.nukkit.event.entity.EntityRegainHealthEvent;
-import cn.nukkit.event.inventory.InventoryClickEvent;
 import cn.nukkit.event.inventory.InventoryTransactionEvent;
 import cn.nukkit.event.player.*;
 import cn.nukkit.form.response.FormResponseCustom;
 import cn.nukkit.form.response.FormResponseData;
 import cn.nukkit.form.response.FormResponseSimple;
 import cn.nukkit.inventory.Inventory;
-import cn.nukkit.inventory.PlayerInventory;
 import cn.nukkit.inventory.transaction.InventoryTransaction;
 import cn.nukkit.inventory.transaction.action.InventoryAction;
 import cn.nukkit.item.Item;
@@ -47,7 +44,6 @@ import java.io.File;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 
 import static RcRPG.Handle.getProbabilisticResults;
 
@@ -134,196 +130,132 @@ public class Events implements Listener {
     public void onFormResponded(PlayerFormRespondedEvent event){
         Player player = event.getPlayer();
         if(!event.wasClosed()){
-            switch(event.getFormID()){
-                case 10086:
-                    FormResponseSimple response1 = (FormResponseSimple) event.getResponse();
-                    inlayForm.makeForm_two_weapon(player,player.getInventory().getItemInHand(),response1);
-                    break;
-                case 10087:
-                    FormResponseSimple response6 = (FormResponseSimple) event.getResponse();
-                    inlayForm.makeForm_two_armour(player,player.getInventory().getItemInHand(),response6);
-                    break;
-                case 10010:
-                    FormResponseCustom response2 = (FormResponseCustom) event.getResponse();
-                    FormResponseData response3 = response2.getDropdownResponse(0);
-                    if(response3.getElementID() == 0){
-                        inlayForm.playerStone.remove(player);
-                    }else{
-                        LinkedList<Stone> list = Weapon.getStones(player.getInventory().getItemInHand());
-                        for(int i = 0;i < list.size();i++){
-                            if(i == inlayForm.playerClick.get(player)){
-                                if(!response3.getElementContent().equals("无")){
-                                    list.set(i,Handle.getStoneByLabel(response3.getElementContent()));
-                                }else{
-                                    list.remove(i);
-                                }
-                                break;
-                            }
-                        }
-                        Weapon.setStone(player,player.getInventory().getItemInHand(),list);
-                        if(!response3.getElementContent().equals("无")) Handle.removeStoneByLabel(player,response3.getElementContent());
-                        if(inlayForm.playerStone.get(player) != null) Stone.giveStone(player,inlayForm.playerStone.get(player).getName(),1);
-                        inlayForm.playerStone.remove(player);
-                    }
-                    inlayForm.playerClick.remove(player);
-                    inlayForm.makeForm_one_weapon(player,player.getInventory().getItemInHand());
-                    break;
-                case 10011:
-                    FormResponseCustom response4 = (FormResponseCustom) event.getResponse();
-                    FormResponseData response5 = response4.getDropdownResponse(0);
-                    if(response5.getElementID() == 0){
-                        inlayForm.playerStone.remove(player);
-                    }else{
-                        LinkedList<Stone> list = Armour.getStones(player.getInventory().getItemInHand());
-                        for(int i = 0;i < list.size();i++){
-                            if(i == inlayForm.playerClick.get(player)){
-                                if(!response5.getElementContent().equals("无")){
-                                    list.set(i,Handle.getStoneByLabel(response5.getElementContent()));
-                                }else{
-                                    list.remove(i);
-                                }
-                                break;
-                            }
-                        }
-                        Armour.setStone(player,player.getInventory().getItemInHand(),list);
-                        if(!response5.getElementContent().equals("无")) Handle.removeStoneByLabel(player,response5.getElementContent());
-                        if(inlayForm.playerStone.get(player) != null) Stone.giveStone(player,inlayForm.playerStone.get(player).getName(),1);
-                        inlayForm.playerStone.remove(player);
-                    }
-                    inlayForm.playerClick.remove(player);
-                    inlayForm.makeForm_one_armour(player,player.getInventory().getItemInHand());
-                    break;
-                case 10000:
+            switch (event.getFormID()) {
+                case 10000 -> {
                     FormResponseCustom response7 = (FormResponseCustom) event.getResponse();
                     FormResponseData response8 = response7.getDropdownResponse(0);
-                    if(response8.getElementID() != 0){
-                        Prefix.setPrefix(player,response8.getElementContent());
+                    if (response8.getElementID() != 0) {
+                        Prefix.setPrefix(player, response8.getElementContent());
                     }
-                    break;
-                case 20000:
+                }
+                case 20000 -> {
                     FormResponseSimple response9 = (FormResponseSimple) event.getResponse();
-                    if(response9.getClickedButtonId() == 0) guildForm.make_join(player);
+                    if (response9.getClickedButtonId() == 0) guildForm.make_join(player);
                     else guildForm.make_create(player);
-                    break;
-                case 20001:
+                }
+                case 20001 -> {
                     FormResponseCustom response21 = (FormResponseCustom) event.getResponse();
                     String guild = response21.getDropdownResponse(0).getElementContent();
-                    if(Guild.getMaxSize(guild) > Guild.getSize(guild)){
-                        Guild.appGuild(player,guild);
+                    if (Guild.getMaxSize(guild) > Guild.getSize(guild)) {
+                        Guild.appGuild(player, guild);
                         guildForm.a_s(player);
-                    }else{
+                    } else {
                         guildForm.a_f(player);
                     }
-                    break;
-                case 20002:
+                }
+                case 20002 -> {
                     FormResponseCustom response10 = (FormResponseCustom) event.getResponse();
-                    if(Handle.getGuilds().contains(response10.getInputResponse(1))){
+                    if (Handle.getGuilds().contains(response10.getInputResponse(1))) {
                         guildForm.create_failed(player);
-                    }else{
-                        if(Money.getMoney(player) < Main.instance.config.getInt("公会创建初始资金")){
+                    } else {
+                        if (Money.getMoney(player) < Main.instance.config.getInt("公会创建初始资金")) {
                             guildForm.create_failed(player);
-                        }else{
-                            Guild.addGuild(player,response10.getInputResponse(1));
+                        } else {
+                            Guild.addGuild(player, response10.getInputResponse(1));
                             guildForm.make_one(player);
                         }
                     }
-                    break;
-                case 20003:
-                case 20009:
-                case 20010:
-                case 20015:
-                case 20016:
-                case 20018:
-                case 20019:
-                case 20021:
+                }
+                case 20003, 20009, 20010, 20015, 20016, 20018, 20019, 20021 -> {
                     FormResponseSimple response11 = (FormResponseSimple) event.getResponse();
-                    if(response11.getClickedButtonId() == 0) guildForm.make_one(player);
-                    break;
-                case 20004:
+                    if (response11.getClickedButtonId() == 0) guildForm.make_one(player);
+                }
+                case 20004 -> {
                     FormResponseSimple response12 = (FormResponseSimple) event.getResponse();
-                    if(response12.getClickedButtonId() == 0) guildForm.make_offer(player);
-                    if(response12.getClickedButtonId() == 1) guildForm.make_member(player);
-                    if(response12.getClickedButtonId() == 2) Guild.tpBase(player);
-                    if(response12.getClickedButtonId() == 3) guildForm.make_update(player);
-                    if(response12.getClickedButtonId() == 4) guildForm.make_app(player);
-                    if(response12.getClickedButtonId() == 5) guildForm.make_assistant(player);
-                    if(response12.getClickedButtonId() == 6) Guild.setBase(player);
-                    if(response12.getClickedButtonId() == 7) guildForm.make_dismiss(player);
-                    break;
-                case 20005:
+                    if (response12.getClickedButtonId() == 0) guildForm.make_offer(player);
+                    if (response12.getClickedButtonId() == 1) guildForm.make_member(player);
+                    if (response12.getClickedButtonId() == 2) Guild.tpBase(player);
+                    if (response12.getClickedButtonId() == 3) guildForm.make_update(player);
+                    if (response12.getClickedButtonId() == 4) guildForm.make_app(player);
+                    if (response12.getClickedButtonId() == 5) guildForm.make_assistant(player);
+                    if (response12.getClickedButtonId() == 6) Guild.setBase(player);
+                    if (response12.getClickedButtonId() == 7) guildForm.make_dismiss(player);
+                }
+                case 20005 -> {
                     FormResponseCustom response13 = (FormResponseCustom) event.getResponse();
-                    if(Money.getMoney(player) < response13.getSliderResponse(0)) guildForm.offer_f(player);
-                    else{
+                    if (Money.getMoney(player) < response13.getSliderResponse(0)) guildForm.offer_f(player);
+                    else {
                         Money.delMoney(player, (int) response13.getSliderResponse(0));
-                        Guild.addMoney(player,(int) response13.getSliderResponse(0));
+                        Guild.addMoney(player, (int) response13.getSliderResponse(0));
                         guildForm.offer_s(player);
                     }
-                    break;
-                case 20006:
-                    if(Guild.isMaster(player) || Guild.isAssistantMaster(player)){
+                }
+                case 20006 -> {
+                    if (Guild.isMaster(player) || Guild.isAssistantMaster(player)) {
                         FormResponseSimple response14 = (FormResponseSimple) event.getResponse();
-                        if(Guild.isAssistantMaster(player) && response14.getClickedButton().getText().equals(Guild.getMaster(player))) guildForm.member_f(player);
-                        else if(response14.getClickedButton().getText().equals(player.getName())){
-                            if(!Guild.isMaster(player)) guildForm.member_m(player);
+                        if (Guild.isAssistantMaster(player) && response14.getClickedButton().getText().equals(Guild.getMaster(player)))
+                            guildForm.member_f(player);
+                        else if (response14.getClickedButton().getText().equals(player.getName())) {
+                            if (!Guild.isMaster(player)) guildForm.member_m(player);
                             else guildForm.make_dismiss(player);
-                        }
-                        else guildForm.member_s(player,response14.getClickedButton().getText());
+                        } else guildForm.member_s(player, response14.getClickedButton().getText());
                     }
-                    break;
-                case 20007:
+                }
+                case 20007 -> {
                     FormResponseSimple response15 = (FormResponseSimple) event.getResponse();
-                    guildForm.app_s(player,response15.getClickedButton().getText());
-                    break;
-                case 20008:
+                    guildForm.app_s(player, response15.getClickedButton().getText());
+                }
+                case 20008 -> {
                     FormResponseSimple response16 = (FormResponseSimple) event.getResponse();
-                    if(response16.getClickedButtonId() == 1) guildForm.make_one(player);
+                    if (response16.getClickedButtonId() == 1) guildForm.make_one(player);
                     else Guild.dismissGuild(player);
-                    break;
-                case 20011:
+                }
+                case 20011 -> {
                     FormResponseSimple response17 = (FormResponseSimple) event.getResponse();
-                    if(response17.getClickedButtonId() == 0) Guild.kickGuild(player,response17.getClickedButton().getText());
+                    if (response17.getClickedButtonId() == 0)
+                        Guild.kickGuild(player, response17.getClickedButton().getText());
                     else guildForm.make_member(player);
-                    break;
-                case 20012:
+                }
+                case 20012 -> {
                     FormResponseSimple response18 = (FormResponseSimple) event.getResponse();
-                    if(response18.getClickedButtonId() == 0) guildForm.make_member(player);
-                    break;
-                case 20013:
+                    if (response18.getClickedButtonId() == 0) guildForm.make_member(player);
+                }
+                case 20013 -> {
                     FormResponseSimple response19 = (FormResponseSimple) event.getResponse();
-                    if(response19.getClickedButtonId() == 0) {
-                        Guild.kickGuild(player,player.getName());
+                    if (response19.getClickedButtonId() == 0) {
+                        Guild.kickGuild(player, player.getName());
                         guildForm.make_one(player);
-                    }else if(response19.getClickedButtonId() == 1){
+                    } else if (response19.getClickedButtonId() == 1) {
                         guildForm.make_one(player);
                     }
-                    break;
-                case 20014:
+                }
+                case 20014 -> {
                     FormResponseSimple response20 = (FormResponseSimple) event.getResponse();
-                    if(response20.getClickedButtonId() == 0) {
-                        Guild.acceptApp(player,response20.getClickedButton().getText());
+                    if (response20.getClickedButtonId() == 0) {
+                        Guild.acceptApp(player, response20.getClickedButton().getText());
                         guildForm.make_one(player);
-                    }else if(response20.getClickedButtonId() == 1){
-                        Guild.rejectApp(player,response20.getClickedButton().getText());
+                    } else if (response20.getClickedButtonId() == 1) {
+                        Guild.rejectApp(player, response20.getClickedButton().getText());
                         guildForm.make_one(player);
                     }
-                    break;
-                case 20017:
+                }
+                case 20017 -> {
                     FormResponseSimple response22 = (FormResponseSimple) event.getResponse();
-                    if(response22.getClickedButtonId() == 0){
-                        if(Guild.getMoney(player) < Guild.getUpdateMoney(player)){
+                    if (response22.getClickedButtonId() == 0) {
+                        if (Guild.getMoney(player) < Guild.getUpdateMoney(player)) {
                             guildForm.update_f(player);
-                        }else{
-                            Guild.delMoney(player,Guild.getUpdateMoney(player));
+                        } else {
+                            Guild.delMoney(player, Guild.getUpdateMoney(player));
                             Guild.updateGuild(player);
                             guildForm.update_s(player);
                         }
                     }
-                    break;
-                case 20020:
+                }
+                case 20020 -> {
                     FormResponseSimple response23 = (FormResponseSimple) event.getResponse();
-                    guildForm.as_s(player,response23.getClickedButton().getText());
-                    Guild.setAssistantMaster(Server.getInstance().getPlayer(response23.getClickedButton().getText()),Guild.getGuild(player));
-                    break;
+                    guildForm.as_s(player, response23.getClickedButton().getText());
+                    Guild.setAssistantMaster(Server.getInstance().getPlayer(response23.getClickedButton().getText()), Guild.getGuild(player));
+                }
             }
         }
     }

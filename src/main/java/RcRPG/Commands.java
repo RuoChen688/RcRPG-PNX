@@ -9,9 +9,7 @@ import RcRPG.Society.Money;
 import RcRPG.Society.Points;
 import RcRPG.Society.Prefix;
 import RcRPG.panel.Panel;
-import RcRPG.window.SendArmourAdminWin;
-import RcRPG.window.SendStoneAdminWin;
-import RcRPG.window.SendWeaponAdminWin;
+import RcRPG.window.*;
 import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.command.CommandSender;
@@ -53,6 +51,12 @@ public class Commands extends PluginCommand<Main> {
         this.addCommandParameters("help",new CommandParameter[]{
                 CommandParameter.newEnum("help",new String[]{"help"})
         });
+        this.addCommandParameters("admin",new CommandParameter[]{
+                CommandParameter.newEnum("admin",new String[]{"admin"})
+        });
+        this.addCommandParameters("inlay",new CommandParameter[]{
+                CommandParameter.newEnum("inlay",new String[]{"inlay"})
+        });
         this.addCommandParameters("check",new CommandParameter[]{
                 CommandParameter.newEnum("check", new String[]{"check"}),
                 CommandParameter.newEnum("type",new String[]{"attr"}),
@@ -73,12 +77,6 @@ public class Commands extends PluginCommand<Main> {
         });
         for (String name : list) {
             if(item.contains(name)){
-                if(name.equals("weapon") || name.equals("armour")){
-                    this.addCommandParameters(name + "_inlay",new CommandParameter[]{
-                            CommandParameter.newEnum(name,new String[]{name}),
-                            CommandParameter.newEnum("inlay",new String[]{"inlay"})
-                    });
-                }
                 if(name.equals("ornament")){
                     this.addCommandParameters(name + "_my",new CommandParameter[]{
                             CommandParameter.newEnum(name,new String[]{name}),
@@ -168,9 +166,10 @@ public class Commands extends PluginCommand<Main> {
         if (args.hasResult(1)) {
             arg1 = args.getResult(1);
         }
-        switch((String) args.getResult(0)){
+        switch((String) args.getResult(0)) {
             case "help":
                 sender.sendMessage("/rpg check attr [playerName]   查询属性命令");
+                sender.sendMessage("/rpg inlay   镶嵌宝石的命令");
                 sender.sendMessage("/rpg weapon help   武器指令");
                 sender.sendMessage("/rpg armour help   盔甲指令");
                 sender.sendMessage("/rpg stone help   宝石指令");
@@ -184,6 +183,31 @@ public class Commands extends PluginCommand<Main> {
                 sender.sendMessage("/rpg point help   点券指令");
                 sender.sendMessage("/rpg shop help   商店指令");
                 break;
+            case "admin": {
+                if (!sender.isPlayer()) {
+                    log.addError("本命令必须是玩家执行").output();
+                    return 0;
+                }
+                new RcRPGAdminWin((Player) sender);
+                return 1;
+            }
+            case "inlay": {
+                if (!sender.isPlayer()) {
+                    log.addError("本命令必须是玩家执行").output();
+                    return 0;
+                }
+                Item item = ((Player) sender).getInventory().getItemInHand();
+                if (item.isNull()) {
+                    log.addError("未手持装备").output();
+                    return 0;
+                }
+                if (!Weapon.isWeapon(item) && !Armour.isArmour(item)) {
+                    log.addError("请手持有效装备").output();
+                    return 0;
+                }
+                new inlayForm().makeInlayForm((Player) sender, item);
+                return 1;
+            }
             case "check":
                 if (!(sender instanceof Player)) {
                     log.addError("仅允许玩家执行").output();
@@ -457,20 +481,6 @@ public class Commands extends PluginCommand<Main> {
                             }
                         }
                     }
-                    case "inlay" -> {
-                        Item item = ((Player) sender).getInventory().getItemInHand();
-                        if (!item.isNull()) {
-                            if (Weapon.isWeapon(item)) {
-                                inlayForm.makeForm_one_weapon(((Player) sender), item);
-                            } else {
-                                sender.sendMessage("请手持武器");
-                                return 0;
-                            }
-                        } else {
-                            sender.sendMessage("未手持武器");
-                            return 0;
-                        }
-                    }
                 }
                 break;
             }
@@ -552,20 +562,6 @@ public class Commands extends PluginCommand<Main> {
                             } else {
                                 if (sender.isPlayer()) sender.sendMessage("给予失败");
                             }
-                        }
-                    }
-                    case "inlay" -> {
-                        Item item = ((Player) sender).getInventory().getItemInHand();
-                        if (!item.isNull()) {
-                            if (Armour.isArmour(item)) {
-                                inlayForm.makeForm_one_armour(((Player) sender), item);
-                            } else {
-                                sender.sendMessage("请手持盔甲");
-                                return 0;
-                            }
-                        } else {
-                            sender.sendMessage("未手持盔甲");
-                            return 0;
                         }
                     }
                 }
@@ -783,6 +779,13 @@ public class Commands extends PluginCommand<Main> {
                         sender.sendMessage("/rpg ornament del [Name] 删除一个名为Name的饰品配置");
                         sender.sendMessage("/rpg ornament give [Player] [Name] [Count] 给予玩家一定数量的饰品");
                         sender.sendMessage("/rpg ornament my 打开自己的饰品背包");
+                    }
+                    case "admin" -> {
+                        if (!sender.isPlayer()) {
+                            log.addError("本命令必须是玩家执行").output();
+                            return 0;
+                        }
+                        new SendOrnamentAdminWin((Player) sender);
                     }
                     case "my" -> {
                         if (args.size() != 2) {

@@ -216,24 +216,16 @@ public class Weapon extends ItemAttr {
         return item.getNamedTag().getString("type").equals("weapon");
     }
 
-    public LinkedList<Stone> getStones() {
+    public static LinkedList<Stone> getStones(Item item){
         LinkedList<Stone> list = new LinkedList<>();
         if (!isWeapon(item) || item.getNamedTag() == null) return list;
         ListTag<StringTag> tags = item.getNamedTag().getList("stone",StringTag.class);
         for(StringTag tag : tags.getAll()){
             list.add(Handle.getStoneByLabel(tag.parseValue()));
         }
-        while(list.size() < getStone()){
+        Weapon weapon = Main.loadWeapon.get(item.getNamedTag().getString("name"));
+        while(list.size() < weapon.getStone()){
             list.add(null);
-        }
-        return list;
-    }
-
-    public static LinkedList<Stone> getStones(Item item){
-        LinkedList<Stone> list = new LinkedList<>();
-        if(Weapon.isWeapon(item)){
-            Weapon weapon = Main.loadWeapon.get(item.getNamedTag().getString("name"));
-            return weapon.getStones();
         }
         return list;
     }

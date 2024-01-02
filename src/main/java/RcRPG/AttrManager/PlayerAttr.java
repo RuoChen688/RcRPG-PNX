@@ -45,7 +45,7 @@ public class PlayerAttr extends Manager {
             Weapon weapon = Main.loadWeapon.get(rcItem.getNamedTag().getString("name"));
             if (weapon == null) continue;
             setItemAttrConfig(weapon.getLabel(), weapon.getMainAttr());
-            checkItemStoneAttr(weapon.getLabel(), weapon.getStones(), beforLabel, labelList);
+            checkItemStoneAttr(weapon.getLabel(), Weapon.getStones(rcItem), beforLabel, labelList);
 
             beforLabel.remove(weapon.getLabel());
             labelList.add(weapon.getLabel());
@@ -55,7 +55,7 @@ public class PlayerAttr extends Manager {
             Armour armour = Main.loadArmour.get(rcItem.getNamedTag().getString("name"));
             if (armour == null) continue;
             setItemAttrConfig(armour.getLabel(), armour.getMainAttr());
-            checkItemStoneAttr(armour.getLabel(), armour.getStones(), beforLabel, labelList);
+            checkItemStoneAttr(armour.getLabel(), Armour.getStones(rcItem), beforLabel, labelList);
 
             beforLabel.remove(armour.getLabel());
             labelList.add(armour.getLabel());
