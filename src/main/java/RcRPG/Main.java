@@ -28,6 +28,7 @@ public class Main extends PluginBase implements Listener {
     public Config config;
 
     public Config ornamentConfig;
+    public Config dismantleConfig;
 
     public List<String> attrDisplayPercentConfig;
     public static boolean money;
@@ -52,11 +53,8 @@ public class Main extends PluginBase implements Listener {
         this.getNewFile();
         this.saveResource("Config.yml","/Config.yml",false);
         config = new Config(this.getDataFolder() + "/Config.yml");
-        this.saveResource("PlayerOrnament.yml","/OrnamentConfig.yml",false);
-        ornamentConfig = new Config(this.getDataFolder() + "/OrnamentConfig.yml");
-        initAttrDisplayPercent();
+
         init();
-        disableChatStyle = !config.exists("底部显示") || config.getString("底部显示").equals("");
 
         if (config.exists("称号.disable") && config.getBoolean("称号.disable")) {
             disablePrefix = true;
@@ -96,6 +94,15 @@ public class Main extends PluginBase implements Listener {
     }
 
     public void init() {
+        this.saveResource("PlayerOrnament.yml","/OrnamentConfig.yml",false);
+        ornamentConfig = new Config(this.getDataFolder() + "/OrnamentConfig.yml");
+
+        this.saveResource("DismantlePlan.yml","/DismantlePlan.yml",false);
+        dismantleConfig = new Config(this.getDataFolder() + "/DismantlePlan.yml");
+
+        initAttrDisplayPercent();
+        disableChatStyle = !config.exists("底部显示") || config.getString("底部显示").equals("");
+
         this.getLogger().info("开始读取武器信息");
         for(String name: Handle.getDefaultFiles("Weapon")){
             Weapon weapon = null;

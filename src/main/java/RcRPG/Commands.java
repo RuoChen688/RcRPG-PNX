@@ -8,7 +8,8 @@ import RcRPG.RPG.*;
 import RcRPG.Society.Money;
 import RcRPG.Society.Points;
 import RcRPG.Society.Prefix;
-import RcRPG.panel.Panel;
+import RcRPG.panel.dismantle.DismantlePanel;
+import RcRPG.panel.ornament.OrnamentPanel;
 import RcRPG.window.*;
 import cn.nukkit.Player;
 import cn.nukkit.Server;
@@ -54,8 +55,14 @@ public class Commands extends PluginCommand<Main> {
         this.addCommandParameters("admin",new CommandParameter[]{
                 CommandParameter.newEnum("admin",new String[]{"admin"})
         });
+        this.addCommandParameters("reload",new CommandParameter[]{
+                CommandParameter.newEnum("reload",new String[]{"reload"})
+        });
         this.addCommandParameters("inlay",new CommandParameter[]{
                 CommandParameter.newEnum("inlay",new String[]{"inlay"})
+        });
+        this.addCommandParameters("dismantle",new CommandParameter[]{
+                CommandParameter.newEnum("dismantle",new String[]{"dismantle"})
         });
         this.addCommandParameters("check",new CommandParameter[]{
                 CommandParameter.newEnum("check", new String[]{"check"}),
@@ -169,7 +176,8 @@ public class Commands extends PluginCommand<Main> {
         switch((String) args.getResult(0)) {
             case "help":
                 sender.sendMessage("/rpg check attr [playerName]   查询属性命令");
-                sender.sendMessage("/rpg inlay   镶嵌宝石的命令");
+                sender.sendMessage("/rpg inlay   镶嵌宝石的命令 (GUI)");
+                sender.sendMessage("/rpg dismantle   分解装备的命令 (GUI)");
                 sender.sendMessage("/rpg weapon help   武器指令");
                 sender.sendMessage("/rpg armour help   盔甲指令");
                 sender.sendMessage("/rpg stone help   宝石指令");
@@ -189,6 +197,20 @@ public class Commands extends PluginCommand<Main> {
                     return 0;
                 }
                 new RcRPGAdminWin((Player) sender);
+                return 1;
+            }
+            case "reload": {
+                Main.getInstance().init();
+                log.addSuccess("重载成功").output();
+                return 1;
+            }
+            case "dismantle": {
+                if (!sender.isPlayer()) {
+                    log.addError("本命令必须是玩家执行").output();
+                    return 0;
+                }
+                DismantlePanel panel = new DismantlePanel();
+                panel.sendPanel((Player) sender);
                 return 1;
             }
             case "inlay": {
@@ -792,7 +814,7 @@ public class Commands extends PluginCommand<Main> {
                             sender.sendMessage("参数错误");
                             return 0;
                         }
-                        Panel panel = new Panel();
+                        OrnamentPanel panel = new OrnamentPanel();
                         panel.sendPanel((Player) sender);
                     }
                     case "add" -> {

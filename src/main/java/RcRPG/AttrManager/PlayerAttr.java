@@ -5,7 +5,7 @@ import RcRPG.RPG.Armour;
 import RcRPG.RPG.Ornament;
 import RcRPG.RPG.Stone;
 import RcRPG.RPG.Weapon;
-import RcRPG.panel.Panel;
+import RcRPG.panel.ornament.OrnamentPanel;
 import cn.nukkit.Player;
 import cn.nukkit.form.element.Element;
 import cn.nukkit.form.element.ElementLabel;
@@ -60,7 +60,7 @@ public class PlayerAttr extends Manager {
             beforLabel.remove(armour.getLabel());
             labelList.add(armour.getLabel());
         }
-        Map<Integer,Item> map = Panel.getPanel(player);
+        Map<Integer,Item> map = OrnamentPanel.getPanel(player);
         if(!map.isEmpty()){
             Map<String, float[]> attr = new HashMap<>();
             for(int i = 0;i < Math.min(Main.getInstance().config.getInt("饰品生效格数"),map.size());i++){

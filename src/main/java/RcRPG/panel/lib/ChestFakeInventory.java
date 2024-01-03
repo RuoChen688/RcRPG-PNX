@@ -25,7 +25,7 @@ public class ChestFakeInventory extends AbstractFakeInventory{
 
     private String name;
 
-    ChestFakeInventory(InventoryType type, InventoryHolder holder, String title) {
+    protected ChestFakeInventory(InventoryType type, InventoryHolder holder, String title) {
         super(type, holder, title);
     }
 

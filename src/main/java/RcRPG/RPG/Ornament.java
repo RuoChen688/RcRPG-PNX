@@ -1,22 +1,17 @@
 package RcRPG.RPG;
 
 import RcRPG.AttrManager.ItemAttr;
-import RcRPG.Handle;
 import RcRPG.Main;
 import cn.nukkit.Player;
 import cn.nukkit.item.Item;
 import cn.nukkit.item.RuntimeItems;
 import cn.nukkit.nbt.tag.CompoundTag;
-import cn.nukkit.nbt.tag.ListTag;
-import cn.nukkit.nbt.tag.StringTag;
-import cn.nukkit.potion.Effect;
 import cn.nukkit.utils.Config;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.LinkedList;
 
 @Getter
 @Setter
@@ -114,8 +109,9 @@ public class Ornament extends ItemAttr {
         return false;
     }
 
-    public static Item getItem(String name,int count) {
+    public static Item getItem(String name, int count) {
         Ornament ornament = Main.loadOrnament.get(name);
+        if (ornament == null) return Item.AIR_ITEM;
         Item item = ornament.getItem();
         item.setCount(count);
         CompoundTag tag = item.getNamedTag();

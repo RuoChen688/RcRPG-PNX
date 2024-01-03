@@ -11,7 +11,8 @@ import RcRPG.Society.Prefix;
 import RcRPG.Society.Shop;
 import RcRPG.Task.removeFloatingText;
 import RcRPG.guild.Guild;
-import RcRPG.panel.OrnamentInventory;
+import RcRPG.panel.dismantle.DismantleInventory;
+import RcRPG.panel.ornament.OrnamentInventory;
 import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.block.Block;
@@ -643,9 +644,21 @@ public class Events implements Listener {
             Item sourceItem = action.getSourceItem();
             Item targetItem = action.getTargetItem();
             for (Inventory inventory : transaction.getInventories()) {
-                if (inventory instanceof OrnamentInventory) {
+                if (inventory instanceof OrnamentInventory) {// 饰品箱子
                     if (!Ornament.isOrnament(sourceItem) && !Ornament.isOrnament(targetItem)) {
                         event.setCancelled();
+                    }
+                } else if (inventory instanceof DismantleInventory) {// 分解炉
+                    if (sourceItem.isNull()) {// 放装备至炉子
+                        if (!Armour.isArmour(targetItem) && !Weapon.isWeapon(targetItem)) {
+                            event.setCancelled();
+                            return;
+                        }
+                    } else {
+                        if (!Armour.isArmour(sourceItem) && !Weapon.isWeapon(sourceItem)) {
+                            event.setCancelled();
+                            return;
+                        }
                     }
                 }
             }

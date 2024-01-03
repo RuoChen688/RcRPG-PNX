@@ -44,6 +44,11 @@ public class Armour extends ItemAttr {
 
     private int stone;
 
+    /**
+     * 分解方案
+     */
+    private String dismantle;
+
     private String tipText;
 
     private String myMessage;
@@ -70,6 +75,7 @@ public class Armour extends ItemAttr {
                 armour.setAttr(config.get("属性"));
             }
             armour.setMessage(config.getString("介绍"));
+            armour.setDismantle(config.getString("分解", ""));
             armour.setTipText(config.getString("底部显示"));
             armour.setMyMessage(config.getString("个人通知"));
             armour.setServerMessage(config.getString("全服通知"));

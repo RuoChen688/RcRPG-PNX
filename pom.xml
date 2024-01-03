@@ -105,6 +105,13 @@
             <systemPath>${pom.basedir}/lib/healthapi_v1.3.1.jar</systemPath>
         </dependency>
 
+        <dependency>
+            <groupId>tip</groupId>
+            <artifactId>rstips</artifactId>
+            <version>2.1.8</version>
+            <scope>system</scope>
+            <systemPath>${pom.basedir}/lib/Tips-2.1.8.jar</systemPath>
+        </dependency>
 
         <dependency>
             <groupId>tip</groupId>
@@ -113,6 +120,15 @@
             <scope>system</scope>
             <systemPath>${pom.basedir}/lib/Tips-2.1.8.jar</systemPath>
         </dependency>
+
+        <dependency>
+            <groupId>cn.ankele.plugin.MagicItem</groupId>
+            <artifactId>MagicItem</artifactId>
+            <version>1.0.0</version>
+            <scope>system</scope>
+            <systemPath>${pom.basedir}/lib/MagicItem-1.0-SNAPSHOT.jar</systemPath>
+        </dependency>
+
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>

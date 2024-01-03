@@ -1,4 +1,4 @@
-package RcRPG.panel;
+package RcRPG.panel.ornament;
 
 import RcRPG.Main;
 import RcRPG.RPG.Ornament;
@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class Panel implements InventoryHolder {
+public class OrnamentPanel implements InventoryHolder {
 
     public static Map<Integer, Item> getPanel(Player player) {
         Map<Integer, Item> panel = new LinkedHashMap<>();
@@ -34,10 +34,10 @@ public class Panel implements InventoryHolder {
     }
 
     public void displayPlayer(Player player, Map<Integer, Item> itemMap) {
-        OrnamentInventory ornamentInventory = new OrnamentInventory(this, "饰品背包");
-        ornamentInventory.setContents(itemMap);
-        ornamentInventory.id = Entity.entityCount++;
-        player.addWindow(ornamentInventory);
+        OrnamentInventory inv = new OrnamentInventory(this, "饰品背包");
+        inv.setContents(itemMap);
+        inv.id = Entity.entityCount++;
+        player.addWindow(inv);
     }
 
     @Override

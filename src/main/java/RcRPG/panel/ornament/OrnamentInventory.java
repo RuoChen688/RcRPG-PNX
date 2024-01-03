@@ -1,7 +1,7 @@
-package RcRPG.panel;
+package RcRPG.panel.ornament;
 
 import RcRPG.Main;
-import RcRPG.panel.lib.DoubleChestFakeInventory;
+import RcRPG.panel.lib.ChestFakeInventory;
 import cn.nukkit.Player;
 import cn.nukkit.inventory.InventoryHolder;
 import cn.nukkit.inventory.InventoryType;
@@ -9,18 +9,16 @@ import cn.nukkit.item.Item;
 import cn.nukkit.network.protocol.ContainerOpenPacket;
 import cn.nukkit.network.protocol.RemoveEntityPacket;
 
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
-public class OrnamentInventory extends DoubleChestFakeInventory {
+public class OrnamentInventory extends ChestFakeInventory {
 
     public long id;
 
     public OrnamentInventory(InventoryHolder holder,String name) {
-        super(holder);
+        super(InventoryType.CHEST, holder, name);
         this.setName(name);
     }
 
@@ -30,7 +28,7 @@ public class OrnamentInventory extends DoubleChestFakeInventory {
         ContainerOpenPacket pk = new ContainerOpenPacket();
         pk.windowId = who.getWindowId(this);
         pk.entityId = id;
-        pk.type = InventoryType.DOUBLE_CHEST.getNetworkType();
+        pk.type = InventoryType.CHEST.getNetworkType();
         who.dataPacket(pk);
     }
 

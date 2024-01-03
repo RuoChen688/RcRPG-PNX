@@ -54,6 +54,11 @@ public class Weapon extends ItemAttr {
 
     private int stone;
 
+    /**
+     * 分解方案
+     */
+    private String dismantle;
+
     private ArrayList<Effect> damagerEffect = new ArrayList<>();
 
     private ArrayList<Effect> damagedEffect = new ArrayList<>();
@@ -122,6 +127,7 @@ public class Weapon extends ItemAttr {
             }
             weapon.setLoreList(list4);
 
+            weapon.setDismantle(config.getString("分解", ""));
             weapon.setKillMessage(config.getString("击杀提示"));
             weapon.setTipText(config.getString("底部显示"));
             weapon.setMyMessage(config.getString("个人通知"));
