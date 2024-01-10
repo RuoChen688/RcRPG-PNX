@@ -22,6 +22,7 @@ import cn.nukkit.event.EventHandler;
 import cn.nukkit.event.Listener;
 import cn.nukkit.event.block.BlockBreakEvent;
 import cn.nukkit.event.entity.EntityDamageByEntityEvent;
+import cn.nukkit.event.entity.EntityDamageEvent;
 import cn.nukkit.event.entity.EntityRegainHealthEvent;
 import cn.nukkit.event.inventory.InventoryTransactionEvent;
 import cn.nukkit.event.player.*;
@@ -44,7 +45,9 @@ import healthapi.PlayerHealth;
 import java.io.File;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.List;
 
 import static RcRPG.Handle.getProbabilisticResults;
 
@@ -58,6 +61,7 @@ public class Events implements Listener {
     public static final boolean hasRsNPC = Server.getInstance().getPluginManager().getPlugin("RsNPC") != null;
     public static final boolean hasLittleMonster = Server.getInstance().getPluginManager().getPlugin("LittleMonster") != null;
     public static final boolean hasRcEntity = Server.getInstance().getPluginManager().getPlugin("RcEntity") != null;
+    public static final List<String> ProjectileWeapons = Arrays.asList("minecraft:bow", "minecraft:crossbow", "minecraft:trident");
 
     public Events(){
     }
@@ -276,6 +280,17 @@ public class Events implements Listener {
 
         if (hasRsNPC && wounded instanceof EntityRsNPC) {// 特判RsNPC
             return;
+        }
+
+        if (damagerIsPlayer) {// 对远程武器，取消近战伤害
+            // 判断手持是否为远程攻击装备
+            if (ProjectileWeapons.contains(((Player) damager).getInventory().getItemInHand().getNamespaceId())) {
+                // 判断伤害原因是否为普攻 ENTITY_ATTACK
+                if (event.getCause().equals(EntityDamageEvent.DamageCause.ENTITY_ATTACK)) {
+                    event.setDamage(1);
+                    return;
+                }
+            }
         }
 
         Manager DAttr;
