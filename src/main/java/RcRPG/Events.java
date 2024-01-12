@@ -18,6 +18,7 @@ import cn.nukkit.Server;
 import cn.nukkit.block.Block;
 import cn.nukkit.block.BlockSignPost;
 import cn.nukkit.entity.Entity;
+import cn.nukkit.entity.projectile.EntityArrow;
 import cn.nukkit.event.EventHandler;
 import cn.nukkit.event.Listener;
 import cn.nukkit.event.block.BlockBreakEvent;
@@ -536,7 +537,10 @@ public class Events implements Listener {
         //}
 
         event.setDamage(finalDamage);
-
+        for(EntityDamageEvent.DamageModifier key : EntityDamageEvent.DamageModifier.values()){
+            if(key == EntityDamageEvent.DamageModifier.BASE) continue;
+            if(event.isApplicable(key)) event.setDamage(0,key);
+        }
 
         if (damager instanceof Player) {
             // 燃烧、冰冻、雷击 效果处理
