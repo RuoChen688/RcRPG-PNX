@@ -77,7 +77,14 @@ public class inlayForm {
         String clickedStoneLabel = response.getClickedButton().getText();
         Stone clickedStone = NO_STONE.equals(clickedStoneLabel) ? null : Handle.getStoneByLabel(clickedStoneLabel);
 
-        LinkedList<String> playerStones = Stone.getStones(player, clickedStoneLabel);
+        String type = null;
+        if (weaponItem != null) {
+            type = weaponItem.getStoneList().get(response.getClickedButtonId());
+        } else if (armourItem != null) {
+            type = armourItem.getStoneList().get(response.getClickedButtonId());
+        }
+
+        LinkedList<String> playerStones = Stone.getStones(player, clickedStoneLabel, type);
         playerStones.addFirst(clickedStoneLabel);
         if (!playerStones.contains(NO_STONE)) playerStones.addLast(NO_STONE);
 
