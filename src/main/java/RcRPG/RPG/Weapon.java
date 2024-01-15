@@ -79,6 +79,8 @@ public class Weapon extends ItemAttr {
 
     private String message;
 
+    private ArrayList<String> stoneList = new ArrayList<>();
+
     private ArrayList<String> loreList = new ArrayList<>();
 
     public Weapon(String name,Config config){
@@ -125,11 +127,10 @@ public class Weapon extends ItemAttr {
                 list3.add(Handle.StringToEffect(effect));
             }
             weapon.setGroupEffect(list3);
-            ArrayList<String> list4 = new ArrayList<>();
-            for(String lore : config.getStringList("显示")){
-                list4.add(lore);
-            }
+            ArrayList<String> list4 = new ArrayList<>(config.getStringList("显示"));
             weapon.setLoreList(list4);
+            ArrayList<String> list5 = new ArrayList<>(config.getStringList("宝石槽"));
+            weapon.setStoneList(list5);
 
             weapon.setDismantle(config.getString("分解", ""));
             weapon.setSuit(config.getString("套装", ""));

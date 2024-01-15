@@ -44,6 +44,8 @@ public class Stone extends ItemAttr {
 
     private String message;
 
+    private String type;
+
     private ArrayList<String> loreList = new ArrayList<>();
 
     public Stone(String name,Config config){
@@ -58,6 +60,7 @@ public class Stone extends ItemAttr {
             stone.setLabel(config.getString("标签"));
             stone.setShowName(config.getString("显示名称"));
             stone.setItem(RuntimeItems.getMapping().getItemByNamespaceId(config.getString("物品ID"),1));
+            stone.setType(config.getString("宝石类型"));
             if (config.exists("属性")) {
                 stone.setAttr(config.get("属性"));
             }
@@ -180,13 +183,13 @@ public class Stone extends ItemAttr {
         return false;
     }
 
-    public static LinkedList<String> getStones(Player player,String df){
+    public static LinkedList<String> getStones(Player player,String df,String type){
         LinkedList<String> list = new LinkedList<>();
         Item item;
         for(int i = 0;i < player.getInventory().getSize();i++){
             item = player.getInventory().getItem(i);
             if(Stone.isStone(item)){
-                if(!list.contains(Main.loadStone.get(item.getNamedTag().getString("name")).getLabel()) && !Main.loadStone.get(item.getNamedTag().getString("name")).getLabel().equals(df)){
+                if(!list.contains(Main.loadStone.get(item.getNamedTag().getString("name")).getLabel()) && !Main.loadStone.get(item.getNamedTag().getString("name")).getLabel().equals(df) && Main.loadStone.get(item.getNamedTag().getString("name")).getType().equals(type)){
                     list.add(Main.loadStone.get(item.getNamedTag().getString("name")).getLabel());
                 }
             }

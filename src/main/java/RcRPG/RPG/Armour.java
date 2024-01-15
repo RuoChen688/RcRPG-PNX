@@ -61,6 +61,8 @@ public class Armour extends ItemAttr {
 
     private String message;
 
+    private ArrayList<String> stoneList = new ArrayList<>();
+
     private ArrayList<String> loreList = new ArrayList<>();
     
     public Armour(String name,Config config){
@@ -92,11 +94,10 @@ public class Armour extends ItemAttr {
                 list1.add(Effect.getEffect(Integer.parseInt(o[0])).setAmplifier(Integer.parseInt(o[1])-1).setDuration(Integer.parseInt(o[2])*20));
             }
             armour.setEffects(list1);
-            ArrayList<String> list2 = new ArrayList<>();
-            for(String lore : config.getStringList("显示")){
-                list2.add(lore);
-            }
+            ArrayList<String> list2 = new ArrayList<>(config.getStringList("显示"));
             armour.setLoreList(list2);
+            ArrayList<String> list3 = new ArrayList<>(config.getStringList("宝石槽"));
+            armour.setStoneList(list3);
 
             return armour;
         }catch(Exception e){

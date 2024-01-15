@@ -82,7 +82,7 @@ public class PlayerAttr extends Manager {
             for(int i = 0;i < Math.min(Main.getInstance().config.getInt("饰品生效格数"),map.size());i++){
                 Ornament ornament = Main.loadOrnament.get(map.get(i).getNamedTag().getString("name"));
                 if(ornament == null) continue;
-                OrnamentOverAttr(attr,ornament.getMainAttr());
+                OverAttr(attr,ornament.getMainAttr());
                 setItemAttrConfig(ornament.getLabel(), attr);
 
                 if (!ornament.getSuit().isEmpty()) {
@@ -112,7 +112,7 @@ public class PlayerAttr extends Manager {
         });
     }
 
-    public void OrnamentOverAttr(Map<String, float[]> map1,Map<String, float[]> map2){
+    public void OverAttr(Map<String, float[]> map1,Map<String, float[]> map2){
         for(Map.Entry<String,float[]> entry : map2.entrySet()){
             String key = entry.getKey();
             float[] value = entry.getValue();
@@ -129,9 +129,19 @@ public class PlayerAttr extends Manager {
     }
 
     public void checkItemStoneAttr(String mainItemName, LinkedList<Stone> list, ArrayList<String> beforLabel, ArrayList<String> labelList) {
+        LinkedHashMap<String,Map<String,float[]>> map = new LinkedHashMap<>();
+        Map<String, float[]> attr = new HashMap<>();
         for(Stone stone : list){
             if(stone == null) continue;
-            setItemAttrConfig(stone.getLabel(), stone.getMainAttr());
+            if(!map.containsKey(stone.getLabel())){
+                attr.clear();
+                OverAttr(attr,stone.getMainAttr());
+                setItemAttrConfig(stone.getLabel(), attr);
+                map.put(stone.getLabel(),attr);
+            }else{
+                OverAttr(map.get(stone.getLabel()),stone.getMainAttr());
+                setItemAttrConfig(stone.getLabel(), map.get(stone.getLabel()));
+            }
             beforLabel.remove(mainItemName + " -> " + stone.getLabel());
             labelList.add(mainItemName + " -> " + stone.getLabel());
         }
