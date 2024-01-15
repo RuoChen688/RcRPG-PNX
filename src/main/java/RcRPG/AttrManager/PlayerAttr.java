@@ -1,10 +1,7 @@
 package RcRPG.AttrManager;
 
 import RcRPG.Main;
-import RcRPG.RPG.Armour;
-import RcRPG.RPG.Ornament;
-import RcRPG.RPG.Stone;
-import RcRPG.RPG.Weapon;
+import RcRPG.RPG.*;
 import RcRPG.panel.ornament.OrnamentPanel;
 import cn.nukkit.Player;
 import cn.nukkit.form.element.Element;
@@ -31,37 +28,56 @@ public class PlayerAttr extends Manager {
         }
         return playerlist.get(player);
     }
-    public static PlayerAttr setPlayerAttr(Player player) {
-        return playerlist.put(player, new PlayerAttr(player));
+    public static void setPlayerAttr(Player player) {
+        playerlist.put(player, new PlayerAttr(player));
     }
+
     public void update() {
         ArrayList<String> beforLabel = new ArrayList<>(labelList);
         labelList.clear();
+
+        Map<String, Integer> suitMap = new HashMap<>();// _声明套装Map
+
         ArrayList<Item> itemList = new ArrayList<>();
-        itemList.add(player.getInventory().getItemInHand());// 主手
-        itemList.add(player.getOffhandInventory().getItem(0));// 副手
+        // 主手
+        itemList.add(player.getInventory().getItemInHand());
+        // 副手
+        itemList.add(player.getOffhandInventory().getItem(0));
         for (Item rcItem : itemList) {
             if (rcItem.getNamedTag() == null) continue;
             Weapon weapon = Main.loadWeapon.get(rcItem.getNamedTag().getString("name"));
             if (weapon == null) continue;
+
+            if (!weapon.getSuit().isEmpty()) {
+                int count = suitMap.getOrDefault(weapon.getSuit(), 0) + 1;
+                suitMap.put(weapon.getSuit(), count);
+            }
+
             setItemAttrConfig(weapon.getLabel(), weapon.getMainAttr());
             checkItemStoneAttr(weapon.getLabel(), Weapon.getStones(rcItem), beforLabel, labelList);
 
             beforLabel.remove(weapon.getLabel());
             labelList.add(weapon.getLabel());
         }
-        for (Item rcItem : player.getInventory().getArmorContents()) {// 护甲栏
+        // 护甲栏
+        for (Item rcItem : player.getInventory().getArmorContents()) {
             if (rcItem.getNamedTag() == null) continue;
             Armour armour = Main.loadArmour.get(rcItem.getNamedTag().getString("name"));
             if (armour == null) continue;
             setItemAttrConfig(armour.getLabel(), armour.getMainAttr());
             checkItemStoneAttr(armour.getLabel(), Armour.getStones(rcItem), beforLabel, labelList);
 
+            if (!armour.getSuit().isEmpty()) {
+                int count = suitMap.getOrDefault(armour.getSuit(), 0) + 1;
+                suitMap.put(armour.getSuit(), count);
+            }
+
             beforLabel.remove(armour.getLabel());
             labelList.add(armour.getLabel());
         }
+        // 饰品
         Map<Integer,Item> map = OrnamentPanel.getPanel(player);
-        if(!map.isEmpty()){
+        if (!map.isEmpty()) {
             Map<String, float[]> attr = new HashMap<>();
             for(int i = 0;i < Math.min(Main.getInstance().config.getInt("饰品生效格数"),map.size());i++){
                 Ornament ornament = Main.loadOrnament.get(map.get(i).getNamedTag().getString("name"));
@@ -69,10 +85,28 @@ public class PlayerAttr extends Manager {
                 OrnamentOverAttr(attr,ornament.getMainAttr());
                 setItemAttrConfig(ornament.getLabel(), attr);
 
+                if (!ornament.getSuit().isEmpty()) {
+                    int count = suitMap.getOrDefault(ornament.getSuit(), 0) + 1;
+                    suitMap.put(ornament.getSuit(), count);
+                }
+
                 beforLabel.remove(ornament.getLabel());
                 labelList.add(ornament.getLabel());
             }
         }
+
+        // 套装
+        suitMap.keySet().forEach(name -> {
+            int count = suitMap.get(name);
+            ItemAttr suitAttr = Suit.getSuitAttr(name, count);
+            if (suitAttr == null) return;
+            String label = name+" "+count+"套装";
+            setItemAttrConfig(label, suitAttr.getMainAttr());
+
+            beforLabel.remove(label);
+            labelList.add(label);
+        });
+
         beforLabel.forEach(label -> {
             setItemAttrConfig(label, new HashMap<String, float[]>());
         });

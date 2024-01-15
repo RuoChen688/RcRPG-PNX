@@ -48,6 +48,10 @@ public class Armour extends ItemAttr {
      * 分解方案
      */
     private String dismantle;
+    /**
+     * 套装方案
+     */
+    private String suit;
 
     private String tipText;
 
@@ -76,6 +80,7 @@ public class Armour extends ItemAttr {
             }
             armour.setMessage(config.getString("介绍"));
             armour.setDismantle(config.getString("分解", ""));
+            armour.setSuit(config.getString("套装", ""));
             armour.setTipText(config.getString("底部显示"));
             armour.setMyMessage(config.getString("个人通知"));
             armour.setServerMessage(config.getString("全服通知"));
