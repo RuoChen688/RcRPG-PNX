@@ -8,9 +8,12 @@ import RcRPG.Task.Tip;
 import RcRPG.tips.TipsVariables;
 import cn.nukkit.Server;
 import cn.nukkit.event.Listener;
+import cn.nukkit.lang.PluginI18n;
+import cn.nukkit.lang.PluginI18nManager;
 import cn.nukkit.permission.Permission;
 import cn.nukkit.plugin.PluginBase;
 import cn.nukkit.utils.Config;
+import lombok.Getter;
 import tip.utils.Api;
 
 import java.io.File;
@@ -20,7 +23,11 @@ import java.util.List;
 
 public class Main extends PluginBase implements Listener {
 
+    @Getter
     public static Main instance;
+
+    @Getter
+    public static PluginI18n i18n;
 
     public boolean disableChatStyle;
     public static boolean disablePrefix = false;
@@ -29,7 +36,6 @@ public class Main extends PluginBase implements Listener {
 
     public Config ornamentConfig;
     public Config dismantleConfig;
-    public Config suitConfig;
 
     public List<String> attrDisplayPercentConfig;
     public static boolean money;
@@ -49,8 +55,14 @@ public class Main extends PluginBase implements Listener {
 
     public Main(){}
 
-    public void onEnable(){
+    public void onLoad(){
+        //save Plugin Instance
         instance = this;
+        //register the plugin i18n
+        i18n = PluginI18nManager.register(this);
+    }
+
+    public void onEnable(){
         this.getNewFile();
         this.saveResource("Config.yml","/Config.yml",false);
         config = new Config(this.getDataFolder() + "/Config.yml");
@@ -320,10 +332,6 @@ public class Main extends PluginBase implements Listener {
         } else {
             attrDisplayPercentConfig = attrDisplayPercent;
         }
-    }
-
-    public static Main getInstance(){
-        return Main.instance;
     }
 
 }
