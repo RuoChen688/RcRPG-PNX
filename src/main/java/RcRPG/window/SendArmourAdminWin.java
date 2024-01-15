@@ -8,11 +8,13 @@ import cn.nukkit.form.element.ElementButton;
 import cn.nukkit.form.handler.FormResponseHandler;
 import cn.nukkit.form.response.FormResponseSimple;
 import cn.nukkit.form.window.FormWindowSimple;
+import cn.nukkit.lang.LangCode;
 
 public class SendArmourAdminWin implements Listener {
 
     public SendArmourAdminWin(Player player) {
-        FormWindowSimple form = new FormWindowSimple("RcRPG管理 - 护甲列表", "请选择你需要管理的配置");
+        LangCode langCode = player.getLanguageCode();
+        FormWindowSimple form = new FormWindowSimple(Main.getI18n().tr(langCode, "rcrpg.window.armour.title"), Main.getI18n().tr(langCode, "rcrpg.window.select_config_manage"));
         for (String key : Main.loadArmour.keySet()) {
             form.addButton(new ElementButton(key));
         }

@@ -1,20 +1,23 @@
 package RcRPG.window;
 
+import RcRPG.Main;
 import cn.nukkit.Player;
 import cn.nukkit.event.Listener;
 import cn.nukkit.form.element.ElementButton;
 import cn.nukkit.form.handler.FormResponseHandler;
 import cn.nukkit.form.response.FormResponseSimple;
 import cn.nukkit.form.window.FormWindowSimple;
+import cn.nukkit.lang.LangCode;
 
 public class RcRPGAdminWin implements Listener {
 
     public RcRPGAdminWin(Player player) {
-        FormWindowSimple form = new FormWindowSimple("RcRPG管理 - 饰品列表", "请选择你需要管理的配置");
-        form.addButton(new ElementButton("武器"));
-        form.addButton(new ElementButton("护甲"));
-        form.addButton(new ElementButton("宝石"));
-        form.addButton(new ElementButton("饰品"));
+        LangCode langCode = player.getLanguageCode();
+        FormWindowSimple form = new FormWindowSimple(Main.getI18n().tr(langCode, "rcrpg.window.main.title"), Main.getI18n().tr(langCode, "rcrpg.window.select_config_manage"));
+        form.addButton(new ElementButton(Main.getI18n().tr(langCode, "rcrpg.window.main.button1")));
+        form.addButton(new ElementButton(Main.getI18n().tr(langCode, "rcrpg.window.main.button2")));
+        form.addButton(new ElementButton(Main.getI18n().tr(langCode, "rcrpg.window.main.button3")));
+        form.addButton(new ElementButton(Main.getI18n().tr(langCode, "rcrpg.window.main.button4")));
 
         form.addHandler(FormResponseHandler.withoutPlayer(ignored -> {
             if (form.wasClosed()) {

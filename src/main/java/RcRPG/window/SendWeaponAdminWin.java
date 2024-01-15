@@ -8,11 +8,13 @@ import cn.nukkit.form.element.ElementButton;
 import cn.nukkit.form.handler.FormResponseHandler;
 import cn.nukkit.form.response.FormResponseSimple;
 import cn.nukkit.form.window.FormWindowSimple;
+import cn.nukkit.lang.LangCode;
 
 public class SendWeaponAdminWin implements Listener { //一般实际开发中不在这个类中写监听器
 
     public SendWeaponAdminWin(Player player) {
-        FormWindowSimple form = new FormWindowSimple("RcRPG管理 - 武器列表", "请选择你需要管理的配置");
+        LangCode langCode = player.getLanguageCode();
+        FormWindowSimple form = new FormWindowSimple(Main.getI18n().tr(langCode, "rcrpg.window.weapon.title"), Main.getI18n().tr(langCode, "rcrpg.window.select_config_manage"));
         for (String key : Main.loadWeapon.keySet()) {
             form.addButton(new ElementButton(key));
         }

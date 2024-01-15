@@ -100,10 +100,10 @@ public class PlayerAttr extends Manager {
             int count = suitMap.get(name);
             ItemAttr suitAttr = Suit.getSuitAttr(name, count);
             if (suitAttr == null) return;
-            String label = name+" "+count+"件套";
+            String label = Main.getI18n().tr(player.getLanguageCode(), "rcrpg.playerattr.suit.label", name, count);
             setItemAttrConfig(label, suitAttr.getMainAttr());
             if (!beforeLabel.contains(label)) {
-                player.sendActionBar("§r§f你感受到了 §l"+name+ "("+count+") §r§f的§d套装§f效果！");
+                player.sendActionBar(Main.getI18n().tr(player.getLanguageCode(), "rcrpg.playerattr.set_suit_message", name, count));
             }
             beforeLabel.remove(label);
             labelList.add(label);

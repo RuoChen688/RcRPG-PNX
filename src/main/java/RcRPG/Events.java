@@ -18,7 +18,6 @@ import cn.nukkit.Server;
 import cn.nukkit.block.Block;
 import cn.nukkit.block.BlockSignPost;
 import cn.nukkit.entity.Entity;
-import cn.nukkit.entity.projectile.EntityArrow;
 import cn.nukkit.event.EventHandler;
 import cn.nukkit.event.Listener;
 import cn.nukkit.event.block.BlockBreakEvent;
@@ -127,7 +126,7 @@ public class Events implements Listener {
         if (weapon == null) return;// TODO: 可能要做无效装备的清除？
 
         if (Level.enable ? Level.getLevel(player) < weapon.getLevel() : player.getExperienceLevel() < weapon.getLevel()) {
-            player.sendMessage("等级不足武器使用等级");
+            player.sendMessage(Main.getI18n().tr(player.getLanguageCode(), "rcrpg.events.insufficient_level_for_weapon"));
             event.setCancelled();
         }
     }
@@ -366,10 +365,11 @@ public class Events implements Listener {
             if (woundedIsPlayer) {
                 wounded.getLevel().addSound(wounded, Sound.valueOf("GAME_PLAYER_ATTACK_NODAMAGE"));
                 ((Player) wounded).sendMessage("你闪避了 " + damagerName + " §r的攻击");
+                ((Player) wounded).sendMessage(Main.getI18n().tr(((Player) wounded).getLanguageCode(), "rcrpg.events.dodge_message_you_evaded", damagerName));
             }
             if (damagerIsPlayer) {
                 damager.getLevel().addSound(damager, Sound.valueOf("GAME_PLAYER_ATTACK_NODAMAGE"));
-                ((Player) damager).sendMessage(woundedName + " §r闪避了你的攻击");
+                ((Player) damager).sendMessage(Main.getI18n().tr(((Player) damager).getLanguageCode(), "rcrpg.events.dodge_message_enemy_evaded", woundedName));
             }
             event.setCancelled(true);
             return;
@@ -527,7 +527,7 @@ public class Events implements Listener {
                     damager.heal(new EntityRegainHealthEvent(damager, (float) lifeSteal, 3));
                 }
                 if (damagerIsPlayer) {
-                    ((Player) damager).sendMessage("你已汲取对方 §c§l" + lifeSteal + "§r 血量值");
+                    ((Player) damager).sendMessage(Main.getI18n().tr(((Player) damager).getLanguageCode(), "rcrpg.events.life_steal_message", lifeSteal));
                 }
             }
         }
@@ -547,7 +547,7 @@ public class Events implements Listener {
             Damage.onDamage((Player) damager, wounded);
 
             if (crtDamage > 0) {
-                ((Player) damager).sendMessage("你对" + woundedName + "§r造成了 §l" + crtDamage + "§r 点暴击伤害");
+                ((Player) damager).sendMessage(Main.getI18n().tr(((Player) damager).getLanguageCode(), "rcrpg.events.critical_damage_message", woundedName, crtDamage));
             }
 
             // 击杀提示
@@ -648,7 +648,7 @@ public class Events implements Listener {
 
     @EventHandler
     public void deathEvent(PlayerDeathEvent event) {
-        if (event.getTranslationDeathMessage().getText() == "death.attack.mob") {
+        if ("death.attack.mob".equals(event.getTranslationDeathMessage().getText())) {
             if (event.getTranslationDeathMessage().getParameter(1).isEmpty()) {
                 return;
             }
