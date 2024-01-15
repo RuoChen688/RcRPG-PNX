@@ -40,6 +40,10 @@ public class Ornament extends ItemAttr {
     private String message;
 
     private ArrayList<String> loreList = new ArrayList<>();
+    /**
+     * 套装方案
+     */
+    private String suit;
 
     public Ornament(String name,Config config){
         this.name = name;
@@ -68,6 +72,7 @@ public class Ornament extends ItemAttr {
             }
             ornament.setLoreList(list);
 
+            ornament.setSuit(config.getString("套装", ""));
             ornament.setTipText(config.getString("底部显示"));
             ornament.setMyMessage(config.getString("个人通知"));
             ornament.setServerMessage(config.getString("全服通知"));

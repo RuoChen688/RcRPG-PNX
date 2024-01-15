@@ -29,6 +29,7 @@ public class Main extends PluginBase implements Listener {
 
     public Config ornamentConfig;
     public Config dismantleConfig;
+    public Config suitConfig;
 
     public List<String> attrDisplayPercentConfig;
     public static boolean money;
@@ -64,7 +65,7 @@ public class Main extends PluginBase implements Listener {
         }
 
         this.getServer().getPluginManager().registerEvents(new Events(),this);
-        if (config.exists("底部显示") && !config.getString("底部显示").equals("")) {
+        if (config.exists("底部显示") && !config.getString("底部显示").isEmpty()) {
             this.getServer().getScheduler().scheduleRepeatingTask(new Tip(this), 20);
         }
         this.getServer().getScheduler().scheduleRepeatingTask(new BoxTimeTask(this),20);
@@ -100,8 +101,11 @@ public class Main extends PluginBase implements Listener {
         this.saveResource("DismantlePlan.yml","/DismantlePlan.yml",false);
         dismantleConfig = new Config(this.getDataFolder() + "/DismantlePlan.yml");
 
+        this.saveResource("SuitPlan.yml","/SuitPlan.yml",false);
+        Suit.init();
+
         initAttrDisplayPercent();
-        disableChatStyle = !config.exists("底部显示") || config.getString("底部显示").equals("");
+        disableChatStyle = !config.exists("底部显示") || config.getString("底部显示").isEmpty();
 
         this.getLogger().info("开始读取武器信息");
         for(String name: Handle.getDefaultFiles("Weapon")){

@@ -58,6 +58,10 @@ public class Weapon extends ItemAttr {
      * 分解方案
      */
     private String dismantle;
+    /**
+     * 套装方案
+     */
+    private String suit;
 
     private ArrayList<Effect> damagerEffect = new ArrayList<>();
 
@@ -129,6 +133,7 @@ public class Weapon extends ItemAttr {
             weapon.setStoneList(list5);
 
             weapon.setDismantle(config.getString("分解", ""));
+            weapon.setSuit(config.getString("套装", ""));
             weapon.setKillMessage(config.getString("击杀提示"));
             weapon.setTipText(config.getString("底部显示"));
             weapon.setMyMessage(config.getString("个人通知"));
