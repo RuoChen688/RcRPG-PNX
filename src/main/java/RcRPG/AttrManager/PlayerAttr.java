@@ -33,7 +33,7 @@ public class PlayerAttr extends Manager {
     }
 
     public void update() {
-        ArrayList<String> beforLabel = new ArrayList<>(labelList);
+        ArrayList<String> beforeLabel = new ArrayList<>(labelList);
         labelList.clear();
 
         Map<String, Integer> suitMap = new HashMap<>();// _声明套装Map
@@ -54,9 +54,9 @@ public class PlayerAttr extends Manager {
             }
 
             setItemAttrConfig(weapon.getLabel(), weapon.getMainAttr());
-            checkItemStoneAttr(weapon.getLabel(), Weapon.getStones(rcItem), beforLabel, labelList);
+            checkItemStoneAttr(weapon.getLabel(), Weapon.getStones(rcItem), beforeLabel, labelList);
 
-            beforLabel.remove(weapon.getLabel());
+            beforeLabel.remove(weapon.getLabel());
             labelList.add(weapon.getLabel());
         }
         // 护甲栏
@@ -65,14 +65,14 @@ public class PlayerAttr extends Manager {
             Armour armour = Main.loadArmour.get(rcItem.getNamedTag().getString("name"));
             if (armour == null) continue;
             setItemAttrConfig(armour.getLabel(), armour.getMainAttr());
-            checkItemStoneAttr(armour.getLabel(), Armour.getStones(rcItem), beforLabel, labelList);
+            checkItemStoneAttr(armour.getLabel(), Armour.getStones(rcItem), beforeLabel, labelList);
 
             if (!armour.getSuit().isEmpty()) {
                 int count = suitMap.getOrDefault(armour.getSuit(), 0) + 1;
                 suitMap.put(armour.getSuit(), count);
             }
 
-            beforLabel.remove(armour.getLabel());
+            beforeLabel.remove(armour.getLabel());
             labelList.add(armour.getLabel());
         }
         // 饰品
@@ -90,7 +90,7 @@ public class PlayerAttr extends Manager {
                     suitMap.put(ornament.getSuit(), count);
                 }
 
-                beforLabel.remove(ornament.getLabel());
+                beforeLabel.remove(ornament.getLabel());
                 labelList.add(ornament.getLabel());
             }
         }
@@ -100,14 +100,16 @@ public class PlayerAttr extends Manager {
             int count = suitMap.get(name);
             ItemAttr suitAttr = Suit.getSuitAttr(name, count);
             if (suitAttr == null) return;
-            String label = name+" "+count+"套装";
+            String label = name+" "+count+"件套";
             setItemAttrConfig(label, suitAttr.getMainAttr());
-
-            beforLabel.remove(label);
+            if (!beforeLabel.contains(label)) {
+                player.sendActionBar("§r§f你感受到了 §l"+name+ "("+count+") §r§f的§d套装§f效果！");
+            }
+            beforeLabel.remove(label);
             labelList.add(label);
         });
 
-        beforLabel.forEach(label -> {
+        beforeLabel.forEach(label -> {
             setItemAttrConfig(label, new HashMap<String, float[]>());
         });
     }
