@@ -361,10 +361,10 @@ public class Events implements Listener {
         }
 
         // 闪避率处理
-        if (getProbabilisticResults(WAttr.dodgeChance - DAttr.hitChance)) {
+        float dodge = WAttr.dodgeChance > 0 ? WAttr.dodgeChance : 0;
+        if (getProbabilisticResults(dodge - DAttr.hitChance)) {
             if (woundedIsPlayer) {
                 wounded.getLevel().addSound(wounded, Sound.valueOf("GAME_PLAYER_ATTACK_NODAMAGE"));
-                ((Player) wounded).sendMessage("你闪避了 " + damagerName + " §r的攻击");
                 ((Player) wounded).sendMessage(Main.getI18n().tr(((Player) wounded).getLanguageCode(), "rcrpg.events.dodge_message_you_evaded", damagerName));
             }
             if (damagerIsPlayer) {

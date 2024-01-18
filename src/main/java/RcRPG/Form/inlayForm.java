@@ -16,19 +16,20 @@ import cn.nukkit.form.window.FormWindowCustom;
 import cn.nukkit.form.window.FormWindowSimple;
 import cn.nukkit.item.Item;
 
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.stream.Collectors;
 
 public class inlayForm {
     private static final String NO_STONE = "无";
     private static final String SUCCESS_MESSAGE = "宝石操作成功！";
-    private LinkedHashMap<Player, Stone> playerStone = new LinkedHashMap<>();
-    private LinkedHashMap<Player, Integer> playerClick = new LinkedHashMap<>();
+    private Stone beforeStone;
+    private int beforeClick;
     private Item handItem = null;
     private Weapon weaponItem = null;
     private Armour armourItem = null;
+    private LinkedList<Stone> originStones = new LinkedList<>();
 
     public void makeInlayForm(Player player, Item item) {
         handItem = item;
@@ -52,20 +53,33 @@ public class inlayForm {
     private FormWindowSimple getStateWindow() {
         String label = "";
         LinkedList<Stone> stones = new LinkedList<>();
+        ArrayList<String> stoneSlots = new ArrayList<>();
         if (weaponItem != null) {
             stones = Weapon.getStones(handItem);
             label = weaponItem.getLabel();
+            stoneSlots = weaponItem.getStoneList();
         } else if (armourItem != null) {
             stones = Armour.getStones(handItem);
             label = armourItem.getLabel();
+            stoneSlots = armourItem.getStoneList();
         }
 
         int stoneCount = stones.size();
+        String slotShow = "";
+        if (!stoneSlots.isEmpty()) {
+            // 构建特定格式的字符串
+            StringBuilder stringBuilder = new StringBuilder();
+            for (String stone : stoneSlots) {
+                stringBuilder.append("- ").append(stone).append(" -\n");
+            }
+            slotShow = stringBuilder.toString();
+        }
+        this.originStones = stones;
         return new FormWindowSimple(
                 label + "宝石列表",
-                stoneCount > 0 ? "装备拥有 " + stoneCount + " 个宝石槽" : "本装备没有宝石槽",
+                stoneCount > 0 ? "装备拥有 " + stoneCount + " 个宝石槽：\n"+slotShow : "本装备没有宝石槽",
                 stones.stream()
-                        .map(stone -> new ElementButton(stone == null ? NO_STONE : stone.getLabel()))
+                        .map(stone -> new ElementButton(stone == null ? NO_STONE : stone.getShowName()))
                         .collect(Collectors.toList()));
     }
 
@@ -74,8 +88,16 @@ public class inlayForm {
             return;
         }
         FormResponseSimple response = form.getResponse();
-        String clickedStoneLabel = response.getClickedButton().getText();
-        Stone clickedStone = NO_STONE.equals(clickedStoneLabel) ? null : Handle.getStoneByLabel(clickedStoneLabel);
+        int clicked = response.getClickedButtonId();
+        String yamlName;
+        if (this.originStones.get(clicked) == null) {
+            yamlName = NO_STONE;
+        } else {
+            yamlName = this.originStones.get(clicked).getName();
+        }
+
+        beforeClick = response.getClickedButtonId();
+        beforeStone = NO_STONE.equals(yamlName) ? null : Handle.getStoneViaName(yamlName);
 
         String type = null;
         if (weaponItem != null) {
@@ -84,29 +106,24 @@ public class inlayForm {
             type = armourItem.getStoneList().get(response.getClickedButtonId());
         }
 
-        LinkedList<String> playerStones = Stone.getStones(player, clickedStoneLabel, type);
-        playerStones.addFirst(clickedStoneLabel);
+        LinkedList<String> playerStones = Stone.getStonesViaType(player, type);
         if (!playerStones.contains(NO_STONE)) playerStones.addLast(NO_STONE);
 
-        FormWindowCustom form_ = getStoneWindow(clickedStoneLabel, playerStones);
+        FormWindowCustom form_ = getStoneWindow(yamlName, playerStones);
         form_.addHandler(FormResponseHandler.withoutPlayer(ignored -> {
             if (form_.wasClosed()) return;
-            handleStoneWindowResponse(form_, player, clickedStone);
+            handleStoneWindowResponse(form_, player);
         }));
         player.showFormWindow(form_);
-
-        playerClick.put(player, response.getClickedButtonId());
-        playerStone.put(player, clickedStone);
     }
 
-    private FormWindowCustom getStoneWindow(String stoneLabel, LinkedList<String> stones) {
+    private FormWindowCustom getStoneWindow(String yamlName, LinkedList<String> stones) {
         ElementDropdown dropdown = new ElementDropdown("", stones);
         dropdown.setDefaultOptionIndex(0);
-        return new FormWindowCustom(stoneLabel, Collections.singletonList(dropdown));
+        return new FormWindowCustom(yamlName, Collections.singletonList(dropdown));
     }
 
-    private void handleStoneWindowResponse(FormWindowCustom form, Player player, Stone clickedStone) {
-
+    private void handleStoneWindowResponse(FormWindowCustom form, Player player) {
         String itemName = "";
         LinkedList<Stone> stones = new LinkedList<>();
         if (weaponItem != null) {
@@ -119,41 +136,17 @@ public class inlayForm {
 
         FormResponseCustom response = form.getResponse();
         FormResponseData responseData = response.getDropdownResponse(0);
+        // 选择的是 yamlName 还是 NO_STONE
         String responseContent = responseData.getElementContent();
-
-        Main.getInstance().getLogger().info("宝石槽数：" + stones.size());
 
         Item item = player.getInventory().getItemInHand();
         if (item.getNamedTag() == null) return;
         if (!itemName.equals(item.getNamedTag().getString("name"))) return;
         player.sendMessage(SUCCESS_MESSAGE);
 
-        if (responseData.getElementID() != 0) {
-            int clickedButtonId = playerClick.get(player);
-            Stone newStone = NO_STONE.equals(responseContent) ? null : Handle.getStoneByLabel(responseContent);
-            updateStones(stones, clickedButtonId, newStone);
+        int clickedButtonId = beforeClick;
+        Stone newStone = NO_STONE.equals(responseContent) ? null : Handle.getStoneViaName(responseContent);
 
-            if (newStone != null) {
-                Handle.removeStoneByLabel(player, newStone.getLabel());
-            }
-            Stone previousStone = playerStone.get(player);// 过去的宝石
-            if (previousStone != null) {
-                Stone.giveStone(player, previousStone.getName(), 1);
-            }
-
-            if (weaponItem != null) {
-                Weapon.setStone(player, handItem, stones);
-            } else if (armourItem != null) {
-                Armour.setStone(player, handItem, stones);
-            }
-        }
-
-        playerStone.remove(player);
-        playerClick.remove(player);
-        //makeInlayForm(player, player.getInventory().getItemInHand());
-    }
-
-    private void updateStones(LinkedList<Stone> stones, int clickedButtonId, Stone newStone) {
         for (int i = 0; i < stones.size(); i++) {
             if (i == clickedButtonId) {
                 if (newStone != null) {
@@ -164,5 +157,20 @@ public class inlayForm {
                 break;
             }
         }
+
+        if (newStone != null) {
+            Handle.removeStoneViaName(player, responseContent);
+        }
+        if (beforeStone != null) {// 过去的宝石
+            Stone.giveStone(player, beforeStone.getName(), 1);
+        }
+
+        if (weaponItem != null) {
+            Weapon.setStone(player, handItem, stones);
+        } else if (armourItem != null) {
+            Armour.setStone(player, handItem, stones);
+        }
+        //makeInlayForm(player, player.getInventory().getItemInHand());
     }
+
 }

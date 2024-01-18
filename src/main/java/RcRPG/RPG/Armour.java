@@ -188,7 +188,7 @@ public class Armour extends ItemAttr {
         if (!isArmour(item) || item.getNamedTag() == null) return list;
         ListTag<StringTag> tags = item.getNamedTag().getList("stone",StringTag.class);
         for(StringTag tag : tags.getAll()){
-            list.add(Handle.getStoneByLabel(tag.parseValue()));
+            list.add(Handle.getStoneViaName(tag.parseValue()));
         }
         Armour armour = Main.loadArmour.get(item.getNamedTag().getString("name"));
         while(list.size() < armour.getStone()){

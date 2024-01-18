@@ -138,11 +138,11 @@ public class PlayerAttr extends Manager {
             if(!map.containsKey(stone.getLabel())){
                 attr.clear();
                 OverAttr(attr,stone.getMainAttr());
-                setItemAttrConfig(stone.getLabel(), attr);
+                setItemAttrConfig(mainItemName + " -> " + stone.getLabel(), attr);
                 map.put(stone.getLabel(),attr);
             }else{
                 OverAttr(map.get(stone.getLabel()),stone.getMainAttr());
-                setItemAttrConfig(stone.getLabel(), map.get(stone.getLabel()));
+                setItemAttrConfig(mainItemName + " -> " + stone.getLabel(), map.get(stone.getLabel()));
             }
             beforLabel.remove(mainItemName + " -> " + stone.getLabel());
             labelList.add(mainItemName + " -> " + stone.getLabel());

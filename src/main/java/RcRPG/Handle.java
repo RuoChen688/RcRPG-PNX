@@ -59,18 +59,18 @@ public class Handle {
         return Effect.getEffect(Integer.parseInt(ss[0])).setAmplifier(Integer.parseInt(ss[1])-1).setDuration(Integer.parseInt(ss[2])*20);
     }
 
-    public static Stone getStoneByLabel(String label){
-        for(Stone stone : Main.loadStone.values()){
-            if(stone.getLabel().equals(label)) return stone;
+    public static Stone getStoneViaName(String yamlName){
+        if (Main.loadStone.containsKey(yamlName)) {
+            return Main.loadStone.get(yamlName);
         }
         return null;
     }
 
-    public static void removeStoneByLabel(Player player,String label){
+    public static void removeStoneViaName(Player player,String yamlName){
         for(int i =0;i < player.getInventory().getSize();i++){
             Item item = player.getInventory().getItem(i);
             if(Stone.isStone(item)){
-                if(Main.loadStone.get(item.getNamedTag().getString("name")).getLabel().equals(label)){
+                if(item.getNamedTag().getString("name").equals(yamlName)){
                     if(item.getCount() == 1){
                         player.getInventory().remove(item);
                     }else{
