@@ -183,14 +183,22 @@ public class Stone extends ItemAttr {
         return false;
     }
 
-    public static LinkedList<String> getStones(Player player,String df,String type){
+    /**
+     * 通过 label 获取玩家背包中所有该类型的宝石
+     * @param player 玩家对象
+     * @param type 宝石类型
+     * @return 宝石的yamlName列表
+     */
+    public static LinkedList<String> getStonesViaType(Player player, String type){
         LinkedList<String> list = new LinkedList<>();
         Item item;
         for(int i = 0;i < player.getInventory().getSize();i++){
             item = player.getInventory().getItem(i);
             if(Stone.isStone(item)){
-                if(!list.contains(Main.loadStone.get(item.getNamedTag().getString("name")).getLabel()) && !Main.loadStone.get(item.getNamedTag().getString("name")).getLabel().equals(df) && Main.loadStone.get(item.getNamedTag().getString("name")).getType().equals(type)){
-                    list.add(Main.loadStone.get(item.getNamedTag().getString("name")).getLabel());
+                if(!list.contains(item.getNamedTag().getString("name")) &&
+                        Main.loadStone.get(item.getNamedTag().getString("name")).getType().equals(type)
+                ){
+                    list.add(item.getNamedTag().getString("name"));
                 }
             }
         }

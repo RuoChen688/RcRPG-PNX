@@ -233,7 +233,7 @@ public class Weapon extends ItemAttr {
         if (!isWeapon(item) || item.getNamedTag() == null) return list;
         ListTag<StringTag> tags = item.getNamedTag().getList("stone",StringTag.class);
         for(StringTag tag : tags.getAll()){
-            list.add(Handle.getStoneByLabel(tag.parseValue()));
+            list.add(Handle.getStoneViaName(tag.parseValue()));
         }
         Weapon weapon = Main.loadWeapon.get(item.getNamedTag().getString("name"));
         while(list.size() < weapon.getStone()){
