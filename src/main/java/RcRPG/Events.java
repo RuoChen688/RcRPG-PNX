@@ -524,7 +524,7 @@ public class Events implements Listener {
                     double H = playerHealth.getHealth() + lifeSteal;
                     playerHealth.setHealth(H > MaxH ? MaxH : H);
                 } else {
-                    damager.heal(new EntityRegainHealthEvent(damager, (float) lifeSteal, 3));
+                    damager.heal(new EntityRegainHealthEvent(damager, (float) lifeSteal, RegainHealthEnum.LifeSteal.getCode()));
                 }
                 if (damagerIsPlayer) {
                     ((Player) damager).sendMessage(Main.getI18n().tr(((Player) damager).getLanguageCode(), "rcrpg.events.life_steal_message", lifeSteal));
@@ -579,8 +579,21 @@ public class Events implements Listener {
         Player player = event.getPlayer();
         PlayerAttr attr = PlayerAttr.getPlayerAttr(player);
         if (attr == null) return;
-        float speedAddition = attr.movementSpeedMultiplier;
+        float speedAddition = attr.movementSpeedMultiplier;// 处理移速加成
         if (speedAddition > 0) player.sendMovementSpeed(speedAddition);
+    }
+
+    @EventHandler
+    public void onRegainHealth(EntityRegainHealthEvent event) {
+        if (event.getRegainReason() != EntityRegainHealthEvent.CAUSE_EATING) return;
+        Entity entity = event.getEntity();
+        if (!(entity instanceof Player player)) return;
+        PlayerAttr manager = PlayerAttr.getPlayerAttr(player);
+        if (manager != null) {
+            int amount = (int) manager.hpPerNature;
+            if (amount < 1) return;
+            player.heal(new EntityRegainHealthEvent(player, amount, RegainHealthEnum.HpPerNature.getCode()));
+        }
     }
 
     @EventHandler

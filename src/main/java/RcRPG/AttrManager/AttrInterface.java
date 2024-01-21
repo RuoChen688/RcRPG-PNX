@@ -62,5 +62,7 @@ public interface AttrInterface {
 
     float[] getHpPerSecond();
 
+    float[] getHpPerNature();
+
     float[] getMovementSpeedMultiplier();
 }

@@ -32,6 +32,7 @@ public class Manager implements AttrInterface {
     public float armorStrengthMultiplier = 0.0f;
     public float experienceGainMultiplier = 0.0f;
     public float hpPerSecond = 0.0f;
+    public float hpPerNature = 0.0f;
     public float movementSpeedMultiplier = 0.0f;
 
     public void updateComp() {
@@ -64,6 +65,7 @@ public class Manager implements AttrInterface {
         // 辅助增益 3
         experienceGainMultiplier = getRandomNum(getExperienceGainMultiplier());
         hpPerSecond = getRandomNum(getHpPerSecond());
+        hpPerNature = getRandomNum(getHpPerNature());
         movementSpeedMultiplier = getRandomNum(getMovementSpeedMultiplier());
         // ...继续更新其他变量的值
     }
@@ -356,6 +358,15 @@ public class Manager implements AttrInterface {
      */
     @Override
     public float[] getHpPerSecond() {
+        return new float[]{ 0.0f, 0.0f };
+    }
+
+    /**
+     * 生命恢复（自然恢复时的额外恢复血量）
+     * @return
+     */
+    @Override
+    public float[] getHpPerNature() {
         return new float[]{ 0.0f, 0.0f };
     }
 
