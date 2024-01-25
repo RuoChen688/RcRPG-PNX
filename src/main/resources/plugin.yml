@@ -1,6 +1,6 @@
 name: RcRPG
 main: RcRPG.Main
-version: 1.0.2
+version: 1.0.3
 author: 若尘
 authors: ["若尘", "Mcayear"]
 api: 1.0.8
