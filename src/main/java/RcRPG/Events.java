@@ -1,5 +1,7 @@
 package RcRPG;
 
+import RcEntity.entity.entity.BaseEntity;
+import RcEntity.entity.npc.NPC;
 import RcRPG.AttrManager.LittleMonsterAttr;
 import RcRPG.AttrManager.Manager;
 import RcRPG.AttrManager.PlayerAttr;
@@ -44,10 +46,7 @@ import healthapi.PlayerHealth;
 
 import java.io.File;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.List;
+import java.util.*;
 
 import static RcRPG.Handle.getProbabilisticResults;
 
@@ -297,15 +296,15 @@ public class Events implements Listener {
         Manager WAttr;
         if (hasLittleMonster && damager instanceof LittleNpc) {
             DAttr = new LittleMonsterAttr(((LittleNpc) damager).getConfig().getMonsterAttrMap());
-        } else if (hasRcEntity && damager instanceof RcEntity.entity.entity.BaseEntity) {
-            String name = ((RcEntity.entity.entity.BaseEntity) damager).getName();
+        } else if (hasRcEntity && damager instanceof BaseEntity) {
+            String name = ((BaseEntity) damager).getName();
             if (RcEntity.Main.getInstance().loadEntity.containsKey(name)) {
                 DAttr = new RcEntityAttr(RcEntity.Main.getInstance().loadEntity.get(name).getMonsterAttrMap());
             } else {
                 DAttr = new Manager();
             }
-        } else if (hasRcEntity && damager instanceof RcEntity.entity.npc.NPC) {
-            String name = ((RcEntity.entity.npc.NPC) damager).getName();
+        } else if (hasRcEntity && damager instanceof NPC) {
+            String name = ((NPC) damager).getName();
             if (RcEntity.Main.getInstance().loadEntity.containsKey(name)) {
                 DAttr = new RcEntityAttr(RcEntity.Main.getInstance().loadEntity.get(name).getMonsterAttrMap());
             } else {
@@ -650,11 +649,6 @@ public class Events implements Listener {
             player.setNameTag(text);
             player.setNameTagVisible();
             player.setNameTagAlwaysVisible();
-        }
-        if (hasHealthAPI) {
-            Handle.getMaxHealth(player);
-        } else {
-            player.setMaxHealth(Handle.getMaxHealth(player));
         }
     }
 

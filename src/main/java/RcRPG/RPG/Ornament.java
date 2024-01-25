@@ -21,14 +21,29 @@ public class Ornament extends ItemAttr {
 
     private String name;
 
+    /**
+     * -- SETTER --
+     *  仅作为属性分类的标识
+     *
+     * @param label
+     */
+    @Setter
     private String label;
 
+    /**
+     * -- GETTER --
+     *  物品名，替代源label用法
+     *
+     * @return
+     */
+    @Getter
     private String showName;
 
     private Item item;
 
     private int level;
 
+    @Getter
     private Object attr;
 
     private String tipText;
@@ -38,6 +53,8 @@ public class Ornament extends ItemAttr {
     private String serverMessage;
 
     private String message;
+
+    private int effectiveSlot;
 
     private ArrayList<String> loreList = new ArrayList<>();
     /**
@@ -76,6 +93,7 @@ public class Ornament extends ItemAttr {
             ornament.setTipText(config.getString("底部显示"));
             ornament.setMyMessage(config.getString("个人通知"));
             ornament.setServerMessage(config.getString("全服通知"));
+            ornament.setEffectiveSlot(config.getInt("生效槽", -1));
             return ornament;
         }catch(Exception e){
             Main.instance.getLogger().error("加载饰品"+name+"配置文件失败");
@@ -180,29 +198,15 @@ public class Ornament extends ItemAttr {
         return item;
     }
 
-    /**
-     * 仅作为属性分类的标识
-     * @param label
-     */
-    public void setLabel(String label) {
-        this.label = label;
-    }
-
-    /**
-     * 物品名，替代源label用法
-     * @return
-     */
-    public String getShowName() {
-        return showName;
-    }
-
-    public Object getAttr() {
-        return attr;
-    }
-
     public void setAttr(Object attr) {
         this.attr = attr;
         setItemAttrConfig(attr);
+    }
+
+    public boolean isValidSlot(int slot) {
+        if (this.effectiveSlot == -1) return true;
+        if (this.effectiveSlot == slot) return true;
+        return false;
     }
 
 }

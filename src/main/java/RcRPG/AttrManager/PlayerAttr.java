@@ -33,6 +33,25 @@ public class PlayerAttr extends Manager {
     }
 
     public void update() {
+        // 等级加点
+        if (Main.instance.config.exists("等级增加血量")) {
+            String[] s = Main.instance.config.getString("等级增加血量").split(":");
+            int lvAddHealth;
+            if (Level.enable) {
+                lvAddHealth = Level.getLevel(player) / Integer.parseInt(s[0]) * Integer.parseInt(s[1]);
+            } else {
+                lvAddHealth = player.getExperienceLevel() / Integer.parseInt(s[0]) * Integer.parseInt(s[1]);
+            }
+            if (lvAddHealth > 0) {
+                PlayerAttr pAttr = PlayerAttr.getPlayerAttr(player);
+                Map<String, float[]> attr = new HashMap<>();
+                attr.put("血量值", new float[]{lvAddHealth, lvAddHealth});
+                if (pAttr != null) {
+                    pAttr.setItemAttrConfig(Main.getI18n().tr(player.getLanguageCode(), "rcrpg.playerattr.lv"), attr);
+                }
+            }
+        }
+
         ArrayList<String> beforeLabel = new ArrayList<>(labelList);
         labelList.clear();
 
@@ -79,9 +98,10 @@ public class PlayerAttr extends Manager {
         Map<Integer,Item> map = OrnamentPanel.getPanel(player);
         if (!map.isEmpty()) {
             Map<String, float[]> attr = new HashMap<>();
-            for(int i = 0;i < Math.min(Main.getInstance().config.getInt("饰品生效格数"),map.size());i++){
+            for(int i = 0; i < Math.min(Main.getInstance().config.getInt("饰品生效格数"), map.size()); i++){
                 Ornament ornament = Main.loadOrnament.get(map.get(i).getNamedTag().getString("name"));
-                if(ornament == null) continue;
+                if (ornament == null) continue;
+                if (!ornament.isValidSlot(i)) continue;
                 OverAttr(attr,ornament.getMainAttr());
                 setItemAttrConfig(ornament.getLabel(), attr);
 
