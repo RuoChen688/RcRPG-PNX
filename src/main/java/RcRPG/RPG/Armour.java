@@ -11,8 +11,10 @@ import cn.nukkit.nbt.tag.ListTag;
 import cn.nukkit.nbt.tag.StringTag;
 import cn.nukkit.potion.Effect;
 import cn.nukkit.utils.Config;
+import cn.nukkit.utils.ConfigSection;
 import lombok.Getter;
 import lombok.Setter;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -26,8 +28,22 @@ public class Armour extends ItemAttr {
 
     private String name;
 
+    /**
+     * -- SETTER --
+     *  仅作为属性分类的标识
+     *
+     * @param label
+     */
+    @Setter
     private String label;
 
+    /**
+     * -- GETTER --
+     *  物品名，替代源label用法
+     *
+     * @return
+     */
+    @Getter
     private String showName;
 
     private Item item;
@@ -40,9 +56,12 @@ public class Armour extends ItemAttr {
 
     private ArrayList<Effect> effects = new ArrayList<>();
 
+    @Getter
     private Object attr;
 
     private int stone;
+
+    private ColorRGB color;
 
     /**
      * 分解方案
@@ -81,6 +100,9 @@ public class Armour extends ItemAttr {
                 armour.setAttr(config.get("属性"));
             }
             armour.setMessage(config.getString("介绍"));
+
+            armour.setColor(loadColorFromConfig(config));
+
             armour.setDismantle(config.getString("分解", ""));
             armour.setSuit(config.getString("套装", ""));
             armour.setTipText(config.getString("底部显示"));
@@ -88,12 +110,8 @@ public class Armour extends ItemAttr {
             armour.setServerMessage(config.getString("全服通知"));
             armour.setStone(config.getInt("宝石孔数"));
 
-            ArrayList<Effect> list1 = new ArrayList<>();
-            for(String effect : config.getStringList("药水效果")){
-                String[] o = effect.split(":");
-                list1.add(Effect.getEffect(Integer.parseInt(o[0])).setAmplifier(Integer.parseInt(o[1])-1).setDuration(Integer.parseInt(o[2])*20));
-            }
-            armour.setEffects(list1);
+            armour.setEffects(loadEffectsFromConfig(config));
+
             ArrayList<String> list2 = new ArrayList<>(config.getStringList("显示"));
             armour.setLoreList(list2);
             ArrayList<String> list3 = new ArrayList<>(config.getStringList("宝石槽"));
@@ -101,10 +119,39 @@ public class Armour extends ItemAttr {
 
             return armour;
         }catch(Exception e){
+            e.printStackTrace();
             Main.instance.getLogger().error("加载盔甲"+name+"配置文件失败");
             return null;
         }
     }
+
+    @NotNull
+    private static ColorRGB loadColorFromConfig(Config config) {
+        if (!config.exists("染色")) {
+            return new ColorRGB(-1, -1, -1);
+        }
+        ConfigSection rgb = config.getSection("染色");
+
+        return new ColorRGB(rgb.getInt("r", -1), rgb.getInt("g", -1), rgb.getInt("b", -1));
+    }
+
+    @NotNull
+    private static ArrayList<Effect> loadEffectsFromConfig(Config config) {
+        ArrayList<Effect> effects = new ArrayList<>();
+        if (!config.exists("药水效果")) {
+            return  effects;
+        }
+        for (String effect : config.getStringList("药水效果")) {
+            String[] parts = effect.split(":");
+            if (parts.length == 3) {
+                effects.add(Effect.getEffect(Integer.parseInt(parts[0]))
+                        .setAmplifier(Integer.parseInt(parts[1]) - 1)
+                        .setDuration(Integer.parseInt(parts[2]) * 20));
+            }
+        }
+        return effects;
+    }
+
 
     public static Config getArmourConfig(String name){
         File file = new File(Main.instance.getDataFolder()+"/Armour/"+name+".yml");
@@ -140,13 +187,15 @@ public class Armour extends ItemAttr {
         Armour armour = Main.loadArmour.get(name);
         Item item = armour.getItem();
         item.setCount(count);
-        CompoundTag tag = item.getNamedTag();
-        if(tag == null){
-            tag = new CompoundTag();
-        }
+        CompoundTag tag = item.hasCompoundTag() ? item.getNamedTag() : new CompoundTag();
         tag.putString("type","armour");
         tag.putString("name",name);
         tag.putByte("Unbreakable",1);
+
+        if (!armour.getColor().isEmpty()) {
+            tag.putInt("customColor", armour.getColor().getRgb());
+        }
+
         item.setNamedTag(tag);
         item.setCustomName(armour.getShowName());
         Armour.setArmourLore(item);
@@ -158,13 +207,13 @@ public class Armour extends ItemAttr {
         }
         Armour armour = Main.loadArmour.get(name);
         player.getInventory().addItem(getItem(name, count));
-        if(!armour.getMyMessage().equals("")){
+        if(!armour.getMyMessage().isEmpty()){
             String text = armour.getMyMessage();
             if(text.contains("@player")) text = text.replace("@player", player.getName());
             if(text.contains("@item")) text = text.replace("@item", armour.getLabel());
             player.sendMessage(text);
         }
-        if(!armour.getServerMessage().equals("")){
+        if(!armour.getServerMessage().isEmpty()){
             String text = armour.getServerMessage();
             if(text.contains("@player")) text = text.replace("@player", player.getName());
             if(text.contains("@item")) text = text.replace("@item", armour.getLabel());
@@ -285,28 +334,22 @@ public class Armour extends ItemAttr {
         return item;
     }
 
-    /**
-     * 仅作为属性分类的标识
-     * @param label
-     */
-    public void setLabel(String label) {
-        this.label = label;
-    }
-
-    /**
-     * 物品名，替代源label用法
-     * @return
-     */
-    public String getShowName() {
-        return showName;
-    }
-
-    public Object getAttr() {
-        return attr;
-    }
     public void setAttr(Object attr) {
         this.attr = attr;
         setItemAttrConfig(attr);
+    }
+    @Getter
+    @Setter
+    public static class ColorRGB {
+        private int rgb;
+
+        public ColorRGB(int r, int g, int b) {
+            this.setRgb((r << 16) | (g << 8) | b);
+        }
+
+        public boolean isEmpty() {
+            return getRgb() == -1;
+        }
     }
 
 }

@@ -1,9 +1,12 @@
+rpg.commands.reloaded=§aConfiguration reload successful
+
 rcrpg.events.insufficient_level_for_weapon=Insufficient level, unable to use this weapon
 rcrpg.events.life_steal_message=You have drained §c§l{%0}§r health from the opponent
 rcrpg.events.critical_damage_message=You dealt §l{%1}§r critical damage to {%0}
 rcrpg.events.dodge_message_you_evaded=You evaded the attack from {%0}
 rcrpg.events.dodge_message_enemy_evaded={%0}§r evaded your attack
 
+rcrpg.playerattr.lv=Level Attr Points
 rcrpg.playerattr.suit.label={%0} {%1} Set
 rcrpg.playerattr.set_suit_message=You feel the effects of §l{%0} ({%1})§r's §dSet§f!
 

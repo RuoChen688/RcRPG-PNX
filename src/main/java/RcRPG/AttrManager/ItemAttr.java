@@ -340,6 +340,14 @@ public class ItemAttr extends Manager {
     }
 
     @Override
+    public float[] getHpPerNature() {
+        if (mainAttr.containsKey("生命恢复")) {
+            return mainAttr.get("生命恢复");
+        }
+        return new float[]{ 0.0f, 0.0f };
+    }
+
+    @Override
     public float[] getMovementSpeedMultiplier() {
         if (mainAttr.containsKey("移速加成")) {
             return mainAttr.get("移速加成");

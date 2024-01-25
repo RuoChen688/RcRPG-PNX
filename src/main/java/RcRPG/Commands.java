@@ -201,7 +201,7 @@ public class Commands extends PluginCommand<Main> {
             }
             case "reload": {
                 Main.getInstance().init();
-                log.addSuccess("重载成功").output();
+                log.addSuccess("rpg.commands.reloaded").output();
                 return 1;
             }
             case "dismantle": {

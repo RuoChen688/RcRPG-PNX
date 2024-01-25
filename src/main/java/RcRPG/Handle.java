@@ -1,7 +1,5 @@
 package RcRPG;
 
-import RcRPG.AttrManager.PlayerAttr;
-import RcRPG.RPG.Level;
 import RcRPG.RPG.Stone;
 import RcRPG.Society.Shop;
 import cn.nukkit.Player;
@@ -136,21 +134,6 @@ public class Handle {
                 }
             }
         }
-    }
-
-    public static int getMaxHealth(Player player){
-        if(Handle.getPlayerConfig(player.getName()) == null) return 20;
-        String s = Main.instance.config.getString("等级增加血量");
-        int health1 = Level.getLevel(player) / Integer.parseInt(s.split(":")[0]) * Integer.parseInt(s.split(":")[1]);
-        int health2 = 0;
-        if (PlayerAttr.playerlist.containsKey(player)) {
-            PlayerAttr pAttr = PlayerAttr.playerlist.get(player);
-            int hp = (int) pAttr.getHp()[0];
-            float hpMulti = pAttr.getHpRegenMultiplier()[0];
-            int hpAdd = (int) (hpMulti * hp);
-            health2 = hp + hpAdd;
-        }
-        return health2 + health1 + 20;
     }
 
     public static int random(int a,int b) {
