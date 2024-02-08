@@ -1,17 +1,16 @@
 package RcRPG.AttrManager;
 
-import com.smallaswater.littlemonster.config.MonsterConfig;
+import RcNPC.Config.RcNPCConfig;
 import lombok.Getter;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class LittleMonsterAttr extends Manager {
+public class RcNPCAttr extends Manager {
 
-    public LittleMonsterAttr(MonsterConfig cfg) {
+    public RcNPCAttr(RcNPCConfig cfg) {
         mainAttr.put("血量值", new float[]{ cfg.getHealth(), cfg.getHealth() });
         mainAttr.put("攻击力", new float[]{ cfg.getDamage(), cfg.getDamage() });
-        mainAttr.put("防御力", new float[]{ cfg.getDelDamage(), cfg.getDelDamage() });
     }
 
     @Getter
@@ -90,12 +89,5 @@ public class LittleMonsterAttr extends Manager {
         return new float[]{ 0.0f, 0.0f };
     }
 
-    @Override
-    public float[] getDefense() {
-        if (mainAttr.containsKey("防御力")) {
-            return mainAttr.get("防御力");
-        }
-        return new float[]{ 0.0f, 0.0f };
-    }
 
 }

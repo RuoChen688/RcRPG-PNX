@@ -2,10 +2,8 @@ package RcRPG;
 
 import RcEntity.entity.entity.BaseEntity;
 import RcEntity.entity.npc.NPC;
-import RcRPG.AttrManager.LittleMonsterAttr;
-import RcRPG.AttrManager.Manager;
-import RcRPG.AttrManager.PlayerAttr;
-import RcRPG.AttrManager.RcEntityAttr;
+import RcNPC.NPC.RcNPC;
+import RcRPG.AttrManager.*;
 import RcRPG.Form.guildForm;
 import RcRPG.RPG.*;
 import RcRPG.Society.Money;
@@ -60,6 +58,7 @@ public class Events implements Listener {
     public static final boolean hasRsNPC = Server.getInstance().getPluginManager().getPlugin("RsNPC") != null;
     public static final boolean hasLittleMonster = Server.getInstance().getPluginManager().getPlugin("LittleMonster") != null;
     public static final boolean hasRcEntity = Server.getInstance().getPluginManager().getPlugin("RcEntity") != null;
+    public static final boolean hasRcNPC = Server.getInstance().getPluginManager().getPlugin("RcNPC") != null;
     public static final List<String> ProjectileWeapons = Arrays.asList("minecraft:bow", "minecraft:crossbow", "minecraft:trident");
 
     public Events(){
@@ -292,36 +291,43 @@ public class Events implements Listener {
             }
         }
 
-        Manager DAttr;
-        Manager WAttr;
-        if (hasLittleMonster && damager instanceof LittleNpc) {
-            DAttr = new LittleMonsterAttr(((LittleNpc) damager).getConfig().getMonsterAttrMap());
+        Manager DAttr = new Manager();
+        Manager WAttr = new Manager();
+
+        if (damagerIsPlayer) {
+            DAttr = PlayerAttr.getPlayerAttr((Player) damager);
+        } else if (hasLittleMonster && damager instanceof LittleNpc) {
+            DAttr = new LittleMonsterAttr(((LittleNpc) damager).getConfig());
         } else if (hasRcEntity && damager instanceof BaseEntity) {
             String name = ((BaseEntity) damager).getName();
             if (RcEntity.Main.getInstance().loadEntity.containsKey(name)) {
                 DAttr = new RcEntityAttr(RcEntity.Main.getInstance().loadEntity.get(name).getMonsterAttrMap());
-            } else {
-                DAttr = new Manager();
             }
         } else if (hasRcEntity && damager instanceof NPC) {
             String name = ((NPC) damager).getName();
             if (RcEntity.Main.getInstance().loadEntity.containsKey(name)) {
                 DAttr = new RcEntityAttr(RcEntity.Main.getInstance().loadEntity.get(name).getMonsterAttrMap());
-            } else {
-                DAttr = new Manager();
             }
-        } else if (damagerIsPlayer) {
-            DAttr = PlayerAttr.getPlayerAttr((Player) damager);
-        } else {
-            DAttr = new Manager();
+        } else if (hasRcNPC && damager instanceof RcNPC) {
+            DAttr = new RcNPCAttr(((RcNPC) damager).getConfig());
         }
 
-        if (hasLittleMonster && wounded instanceof LittleNpc) {
-            WAttr = new LittleMonsterAttr(((LittleNpc) wounded).getConfig().getMonsterAttrMap());
-        } else if (woundedIsPlayer) {
+        if (woundedIsPlayer) {
             WAttr = PlayerAttr.getPlayerAttr((Player) wounded);
-        } else {
-            WAttr = new Manager();
+        } else if (hasLittleMonster && wounded instanceof LittleNpc) {
+            WAttr = new LittleMonsterAttr(((LittleNpc) wounded).getConfig());
+        } else if (hasRcEntity && wounded instanceof BaseEntity) {
+            String name = ((BaseEntity) wounded).getName();
+            if (RcEntity.Main.getInstance().loadEntity.containsKey(name)) {
+                WAttr = new RcEntityAttr(RcEntity.Main.getInstance().loadEntity.get(name).getMonsterAttrMap());
+            }
+        } else if (hasRcEntity && wounded instanceof NPC) {
+            String name = ((NPC) wounded).getName();
+            if (RcEntity.Main.getInstance().loadEntity.containsKey(name)) {
+                WAttr = new RcEntityAttr(RcEntity.Main.getInstance().loadEntity.get(name).getMonsterAttrMap());
+            }
+        } else if (hasRcNPC && wounded instanceof RcNPC) {
+            WAttr = new RcNPCAttr(((RcNPC) wounded).getConfig());
         }
 
         DAttr.updateComp();
@@ -381,13 +387,6 @@ public class Events implements Listener {
             double h = playerHealth.getHealth();
             if (h > max) {
                 playerHealth.setHealth(max);
-            }
-        } else if (woundedIsPlayer) {
-            float h = wounded.getHealth();
-            int max = (int) ((WAttr.hp + WAttr.maxHpMultiplier) * (1 + WAttr.hpRegenMultiplier));
-            wounded.setMaxHealth(max);// 为什么这里要设置血量上限呢？
-            if (h > max) {
-                wounded.setHealth(max);
             }
         }
 
@@ -656,6 +655,11 @@ public class Events implements Listener {
     @EventHandler
     public void deathEvent(PlayerDeathEvent event) {
         if ("death.attack.mob".equals(event.getTranslationDeathMessage().getText())) {
+            if (event.getTranslationDeathMessage().getParameter(1).isEmpty()) {
+                return;
+            }
+            event.getTranslationDeathMessage().setParameter(1, event.getTranslationDeathMessage().getParameter(1).split("\n")[0]+"§r§f");
+        } else if ("death.attack.arrow".equals(event.getTranslationDeathMessage().getText())) {
             if (event.getTranslationDeathMessage().getParameter(1).isEmpty()) {
                 return;
             }

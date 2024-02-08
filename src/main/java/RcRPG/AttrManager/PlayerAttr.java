@@ -99,6 +99,7 @@ public class PlayerAttr extends Manager {
         if (!map.isEmpty()) {
             Map<String, float[]> attr = new HashMap<>();
             for(int i = 0; i < Math.min(Main.getInstance().config.getInt("饰品生效格数"), map.size()); i++){
+                if (!map.get(i).hasCompoundTag()) continue;
                 Ornament ornament = Main.loadOrnament.get(map.get(i).getNamedTag().getString("name"));
                 if (ornament == null) continue;
                 if (!ornament.isValidSlot(i)) continue;
