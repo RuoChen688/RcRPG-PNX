@@ -4,7 +4,6 @@ import cn.nukkit.Player;
 import cn.nukkit.inventory.ContainerInventory;
 import cn.nukkit.inventory.InventoryHolder;
 import cn.nukkit.inventory.InventoryType;
-import cn.nukkit.level.GlobalBlockPalette;
 import cn.nukkit.math.BlockVector3;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.network.protocol.ContainerOpenPacket;
@@ -78,7 +77,7 @@ public abstract class AbstractFakeInventory extends ContainerInventory {
             service.execute(() -> {
                 Vector3 blockPosition = blocks.get(index).asVector3();
                 UpdateBlockPacket updateBlock = new UpdateBlockPacket();
-                updateBlock.blockRuntimeId = GlobalBlockPalette.getOrCreateRuntimeId(who.getLevel().getBlock(blockPosition).getFullId());
+                updateBlock.blockRuntimeId = who.getLevel().getBlock(blockPosition).getRuntimeId();
                 updateBlock.flags = UpdateBlockPacket.FLAG_ALL_PRIORITY;
                 updateBlock.x = blockPosition.getFloorX();
                 updateBlock.y = blockPosition.getFloorY();

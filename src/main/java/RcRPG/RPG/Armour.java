@@ -5,7 +5,6 @@ import RcRPG.Handle;
 import RcRPG.Main;
 import cn.nukkit.Player;
 import cn.nukkit.item.Item;
-import cn.nukkit.item.RuntimeItems;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.nbt.tag.ListTag;
 import cn.nukkit.nbt.tag.StringTag;
@@ -95,7 +94,7 @@ public class Armour extends ItemAttr {
 
             armour.setLabel(config.getString("标签"));
             armour.setShowName(config.getString("显示名称"));
-            armour.setItem(RuntimeItems.getMapping().getItemByNamespaceId(config.getString("物品ID"),1));
+            armour.setItem(Item.get(config.getString("物品ID"),1));
             if (config.exists("属性")) {
                 armour.setAttr(config.get("属性"));
             }
@@ -266,13 +265,13 @@ public class Armour extends ItemAttr {
     }
 
     public static void setStone(Player player,Item item,LinkedList<Stone> list){
-        ListTag<StringTag> stoneList = new ListTag<>("stone");
+        ListTag<StringTag> stoneList = new ListTag<>();
         for(Stone stone : list){
             if(stone == null) continue;
-            stoneList.add(new StringTag(stone.getLabel(),stone.getLabel()));
+            stoneList.add(new StringTag(stone.getLabel()));
         }
         CompoundTag tag = item.getNamedTag();
-        tag.putList(stoneList);
+        tag.putList("stone", stoneList);
         item.setNamedTag(tag);
         player.getInventory().setItemInHand(Armour.setArmourLore(item));
     }
@@ -283,7 +282,7 @@ public class Armour extends ItemAttr {
             int damage = 0;
             for(Stone stone : list){
                 if(stone == null) continue;
-                damage += stone.getItemAttr("血量值");
+                damage += (int) stone.getItemAttr("血量值");
             }
             return damage;
         }
@@ -296,7 +295,7 @@ public class Armour extends ItemAttr {
             int damage = 0;
             for(Stone stone : list){
                 if(stone == null) continue;
-                damage += stone.getItemAttr("PVE攻击力");
+                damage += (int) stone.getItemAttr("PVE攻击力");
             }
             return damage;
         }
@@ -309,7 +308,7 @@ public class Armour extends ItemAttr {
             int damage = 0;
             for(Stone stone : list){
                 if(stone == null) continue;
-                damage += stone.getItemAttr("防御力");
+                damage += (int) stone.getItemAttr("防御力");
             }
             return damage;
         }

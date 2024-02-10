@@ -2,7 +2,6 @@ package RcRPG.window;
 
 import RcRPG.Main;
 import RcRPG.RPG.Ornament;
-import RcRPG.RPG.Stone;
 import cn.nukkit.Player;
 import cn.nukkit.event.Listener;
 import cn.nukkit.form.element.ElementButton;
@@ -30,14 +29,14 @@ public class SendOrnamentAdminWin implements Listener {
         player.showFormWindow(form);
     }
 
-    public void SendStoneOptionsWin(Player player, String stoneKey) {
-        Ornament stone = Main.loadOrnament.get(stoneKey);
+    public void SendStoneOptionsWin(Player player, String ornamentKey) {
+        Ornament ornament = Main.loadOrnament.get(ornamentKey);
 
-        FormWindowSimple form = new FormWindowSimple("RcRPG管理 - " + stoneKey,
-                "显示名称: " + stone.getShowName() +
-                        "\n§r标签: " + stone.getLabel() +
-                        "\n§r物品ID: " + stone.getConfig().get("物品ID") +
-                        "\n§r介绍: " + stone.getMessage());
+        FormWindowSimple form = new FormWindowSimple("RcRPG管理 - " + ornamentKey,
+                "显示名称: " + ornament.getShowName() +
+                        "\n§r标签: " + ornament.getLabel() +
+                        "\n§r物品ID: " + ornament.getConfig().get("物品ID") +
+                        "\n§r介绍: " + ornament.getMessage());
         form.addButton(new ElementButton("获取"));
         form.addButton(new ElementButton("修改 (未完成)"));
         form.addButton(new ElementButton("返回"));
@@ -49,7 +48,7 @@ public class SendOrnamentAdminWin implements Listener {
             int key = response.getClickedButtonId();
             switch (key) {
                 case 0 -> {
-                    if (Stone.giveStone(player, stoneKey, 1)) {
+                    if (Ornament.giveOrnament(player, ornamentKey, 1)) {
                         player.sendMessage("给予成功");
                     } else {
                         player.sendMessage("给予失败");

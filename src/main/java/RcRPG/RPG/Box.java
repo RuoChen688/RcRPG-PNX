@@ -7,7 +7,6 @@ import RcRPG.Society.Points;
 import RcRPG.Society.Prefix;
 import cn.nukkit.Player;
 import cn.nukkit.item.Item;
-import cn.nukkit.item.RuntimeItems;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.utils.Config;
 import lombok.Getter;
@@ -53,7 +52,7 @@ public class Box {
             Box box = new Box(name,config);
 
             box.setLabel(config.getString("标签"));
-            box.setItem(RuntimeItems.getMapping().getItemByNamespaceId(config.getString("物品ID"),1));
+            box.setItem(Item.get(config.getString("物品ID"),1));
             box.setSize(config.getInt("容量"));
             box.setTime(config.getInt("时间"));
             ArrayList<String> list = new ArrayList<>(config.getStringList("奖励"));

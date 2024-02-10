@@ -4,7 +4,6 @@ import RcRPG.AttrManager.ItemAttr;
 import RcRPG.Main;
 import cn.nukkit.Player;
 import cn.nukkit.item.Item;
-import cn.nukkit.item.RuntimeItems;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.utils.Config;
 import lombok.Getter;
@@ -59,7 +58,7 @@ public class Stone extends ItemAttr {
 
             stone.setLabel(config.getString("标签"));
             stone.setShowName(config.getString("显示名称"));
-            stone.setItem(RuntimeItems.getMapping().getItemByNamespaceId(config.getString("物品ID"),1));
+            stone.setItem(Item.get(config.getString("物品ID"),1));
             stone.setType(config.getString("宝石类型"));
             if (config.exists("属性")) {
                 stone.setAttr(config.get("属性"));

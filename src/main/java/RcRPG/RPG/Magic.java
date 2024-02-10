@@ -5,7 +5,6 @@ import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.command.ConsoleCommandSender;
 import cn.nukkit.item.Item;
-import cn.nukkit.item.RuntimeItems;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.potion.Effect;
 import cn.nukkit.utils.Config;
@@ -51,7 +50,7 @@ public class Magic {
             Magic magic = new Magic(name,config);
 
             magic.setLabel(config.getString("标签"));
-            magic.setItem(RuntimeItems.getMapping().getItemByNamespaceId(config.getString("物品ID"),1));
+            magic.setItem(Item.get(config.getString("物品ID"),1));
             magic.setConsume(config.getBoolean("是否为消耗品"));
             magic.setMessage(config.getString("介绍"));
             magic.setTipText(config.getString("底部显示"));

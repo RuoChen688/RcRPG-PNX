@@ -450,7 +450,7 @@ public class Commands extends PluginCommand<Main> {
                         if (item.isNull()) {
                             id = "minecraft:iron_sword";
                         } else {
-                            id = item.getNamespaceId();
+                            id = item.getId();
                         }
                         Config config;
                         String weaponName = args.getResult(2);
@@ -533,7 +533,7 @@ public class Commands extends PluginCommand<Main> {
                         if (item.isNull()) {
                             id = "minecraft:iron_chestplate";
                         } else {
-                            id = item.getNamespaceId();
+                            id = item.getId();
                         }
                         Config config;
                         String armorName = args.getResult(2);
@@ -615,7 +615,7 @@ public class Commands extends PluginCommand<Main> {
                         if (item.isNull()) {
                             id = "minecraft:emerald";
                         } else {
-                            id = item.getNamespaceId();
+                            id = item.getId();
                         }
                         String stoneName = args.getResult(2);
                         Config config;
@@ -681,7 +681,7 @@ public class Commands extends PluginCommand<Main> {
                         if (item.isNull()) {
                             id = "minecraft:apple";
                         } else {
-                            id = item.getNamespaceId();
+                            id = item.getId();
                         }
                         String magicName = args.getResult(2);
                         Config config;
@@ -746,7 +746,7 @@ public class Commands extends PluginCommand<Main> {
                         if (item.isNull()) {
                             id = "minecraft:egg";
                         } else {
-                            id = item.getNamespaceId();
+                            id = item.getId();
                         }
                         String boxName = args.getResult(2);
                         Config config;
@@ -827,7 +827,7 @@ public class Commands extends PluginCommand<Main> {
                         if (item.isNull()) {
                             id = "minecraft:emerald";
                         } else {
-                            id = item.getNamespaceId();
+                            id = item.getId();
                         }
                         String ornamentName = args.getResult(2);
                         Config config;

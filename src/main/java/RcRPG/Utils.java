@@ -37,7 +37,7 @@ public class Utils {
         if (arr[0].equals("mi")) {// mi@1 代金券
             if (Server.getInstance().getPluginManager().getPlugin("MagicItem") == null) {
                 Main.getInstance().getLogger().warning("你没有使用 MagicItem 插件却在试图获取它的物品：" + str);
-                return Item.AIR_ITEM;
+                return Item.AIR;
             }
             LinkedHashMap<String, ItemBean> items = MagicItem.getItemsMap();
             LinkedHashMap<String, Object> otherItems = MagicItem.getOthers();
@@ -49,7 +49,7 @@ public class Utils {
                 return back;
             } else if (otherItems.containsKey(args[1])) {
                 String[] otherItemArr = ((String) otherItems.get(args[1])).split(":");
-                Item item = Item.get(Integer.parseInt(otherItemArr[0]), Integer.parseInt(otherItemArr[1]));
+                Item item = Item.get(otherItemArr[0], Integer.parseInt(otherItemArr[1]));
                 item.setCount(Integer.parseInt(args[0]));
                 item.setCompoundTag(Tools.hexStringToBytes(otherItemArr[3]));
                 return item;
@@ -58,7 +58,7 @@ public class Utils {
             }
         } else if (arr[0].equals("item")) {
             String[] args = arr[1].split(" ");
-            Item item = Item.fromString(args[0]);
+            Item item = Item.get(args[0]);
             if (args.length == 2) {
                 item.setCount(Integer.parseInt(args[1]));
             } else {
@@ -69,7 +69,7 @@ public class Utils {
         } else if (arr[0].equals("nweapon") || arr[0].equals("rcrpg")) {
             if (Server.getInstance().getPluginManager().getPlugin("RcRPG") == null) {
                 Main.getInstance().getLogger().warning("你没有使用 RcRPG、NWeapon 插件却在试图获取它的物品：" + str);
-                return Item.AIR_ITEM;
+                return Item.AIR;
             }
             String[] args = arr[1].split(" ");//Main.loadWeapon
             String type = args[0];
@@ -123,11 +123,11 @@ public class Utils {
                     break;
                 }
             }
-            return Item.AIR_ITEM;
+            return Item.AIR;
             //return nWeapon.onlyNameGetItem(args[0], args[1], args[2], null);
         } else {
             Main.getInstance().getLogger().warning("物品配置有误：" + str);
         }
-        return Item.AIR_ITEM;
+        return Item.AIR;
     }
 }

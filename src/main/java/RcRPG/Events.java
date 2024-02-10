@@ -18,7 +18,7 @@ import RcRPG.panel.ornament.OrnamentInventory;
 import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.block.Block;
-import cn.nukkit.block.BlockSignPost;
+import cn.nukkit.block.BlockSignBase;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.event.EventHandler;
 import cn.nukkit.event.Listener;
@@ -74,7 +74,7 @@ public class Events implements Listener {
             if (Magic.isMagic(item)) Magic.useMagic(player, item);
             else if (Box.isBox(item)) Box.useBox(player, item);
         }
-        if(block instanceof BlockSignPost && Events.playerShop.containsKey(player)){
+        if(block instanceof BlockSignBase && Events.playerShop.containsKey(player)){
             Config config = Shop.addShopConfig(Events.playerShop.get(player),block.x + ":" + block.y + ":" + block.z + ":" +block.level.getName());
             Shop.loadShop(Events.playerShop.get(player),config);
             Events.playerShop.remove(player);
@@ -101,7 +101,7 @@ public class Events implements Listener {
     public void blockBreak(BlockBreakEvent event){
         Block block = event.getBlock();
         Player player = event.getPlayer();
-        if(block instanceof BlockSignPost && Handle.getShopByPos(block) != null){
+        if(block instanceof BlockSignBase && Handle.getShopByPos(block) != null){
             if(!player.isOp()) {
                 event.setCancelled();
                 return;
@@ -283,7 +283,7 @@ public class Events implements Listener {
 
         if (damagerIsPlayer) {// 对远程武器，取消近战伤害
             // 判断手持是否为远程攻击装备
-            if (ProjectileWeapons.contains(((Player) damager).getInventory().getItemInHand().getNamespaceId())) {
+            if (ProjectileWeapons.contains(((Player) damager).getInventory().getItemInHand().getId())) {
                 // 判断伤害原因是否为普攻 ENTITY_ATTACK
                 if (event.getCause().equals(EntityDamageEvent.DamageCause.ENTITY_ATTACK)) {
                     event.setDamage(1);

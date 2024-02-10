@@ -5,7 +5,6 @@ import RcRPG.Handle;
 import RcRPG.Main;
 import cn.nukkit.Player;
 import cn.nukkit.item.Item;
-import cn.nukkit.item.RuntimeItems;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.nbt.tag.ListTag;
 import cn.nukkit.nbt.tag.StringTag;
@@ -26,8 +25,22 @@ public class Weapon extends ItemAttr {
 
     private String name;
 
+    /**
+     * -- SETTER --
+     *  仅作为属性分类的标识
+     *
+     * @param label
+     */
+    @Setter
     private String label;
 
+    /**
+     * -- GETTER --
+     *  物品名，替代源label用法
+     *
+     * @return
+     */
+    @Getter
     private String showName;
 
     private Item item;
@@ -50,6 +63,7 @@ public class Weapon extends ItemAttr {
 
     private int lightRound;// 属性 - 雷击
 
+    @Getter
     private Object attr;
 
     private int stone;
@@ -94,7 +108,7 @@ public class Weapon extends ItemAttr {
 
             weapon.setLabel(config.getString("标签"));
             weapon.setShowName(config.getString("显示名称"));
-            weapon.setItem(RuntimeItems.getRuntimeMapping().getItemByNamespaceId(config.getString("物品ID"),1));
+            weapon.setItem(Item.get(config.getString("物品ID"), 1));
             weapon.setUnBreak(config.getBoolean("无限耐久"));
             weapon.setOffHand(config.getBoolean("可副手"));
             weapon.setLevel(config.getInt("最低使用等级"));
@@ -189,8 +203,8 @@ public class Weapon extends ItemAttr {
         if(weapon.isUnBreak()){
             tag.putByte("Unbreakable",1);
         }
-        ListTag<StringTag> stoneList = new ListTag<>("stone");
-        tag.putList(stoneList);
+        ListTag<StringTag> stoneList = new ListTag<>();
+        tag.putList("stone", stoneList);
         item.setNamedTag(tag);
         item.setCustomName(weapon.getShowName());
         Weapon.setWeaponLore(item);
@@ -262,13 +276,13 @@ public class Weapon extends ItemAttr {
     }
 
     public static void setStone(Player player,Item item,LinkedList<Stone> list){
-        ListTag<StringTag> stoneList = new ListTag<>("stone");
+        ListTag<StringTag> stoneList = new ListTag<>();
         for(Stone stone : list){
             if(stone == null) continue;
-            stoneList.add(new StringTag(stone.getLabel(),stone.getLabel()));
+            stoneList.add(new StringTag(stone.getLabel()));
         }
         CompoundTag tag = item.getNamedTag();
-        tag.putList(stoneList);
+        tag.putList("stone", stoneList);
         item.setNamedTag(tag);
         player.getInventory().setItemInHand(Weapon.setWeaponLore(item));
     }
@@ -292,7 +306,7 @@ public class Weapon extends ItemAttr {
             int damage = 0;
             for(Stone stone : list){
                 if(stone == null) continue;
-                damage += stone.getItemAttr("防御力");
+                damage += (int) stone.getItemAttr("防御力");
             }
             return damage;
         }
@@ -318,25 +332,6 @@ public class Weapon extends ItemAttr {
         return item;
     }
 
-    /**
-     * 仅作为属性分类的标识
-     * @param label
-     */
-    public void setLabel(String label) {
-        this.label = label;
-    }
-
-    /**
-     * 物品名，替代源label用法
-     * @return
-     */
-    public String getShowName() {
-        return showName;
-    }
-
-    public Object getAttr() {
-        return attr;
-    }
     public void setAttr(Object attr) {
         this.attr = attr;
         setItemAttrConfig(attr);

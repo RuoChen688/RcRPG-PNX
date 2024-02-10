@@ -4,7 +4,6 @@ import RcRPG.AttrManager.ItemAttr;
 import RcRPG.Main;
 import cn.nukkit.Player;
 import cn.nukkit.item.Item;
-import cn.nukkit.item.RuntimeItems;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.utils.Config;
 import lombok.Getter;
@@ -73,7 +72,7 @@ public class Ornament extends ItemAttr {
 
             ornament.setLabel(config.getString("标签"));
             ornament.setShowName(config.getString("显示名称"));
-            ornament.setItem(RuntimeItems.getRuntimeMapping().getItemByNamespaceId(config.getString("物品ID"),1));
+            ornament.setItem(Item.get(config.getString("物品ID"), 1));
             ornament.setLevel(config.getInt("最低使用等级"));
 
             if (config.exists("属性")) {
@@ -97,6 +96,7 @@ public class Ornament extends ItemAttr {
             return ornament;
         }catch(Exception e){
             Main.instance.getLogger().error("加载饰品"+name+"配置文件失败");
+            e.printStackTrace();
             return null;
         }
     }
@@ -134,7 +134,7 @@ public class Ornament extends ItemAttr {
 
     public static Item getItem(String name, int count) {
         Ornament ornament = Main.loadOrnament.get(name);
-        if (ornament == null) return Item.AIR_ITEM;
+        if (ornament == null) return Item.AIR;
         Item item = ornament.getItem();
         item.setCount(count);
         CompoundTag tag = item.getNamedTag();

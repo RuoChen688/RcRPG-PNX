@@ -13,7 +13,7 @@ public class DismantlePanel implements InventoryHolder {
 
     public static Map<Integer, Item> getPanel(Player player) {
         Map<Integer, Item> panel = new LinkedHashMap<>();
-        Item tipItem = Item.fromString("minecraft:oak_hanging_sign");
+        Item tipItem = Item.get("minecraft:oak_hanging_sign");
         tipItem.setCustomName("提示");
         tipItem.setLore(
                 "将武器、防具放入`分解炉`中关闭即可",
