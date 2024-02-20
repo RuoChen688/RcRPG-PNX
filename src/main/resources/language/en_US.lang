@@ -9,6 +9,7 @@ rcrpg.events.dodge_message_enemy_evaded={%0}§r evaded your attack
 rcrpg.playerattr.lv=Level Attr Points
 rcrpg.playerattr.suit.label={%0} {%1} Set
 rcrpg.playerattr.set_suit_message=You feel the effects of §l{%0} ({%1})§r's §dSet§f!
+rcrpg.event.item_consume=§l§cOrnament§r are non-consumable! Please put them in your §l§eOrnament backpack§r to use them.
 
 rcrpg.window.select_config_manage=Please select the configuration you want to manage
 rcrpg.window.main.title=RcRPG Management - Accessories List

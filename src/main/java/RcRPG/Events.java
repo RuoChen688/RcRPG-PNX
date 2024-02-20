@@ -68,6 +68,12 @@ public class Events implements Listener {
     public void interact(PlayerInteractEvent event){
         Player player = event.getPlayer();
         Item item = event.getItem();
+
+        if (event.getAction() == PlayerInteractEvent.Action.RIGHT_CLICK_AIR && Ornament.isOrnament(item)) {
+            player.sendActionBar(Main.getI18n().tr(player.getLanguageCode(), "rcrpg.event.item_consume"));
+            event.setCancelled();
+        }
+
         Block block = event.getBlock();
         if (item != null && !item.isNull() && Handle.getShopByPos(block) == null) {
             if (Magic.isMagic(item)) Magic.useMagic(player, item);
@@ -694,6 +700,5 @@ public class Events implements Listener {
             }
         }
     }
-
 }
 

@@ -20,6 +20,10 @@ public class OrnamentPanel implements InventoryHolder {
         if (Main.getInstance().ornamentConfig.exists(name)) {
             ArrayList<String> list = (ArrayList<String>) Main.getInstance().ornamentConfig.getStringList(name);
             for (int i = 0; i < list.size(); i++) {
+                if (list.get(i) == null || list.get(i).isEmpty()) {
+                    panel.put(i, Item.AIR_ITEM);
+                    continue;
+                };
                 String[] s = list.get(i).split(":");
                 Item item = Ornament.getItem(s[0], Integer.parseInt(s[1])).clone();
                 panel.put(i, item);

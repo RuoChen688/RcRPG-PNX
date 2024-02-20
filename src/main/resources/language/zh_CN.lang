@@ -9,6 +9,7 @@ rcrpg.events.dodge_message_enemy_evaded={%0} §r闪避了你的攻击
 rcrpg.playerattr.lv=等级加点
 rcrpg.playerattr.suit.label={%0} {%1}件套
 rcrpg.playerattr.set_suit_message=你感受到了 §l{%0} ({%1}) §r的§d套装§f效果！
+rcrpg.event.item_consume=§l§c饰品§r为非消耗品！请放入§l§e饰品背包§r使用。
 
 rcrpg.window.select_config_manage=请选择你需要管理的配置
 rcrpg.window.main.title=RcRPG管理 - 饰品列表
