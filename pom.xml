@@ -6,7 +6,7 @@
 
     <groupId>RcRPG.Main</groupId>
     <artifactId>RcRPG</artifactId>
-    <version>1.0.4-PNX1</version>
+    <version>1.0.4-MOT</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -16,6 +16,10 @@
         <repository>
             <id>jitpack.io</id>
             <url>https://www.jitpack.io</url>
+        </repository>
+        <repository>
+            <id>repo-lanink-cn</id>
+            <url>https://repo.lanink.cn/repository/maven-public/</url>
         </repository>
     </repositories>
 
@@ -27,8 +31,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.2</version>
                 <configuration>
-                    <source>17</source>
-                    <target>17</target>
+                    <source>1.8</source>
+                    <target>1.8</target>
                     <encoding>UTF-8</encoding>
                 </configuration>
             </plugin>
@@ -37,11 +41,11 @@
     </build>
 
     <dependencies>
-
         <dependency>
-            <groupId>cn.powernukkitx</groupId>
-            <artifactId>powernukkitx</artifactId>
-            <version>1.20.50-r1</version>
+            <groupId>cn.nukkit</groupId>
+            <artifactId>Nukkit</artifactId>
+            <version>MOT-SNAPSHOT</version>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
@@ -86,9 +90,9 @@
         <dependency>
             <groupId>com.smallaswater.littlemonster.LittleMonsterMainClass</groupId>
             <artifactId>LittleMonster</artifactId>
-            <version>1.7.0-SNAPSHOT</version>
+            <version>1.7.1-SNAPSHOT</version>
             <scope>system</scope>
-            <systemPath>${pom.basedir}/lib/LittleMonster_v1.7.0-PNX.jar</systemPath>
+            <systemPath>${pom.basedir}/lib/LittleMonster_v1.7.1-SNAPSHOT.jar</systemPath>
         </dependency>
 
         <dependency>
@@ -121,6 +125,14 @@
             <version>1.0.0</version>
             <scope>system</scope>
             <systemPath>${pom.basedir}/lib/MagicItem-1.1.0.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>me.iwareq.fakeinventories.FakeInventories</groupId>
+            <artifactId>FakeInventories</artifactId>
+            <version>1.1.5</version>
+            <scope>system</scope>
+            <systemPath>${pom.basedir}/lib/FakeInventories-1.1.5.jar</systemPath>
         </dependency>
     </dependencies>
 </project>

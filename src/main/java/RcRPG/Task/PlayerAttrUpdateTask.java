@@ -2,7 +2,7 @@ package RcRPG.Task;
 
 import RcRPG.AttrManager.PlayerAttr;
 import RcRPG.Events;
-import RcRPG.Main;
+import RcRPG.RcRPGMain;
 import cn.nukkit.Player;
 import cn.nukkit.potion.Effect;
 import cn.nukkit.scheduler.PluginTask;
@@ -11,13 +11,13 @@ import healthapi.PlayerHealth;
 import java.util.Objects;
 
 public class PlayerAttrUpdateTask extends PluginTask {
-    public PlayerAttrUpdateTask(Main main){
-        super(main);
+    public PlayerAttrUpdateTask(RcRPGMain rcRPGMain){
+        super(rcRPGMain);
     }
 
     @Override
     public void onRun(int i) {
-        for (Player player : Main.instance.getServer().getOnlinePlayers().values()) {
+        for (Player player : RcRPGMain.instance.getServer().getOnlinePlayers().values()) {
             if (!player.isAlive()) continue;
             int addHealth = 0;
             if (!PlayerAttr.playerlist.containsKey(player)) continue;

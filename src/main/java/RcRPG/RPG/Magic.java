@@ -1,6 +1,6 @@
 package RcRPG.RPG;
 
-import RcRPG.Main;
+import RcRPG.RcRPGMain;
 import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.command.ConsoleCommandSender;
@@ -51,7 +51,7 @@ public class Magic {
             Magic magic = new Magic(name,config);
 
             magic.setLabel(config.getString("标签"));
-            magic.setItem(RuntimeItems.getMapping().getItemByNamespaceId(config.getString("物品ID"),1));
+            magic.setItem(Item.fromString(config.getString("物品ID")));
             magic.setConsume(config.getBoolean("是否为消耗品"));
             magic.setMessage(config.getString("介绍"));
             magic.setTipText(config.getString("底部显示"));
@@ -72,13 +72,13 @@ public class Magic {
 
             return magic;
         }catch(Exception e){
-            Main.instance.getLogger().error("加载魔法物品"+name+"配置文件失败");
+            RcRPGMain.instance.getLogger().error("加载魔法物品"+name+"配置文件失败");
             return null;
         }
     }
 
     public static Config getMagicConfig(String name){
-        File file = new File(Main.instance.getDataFolder()+"/Magic/"+name+".yml");
+        File file = new File(RcRPGMain.instance.getDataFolder()+"/Magic/"+name+".yml");
         Config config;
         if(file.exists()){
             config = new Config(file,Config.YAML);
@@ -90,8 +90,8 @@ public class Magic {
 
     public static Config addMagicConfig(String name,String id){
         if(getMagicConfig(name) == null){
-            Main.instance.saveResource("Magic.yml","/Magic/"+name+".yml",false);
-            Config config = new Config(Main.instance.getMagicFile()+"/"+name+".yml");
+            RcRPGMain.instance.saveResource("Magic.yml","/Magic/"+name+".yml",false);
+            Config config = new Config(RcRPGMain.instance.getMagicFile()+"/"+name+".yml");
             config.set("物品ID",id);
             config.save();
             return config;
@@ -101,7 +101,7 @@ public class Magic {
 
     public static boolean delMagicConfig(String name){
         if(getMagicConfig(name) != null){
-            File file = new File(Main.instance.getMagicFile(),"/"+name+".yml");
+            File file = new File(RcRPGMain.instance.getMagicFile(),"/"+name+".yml");
             file.delete();
             return true;
         }
@@ -109,8 +109,8 @@ public class Magic {
     }
 
     public static boolean giveMagic(Player player, String name, int count){
-        if(Main.loadMagic.get(name) != null){
-            Magic magic = Main.loadMagic.get(name);
+        if(RcRPGMain.loadMagic.get(name) != null){
+            Magic magic = RcRPGMain.loadMagic.get(name);
             Item item = magic.getItem();
             item.setCount(count);
             CompoundTag tag = item.getNamedTag();
@@ -134,7 +134,7 @@ public class Magic {
                 String text = magic.getServerMessage();
                 if(text.contains("@player")) text = text.replace("@player", player.getName());
                 if(text.contains("@item")) text = text.replace("@item", magic.getLabel());
-                Main.instance.getServer().broadcastMessage(text);
+                RcRPGMain.instance.getServer().broadcastMessage(text);
             }
             return true;
         }
@@ -152,7 +152,7 @@ public class Magic {
     }
 
     public static void useMagic(Player player,Item item){
-        Magic magic = Main.loadMagic.get(item.getNamedTag().getString("name"));
+        Magic magic = RcRPGMain.loadMagic.get(item.getNamedTag().getString("name"));
         if(!magic.getEffects().isEmpty()){
             for(Effect effect : magic.getEffects()){
                 effect.add(player);

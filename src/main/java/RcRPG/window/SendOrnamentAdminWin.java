@@ -1,6 +1,6 @@
 package RcRPG.window;
 
-import RcRPG.Main;
+import RcRPG.RcRPGMain;
 import RcRPG.RPG.Ornament;
 import cn.nukkit.Player;
 import cn.nukkit.event.Listener;
@@ -14,8 +14,8 @@ public class SendOrnamentAdminWin implements Listener {
 
     public SendOrnamentAdminWin(Player player) {
         LangCode langCode = player.getLanguageCode();
-        FormWindowSimple form = new FormWindowSimple(Main.getI18n().tr(langCode, "rcrpg.window.ornament.title"), Main.getI18n().tr(langCode, "rcrpg.window.select_config_manage"));
-        for (String key : Main.loadOrnament.keySet()) {
+        FormWindowSimple form = new FormWindowSimple(RcRPGMain.getI18n().tr(langCode, "rcrpg.window.ornament.title"), RcRPGMain.getI18n().tr(langCode, "rcrpg.window.select_config_manage"));
+        for (String key : RcRPGMain.loadOrnament.keySet()) {
             form.addButton(new ElementButton(key));
         }
         form.addHandler(FormResponseHandler.withoutPlayer(ignored -> {
@@ -30,7 +30,7 @@ public class SendOrnamentAdminWin implements Listener {
     }
 
     public void SendStoneOptionsWin(Player player, String ornamentKey) {
-        Ornament ornament = Main.loadOrnament.get(ornamentKey);
+        Ornament ornament = RcRPGMain.loadOrnament.get(ornamentKey);
 
         FormWindowSimple form = new FormWindowSimple("RcRPG管理 - " + ornamentKey,
                 "显示名称: " + ornament.getShowName() +

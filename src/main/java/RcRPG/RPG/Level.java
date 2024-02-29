@@ -1,7 +1,7 @@
 package RcRPG.RPG;
 
 import RcRPG.Handle;
-import RcRPG.Main;
+import RcRPG.RcRPGMain;
 import cn.nukkit.Player;
 import cn.nukkit.utils.Config;
 
@@ -21,12 +21,12 @@ public class Level {
             int newExp = config.getInt("经验") + exp;
             int level = config.getInt("等级");
             int oldLevel = level;
-            while(newExp >= level * Main.instance.config.getInt("经验增量")){
-                newExp -= level * Main.instance.config.getInt("经验增量");
+            while(newExp >= level * RcRPGMain.instance.config.getInt("经验增量")){
+                newExp -= level * RcRPGMain.instance.config.getInt("经验增量");
                 level++;
             }
             config.set("经验",newExp);
-            String text = Main.instance.config.getString("经验增加提示");
+            String text = RcRPGMain.instance.config.getString("经验增加提示");
             if(!text.equals("")){
                 if(text.contains("@player")) text = text.replace("@player",name);
                 if(text.contains("@exp")) text = text.replace("@exp",String.valueOf(exp));
@@ -44,8 +44,8 @@ public class Level {
         String name = player.getName();
         Config config = Handle.getPlayerConfig(name);
         int newLevel = config.getInt("等级") + level;
-        if(!Main.instance.config.getString("等级增加提示").equals("")){
-            String text = Main.instance.config.getString("等级增加提示");
+        if(!RcRPGMain.instance.config.getString("等级增加提示").equals("")){
+            String text = RcRPGMain.instance.config.getString("等级增加提示");
             if(text.contains("@player")) text = text.replace("@player",name);
             if(text.contains("@level")) text = text.replace("@level",String.valueOf(level));
             if(text.contains("@newLevel")) text = text.replace("@newLevel",String.valueOf(newLevel));
@@ -72,7 +72,7 @@ public class Level {
         Config config = Handle.getPlayerConfig(player.getName());
         if (config == null) return 0;
         int level = config.getInt("等级");
-        return level * Main.instance.config.getInt("经验增量");
+        return level * RcRPGMain.instance.config.getInt("经验增量");
     }
 
 }

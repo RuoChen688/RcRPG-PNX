@@ -2,10 +2,9 @@ package RcRPG.RPG;
 
 import RcRPG.AttrManager.ItemAttr;
 import RcRPG.Handle;
-import RcRPG.Main;
+import RcRPG.RcRPGMain;
 import cn.nukkit.Player;
 import cn.nukkit.item.Item;
-import cn.nukkit.item.RuntimeItems;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.nbt.tag.ListTag;
 import cn.nukkit.nbt.tag.StringTag;
@@ -95,7 +94,7 @@ public class Armour extends ItemAttr {
 
             armour.setLabel(config.getString("标签"));
             armour.setShowName(config.getString("显示名称"));
-            armour.setItem(RuntimeItems.getMapping().getItemByNamespaceId(config.getString("物品ID"),1));
+            armour.setItem(Item.fromString(config.getString("物品ID")));
             if (config.exists("属性")) {
                 armour.setAttr(config.get("属性"));
             }
@@ -120,7 +119,7 @@ public class Armour extends ItemAttr {
             return armour;
         }catch(Exception e){
             e.printStackTrace();
-            Main.instance.getLogger().error("加载盔甲"+name+"配置文件失败");
+            RcRPGMain.instance.getLogger().error("加载盔甲"+name+"配置文件失败");
             return null;
         }
     }
@@ -154,7 +153,7 @@ public class Armour extends ItemAttr {
 
 
     public static Config getArmourConfig(String name){
-        File file = new File(Main.instance.getDataFolder()+"/Armour/"+name+".yml");
+        File file = new File(RcRPGMain.instance.getDataFolder()+"/Armour/"+name+".yml");
         Config config;
         if(file.exists()){
             config = new Config(file,Config.YAML);
@@ -166,8 +165,8 @@ public class Armour extends ItemAttr {
 
     public static Config addArmourConfig(String name,String id){
         if(getArmourConfig(name) == null){
-            Main.instance.saveResource("Armour.yml","/Armour/"+name+".yml",false);
-            Config config = new Config(Main.instance.getArmourFile()+"/"+name+".yml");
+            RcRPGMain.instance.saveResource("Armour.yml","/Armour/"+name+".yml",false);
+            Config config = new Config(RcRPGMain.instance.getArmourFile()+"/"+name+".yml");
             config.set("物品ID",id);
             config.save();
             return config;
@@ -177,14 +176,14 @@ public class Armour extends ItemAttr {
 
     public static boolean delArmourConfig(String name){
         if(getArmourConfig(name) != null){
-            File file = new File(Main.instance.getArmourFile(),"/"+name+".yml");
+            File file = new File(RcRPGMain.instance.getArmourFile(),"/"+name+".yml");
             file.delete();
             return true;
         }
         return false;
     }
     public static Item getItem(String name, int count) {
-        Armour armour = Main.loadArmour.get(name);
+        Armour armour = RcRPGMain.loadArmour.get(name);
         Item item = armour.getItem();
         item.setCount(count);
         CompoundTag tag = item.hasCompoundTag() ? item.getNamedTag() : new CompoundTag();
@@ -202,10 +201,10 @@ public class Armour extends ItemAttr {
         return item;
     }
     public static boolean giveArmour(Player player, String name, int count){
-        if(!Main.loadArmour.containsKey(name)) {
+        if(!RcRPGMain.loadArmour.containsKey(name)) {
             return false;
         }
-        Armour armour = Main.loadArmour.get(name);
+        Armour armour = RcRPGMain.loadArmour.get(name);
         player.getInventory().addItem(getItem(name, count));
         if(!armour.getMyMessage().isEmpty()){
             String text = armour.getMyMessage();
@@ -217,7 +216,7 @@ public class Armour extends ItemAttr {
             String text = armour.getServerMessage();
             if(text.contains("@player")) text = text.replace("@player", player.getName());
             if(text.contains("@item")) text = text.replace("@item", armour.getLabel());
-            Main.instance.getServer().broadcastMessage(text);
+            RcRPGMain.instance.getServer().broadcastMessage(text);
         }
         return true;
     }
@@ -239,7 +238,7 @@ public class Armour extends ItemAttr {
         for(StringTag tag : tags.getAll()){
             list.add(Handle.getStoneViaName(tag.parseValue()));
         }
-        Armour armour = Main.loadArmour.get(item.getNamedTag().getString("name"));
+        Armour armour = RcRPGMain.loadArmour.get(item.getNamedTag().getString("name"));
         while(list.size() < armour.getStone()){
             list.add(null);
         }
@@ -258,7 +257,7 @@ public class Armour extends ItemAttr {
     @Deprecated
     public static boolean canInlay(Item item){
         if(Armour.isArmour(item)){
-            Armour armour = Main.loadArmour.get(item.getNamedTag().getString("name"));
+            Armour armour = RcRPGMain.loadArmour.get(item.getNamedTag().getString("name"));
             return Armour.getStoneSize(item) < armour.getStone();
         }else{
             return false;
@@ -318,7 +317,7 @@ public class Armour extends ItemAttr {
 
     public static Item setArmourLore(Item item){
         if(Armour.isArmour(item)){
-            Armour armour = Main.loadArmour.get(item.getNamedTag().getString("name"));
+            Armour armour = RcRPGMain.loadArmour.get(item.getNamedTag().getString("name"));
             ArrayList<String> lore = (ArrayList<String>) armour.getLoreList().clone();
             for(int i = 0;i < lore.size();i++){
                 String s = lore.get(i);

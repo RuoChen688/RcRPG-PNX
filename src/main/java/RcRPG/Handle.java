@@ -17,7 +17,7 @@ import java.util.Random;
 public class Handle {
 
     public static Config getPlayerConfig(String name){
-        File file = new File(Main.instance.getDataFolder()+"/Players/"+name+".yml");
+        File file = new File(RcRPGMain.instance.getDataFolder()+"/Players/"+name+".yml");
         if(file.exists()){
             return new Config(file, Config.YAML);
         }
@@ -26,7 +26,7 @@ public class Handle {
 
     public static String[] getDefaultFiles(String fileName) {
         List<String> names = new ArrayList<>();
-        File files = new File(Main.instance.getDataFolder()+ "/"+fileName);
+        File files = new File(RcRPGMain.instance.getDataFolder()+ "/"+fileName);
         if(files.isDirectory()){
             File[] filesArray = files.listFiles();
             if(filesArray != null){
@@ -40,7 +40,7 @@ public class Handle {
 
     public static List<String> getGuilds(){
         List<String> names = new ArrayList<>();
-        File files = new File(Main.instance.getDataFolder()+ "/Guild");
+        File files = new File(RcRPGMain.instance.getDataFolder()+ "/Guild");
         if(files.isDirectory()){
             File[] filesArray = files.listFiles();
             if(filesArray != null){
@@ -58,8 +58,8 @@ public class Handle {
     }
 
     public static Stone getStoneViaName(String yamlName){
-        if (Main.loadStone.containsKey(yamlName)) {
-            return Main.loadStone.get(yamlName);
+        if (RcRPGMain.loadStone.containsKey(yamlName)) {
+            return RcRPGMain.loadStone.get(yamlName);
         }
         return null;
     }
@@ -82,7 +82,7 @@ public class Handle {
     }
 
     public static Shop getShopByPos(Position pos){
-        for(Shop shop : Main.loadShop.values()){
+        for(Shop shop : RcRPGMain.loadShop.values()){
             if(shop.getPosition().equals(pos)) return shop;
         }
         return null;

@@ -1,15 +1,15 @@
 package RcRPG.Task;
 
 import RcRPG.FloatingText;
-import RcRPG.Main;
+import RcRPG.RcRPGMain;
 import cn.nukkit.scheduler.PluginTask;
 
 public class removeFloatingText extends PluginTask {
 
     protected FloatingText floatingText;
 
-    public removeFloatingText(Main main, FloatingText floatingText){
-        super(main);
+    public removeFloatingText(RcRPGMain rcRPGMain, FloatingText floatingText){
+        super(rcRPGMain);
         this.floatingText = floatingText;
     }
 

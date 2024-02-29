@@ -1,25 +1,23 @@
 package RcRPG.panel.ornament;
 
-import RcRPG.Main;
-import RcRPG.panel.lib.ChestFakeInventory;
+import RcRPG.RcRPGMain;
 import cn.nukkit.Player;
-import cn.nukkit.inventory.InventoryHolder;
 import cn.nukkit.inventory.InventoryType;
 import cn.nukkit.item.Item;
 import cn.nukkit.network.protocol.ContainerOpenPacket;
 import cn.nukkit.network.protocol.RemoveEntityPacket;
+import me.iwareq.fakeinventories.FakeInventory;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class OrnamentInventory extends ChestFakeInventory {
+public class OrnamentInventory extends FakeInventory {
 
     public long id;
 
-    public OrnamentInventory(InventoryHolder holder,String name) {
-        super(InventoryType.CHEST, holder, name);
-        this.setName(name);
+    public OrnamentInventory(String name) {
+        super(InventoryType.CHEST, name);
     }
 
     @Override
@@ -39,7 +37,7 @@ public class OrnamentInventory extends ChestFakeInventory {
         who.dataPacket(pk);
         super.onClose(who);
         ArrayList<String> list = new ArrayList<>();
-        for (int i = 0; i < Main.getInstance().config.getInt("饰品生效格数"); i++) {
+        for (int i = 0; i < RcRPGMain.getInstance().config.getInt("饰品生效格数"); i++) {
             Item item = this.getItem(i);
             if (item.isNull()) {
                 list.add(i, "");
@@ -55,14 +53,14 @@ public class OrnamentInventory extends ChestFakeInventory {
             }
         }
         String name = who.getName();
-        if(Main.getInstance().ornamentConfig.exists(name)){
-            Main.getInstance().ornamentConfig.set(name,list);
+        if(RcRPGMain.getInstance().ornamentConfig.exists(name)){
+            RcRPGMain.getInstance().ornamentConfig.set(name,list);
         }else {
-            Map<String,Object> map = Main.getInstance().ornamentConfig.getAll();
+            Map<String,Object> map = RcRPGMain.getInstance().ornamentConfig.getAll();
             map.put(name,list);
-            Main.getInstance().ornamentConfig.setAll((LinkedHashMap<String, Object>) map);
+            RcRPGMain.getInstance().ornamentConfig.setAll((LinkedHashMap<String, Object>) map);
         }
-        Main.getInstance().ornamentConfig.save();
+        RcRPGMain.getInstance().ornamentConfig.save();
     }
 
 

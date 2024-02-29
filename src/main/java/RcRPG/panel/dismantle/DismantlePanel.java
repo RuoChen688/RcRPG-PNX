@@ -1,10 +1,14 @@
 package RcRPG.panel.dismantle;
 
+import RcRPG.RPG.Armour;
+import RcRPG.RPG.Weapon;
 import cn.nukkit.Player;
-import cn.nukkit.entity.Entity;
 import cn.nukkit.inventory.Inventory;
 import cn.nukkit.inventory.InventoryHolder;
+import cn.nukkit.inventory.transaction.action.InventoryAction;
+import cn.nukkit.inventory.transaction.action.SlotChangeAction;
 import cn.nukkit.item.Item;
+import me.iwareq.fakeinventories.FakeInventory;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -29,9 +33,32 @@ public class DismantlePanel implements InventoryHolder {
     }
 
     public void displayPlayer(Player player, Map<Integer, Item> itemMap) {
-        DismantleInventory inv = new DismantleInventory(this, "分解炉");
+        FakeInventory inv = new DismantleInventory("分解炉");
         inv.setContents(itemMap);
-        inv.id = Entity.entityCount++;
+        inv.setDefaultItemHandler((item, event) -> {
+            for (InventoryAction action : event.getTransaction().getActions()) {
+                Item sourceItem = action.getSourceItem();
+                Item targetItem = action.getTargetItem();
+                if (action instanceof SlotChangeAction slotChange) {
+                    if (slotChange.getInventory() instanceof FakeInventory) {
+
+                        if (sourceItem.isNull()) {// 放装备至炉子
+                            if (!Armour.isArmour(targetItem) && !Weapon.isWeapon(targetItem)) {
+                                event.setCancelled();
+                                return;
+                            }
+                        } else {
+                            if (!Armour.isArmour(sourceItem) && !Weapon.isWeapon(sourceItem)) {
+                                event.setCancelled();
+                                return;
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
+
+        });
         player.addWindow(inv);
     }
 

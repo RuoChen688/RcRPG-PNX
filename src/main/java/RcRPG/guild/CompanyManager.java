@@ -1,6 +1,6 @@
 package RcRPG.guild;
 
-import RcRPG.Main;
+import RcRPG.RcRPGMain;
 import cn.nukkit.Player;
 
 import java.util.HashMap;
@@ -10,7 +10,7 @@ public class CompanyManager {
 
     public boolean createCompany(String companyName, Player founder) {
         if (companies.containsKey(companyName)) {
-            Main.instance.getLogger().info("Company " + companyName + " already exists.");
+            RcRPGMain.instance.getLogger().info("Company " + companyName + " already exists.");
             return false;
         }
         // 默认公司初始资金
@@ -29,13 +29,13 @@ public class CompanyManager {
         Company company = companies.get(companyName);
 
         if (company == null) {
-            Main.instance.getLogger().info("Company " + companyName + " does not exist.");
+            RcRPGMain.instance.getLogger().info("Company " + companyName + " does not exist.");
             return false;
         }
         int shareholderShares = company.getShareholder(shareholder);
 
         if (shareholderShares < shares) {
-            Main.instance.getLogger().info(shareholder.getName() + " does not have enough shares to transfer.");
+            RcRPGMain.instance.getLogger().info(shareholder.getName() + " does not have enough shares to transfer.");
             return false;
         }
 

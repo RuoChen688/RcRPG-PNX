@@ -1,7 +1,7 @@
 package RcRPG.Society;
 
 import RcRPG.Handle;
-import RcRPG.Main;
+import RcRPG.RcRPGMain;
 import RcRPG.RPG.Armour;
 import RcRPG.RPG.Magic;
 import RcRPG.RPG.Stone;
@@ -60,13 +60,13 @@ public class Shop {
 
             return shop;
         }catch (Exception e){
-            Main.instance.getLogger().error("加载商店"+name+"配置文件失败");
+            RcRPGMain.instance.getLogger().error("加载商店"+name+"配置文件失败");
             return null;
         }
     }
 
     public static Config getShopConfig(String name){
-        File file = new File(Main.instance.getDataFolder()+"/Shop/"+name+".yml");
+        File file = new File(RcRPGMain.instance.getDataFolder()+"/Shop/"+name+".yml");
         Config config;
         if(file.exists()){
             config = new Config(file,Config.YAML);
@@ -78,8 +78,8 @@ public class Shop {
 
     public static Config addShopConfig(String name,String pos){
         if(getShopConfig(name) == null){
-            Main.instance.saveResource("Shop.yml","/Shop/"+name+".yml",false);
-            Config config = new Config(Main.instance.getShopFile()+"/"+name+".yml");
+            RcRPGMain.instance.saveResource("Shop.yml","/Shop/"+name+".yml",false);
+            Config config = new Config(RcRPGMain.instance.getShopFile()+"/"+name+".yml");
             config.set("位置",pos);
             config.save();
             return config;
@@ -89,7 +89,7 @@ public class Shop {
 
     public static boolean delShopConfig(String name){
         if(getShopConfig(name) != null){
-            File file = new File(Main.instance.getShopFile(),"/"+name+".yml");
+            File file = new File(RcRPGMain.instance.getShopFile(),"/"+name+".yml");
             file.delete();
             return true;
         }

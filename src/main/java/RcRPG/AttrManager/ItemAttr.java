@@ -1,6 +1,6 @@
 package RcRPG.AttrManager;
 
-import RcRPG.Main;
+import RcRPG.RcRPGMain;
 
 import java.util.HashMap;
 import java.util.List;
@@ -50,7 +50,7 @@ public class ItemAttr extends Manager {
                     attrMap.put(key, floatValue);
                 }
             } else {
-                Main.instance.getLogger().warning(key + " ItemAttr中不知道是啥类型");
+                RcRPGMain.instance.getLogger().warning(key + " ItemAttr中不知道是啥类型");
             }
         }
         mainAttr = attrMap;

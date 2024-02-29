@@ -1,7 +1,7 @@
 package RcRPG.Task;
 
 import RcRPG.Handle;
-import RcRPG.Main;
+import RcRPG.RcRPGMain;
 import RcRPG.RPG.*;
 import RcRPG.Society.Money;
 import RcRPG.Society.Points;
@@ -12,16 +12,16 @@ import cn.nukkit.scheduler.PluginTask;
 
 public class Tip extends PluginTask {
 
-    public Tip(Main main){
-        super(main);
+    public Tip(RcRPGMain rcRPGMain){
+        super(rcRPGMain);
     }
 
     @Override
     public void onRun(int i) {
-        for (Player player : Main.instance.getServer().getOnlinePlayers().values()) {
+        for (Player player : RcRPGMain.instance.getServer().getOnlinePlayers().values()) {
             if(Handle.getPlayerConfig(player.getName()) == null) return;
             if(player.getInventory().getItemInHand().isNull() || player.getInventory().getItemInHand().getNamedTag() == null){
-                String text = Main.instance.config.getString("底部显示");
+                String text = RcRPGMain.instance.config.getString("底部显示");
                 if(text.contains("@name")) text = text.replace("@name", player.getName());
                 if(text.contains("@hp")) text = text.replace("@hp",String.valueOf(player.getHealth()));
                 if(text.contains("@maxhp")) text = text.replace("@maxhp",String.valueOf(player.getMaxHealth()));
@@ -44,22 +44,22 @@ public class Tip extends PluginTask {
                 String text = "";
                 switch (tag.getString("type")){
                     case "weapon":
-                        Weapon weapon = Main.loadWeapon.get(item.getNamedTag().getString("name"));
+                        Weapon weapon = RcRPGMain.loadWeapon.get(item.getNamedTag().getString("name"));
                         text = weapon.getTipText();
                         if(text.contains("@n")) text = text.replace("@n","\n");
                         break;
                     case "armour":
-                        Armour armour = Main.loadArmour.get(item.getNamedTag().getString("name"));
+                        Armour armour = RcRPGMain.loadArmour.get(item.getNamedTag().getString("name"));
                         text = armour.getTipText();
                         if(text.contains("@n")) text = text.replace("@n","\n");
                         break;
                     case "stone":
-                        Stone stone = Main.loadStone.get(item.getNamedTag().getString("name"));
+                        Stone stone = RcRPGMain.loadStone.get(item.getNamedTag().getString("name"));
                         text = stone.getTipText();
                         if(text.contains("@n")) text = text.replace("@n","\n");
                         break;
                     case "magic":
-                        Magic magic = Main.loadMagic.get(item.getNamedTag().getString("name"));
+                        Magic magic = RcRPGMain.loadMagic.get(item.getNamedTag().getString("name"));
                         text = magic.getTipText();
                         if(text.contains("@n")) text = text.replace("@n","\n");
                         break;    

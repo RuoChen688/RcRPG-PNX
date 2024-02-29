@@ -21,10 +21,10 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-public class Main extends PluginBase implements Listener {
+public class RcRPGMain extends PluginBase implements Listener {
 
     @Getter
-    public static Main instance;
+    public static RcRPGMain instance;
 
     @Getter
     public static PluginI18n i18n;
@@ -53,7 +53,7 @@ public class Main extends PluginBase implements Listener {
 
     public static LinkedHashMap<String, Ornament> loadOrnament = new LinkedHashMap<>();
 
-    public Main(){}
+    public RcRPGMain(){}
 
     public void onLoad(){
         //save Plugin Instance
@@ -327,8 +327,8 @@ public class Main extends PluginBase implements Listener {
         attrDisplayPercent.add("燃烧概率");
         attrDisplayPercent.add("雷击概率");
         attrDisplayPercent.add("冰冻概率");
-        if (Main.instance.config.exists("AttrDisplayPercent")) {
-            attrDisplayPercentConfig = Main.instance.config.getStringList("AttrDisplayPercent");
+        if (RcRPGMain.instance.config.exists("AttrDisplayPercent")) {
+            attrDisplayPercentConfig = RcRPGMain.instance.config.getStringList("AttrDisplayPercent");
         } else {
             attrDisplayPercentConfig = attrDisplayPercent;
         }

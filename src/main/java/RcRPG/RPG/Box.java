@@ -1,6 +1,6 @@
 package RcRPG.RPG;
 
-import RcRPG.Main;
+import RcRPG.RcRPGMain;
 import RcRPG.PlayerStatus;
 import RcRPG.Society.Money;
 import RcRPG.Society.Points;
@@ -53,7 +53,7 @@ public class Box {
             Box box = new Box(name,config);
 
             box.setLabel(config.getString("标签"));
-            box.setItem(RuntimeItems.getMapping().getItemByNamespaceId(config.getString("物品ID"),1));
+            box.setItem(Item.fromString(config.getString("物品ID")));
             box.setSize(config.getInt("容量"));
             box.setTime(config.getInt("时间"));
             ArrayList<String> list = new ArrayList<>(config.getStringList("奖励"));
@@ -65,13 +65,13 @@ public class Box {
 
             return box;
         }catch(Exception e){
-            Main.instance.getLogger().error("加载箱子"+name+"配置文件失败");
+            RcRPGMain.instance.getLogger().error("加载箱子"+name+"配置文件失败");
             return null;
         }
     }
 
     public static Config getBoxConfig(String name){
-        File file = new File(Main.instance.getDataFolder()+"/Box/"+name+".yml");
+        File file = new File(RcRPGMain.instance.getDataFolder()+"/Box/"+name+".yml");
         Config config;
         if(file.exists()){
             config = new Config(file,Config.YAML);
@@ -83,8 +83,8 @@ public class Box {
 
     public static Config addBoxConfig(String name,String id){
         if(getBoxConfig(name) == null){
-            Main.instance.saveResource("Box.yml","/Box/"+name+".yml",false);
-            Config config = new Config(Main.instance.getBoxFile()+"/"+name+".yml");
+            RcRPGMain.instance.saveResource("Box.yml","/Box/"+name+".yml",false);
+            Config config = new Config(RcRPGMain.instance.getBoxFile()+"/"+name+".yml");
             config.set("物品ID",id);
             config.save();
             return config;
@@ -94,7 +94,7 @@ public class Box {
 
     public static boolean delBoxConfig(String name){
         if(getBoxConfig(name) != null){
-            File file = new File(Main.instance.getBoxFile(),"/"+name+".yml");
+            File file = new File(RcRPGMain.instance.getBoxFile(),"/"+name+".yml");
             file.delete();
             return true;
         }
@@ -102,9 +102,9 @@ public class Box {
     }
 
     public static boolean giveBox(Player player, String name, int count){
-        if(Main.loadBox.containsKey(name)){
-            Box box = Main.loadBox.get(name);
-            Item item = Main.loadBox.get(name).getItem();
+        if(RcRPGMain.loadBox.containsKey(name)){
+            Box box = RcRPGMain.loadBox.get(name);
+            Item item = RcRPGMain.loadBox.get(name).getItem();
             item.setCount(count);
             item.setLore(box.lore());
             CompoundTag tag = item.getNamedTag();
@@ -127,7 +127,7 @@ public class Box {
                 String text = box.getServerMessage();
                 if(text.contains("@player")) text = text.replace("@player", player.getName());
                 if(text.contains("@item")) text = text.replace("@item", box.getLabel());
-                Main.instance.getServer().broadcastMessage(text);
+                RcRPGMain.instance.getServer().broadcastMessage(text);
             }
             return true;
         }
@@ -158,7 +158,7 @@ public class Box {
     }
 
     public static void useBox(Player player,Item item){
-        Box box = Main.loadBox.get(item.getNamedTag().getString("name"));
+        Box box = RcRPGMain.loadBox.get(item.getNamedTag().getString("name"));
         if(PlayerStatus.getSize(player) < box.getSize()){
             player.sendMessage("箱子槽数不够啦，你只有"+PlayerStatus.getSize(player)+"格啦");
             return;

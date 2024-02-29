@@ -1,14 +1,14 @@
 package RcRPG.Task;
 
-import RcRPG.Main;
+import RcRPG.RcRPGMain;
 import RcRPG.PlayerStatus;
 import RcRPG.RPG.Box;
 import cn.nukkit.Player;
 import cn.nukkit.scheduler.PluginTask;
 
 public class BoxTimeTask extends PluginTask {
-    public BoxTimeTask(Main main){
-        super(main);
+    public BoxTimeTask(RcRPGMain rcRPGMain){
+        super(rcRPGMain);
     }
 
     @Override

@@ -13,7 +13,7 @@ import cn.nukkit.item.Item;
 
 import java.util.LinkedHashMap;
 
-import static cn.ankele.plugin.utils.Commands.createItem;
+import static cn.ankele.plugin.utils.BaseCommand.createItem;
 
 public class Utils {
 
@@ -36,7 +36,7 @@ public class Utils {
         String[] arr = str.split("@");
         if (arr[0].equals("mi")) {// mi@1 代金券
             if (Server.getInstance().getPluginManager().getPlugin("MagicItem") == null) {
-                Main.getInstance().getLogger().warning("你没有使用 MagicItem 插件却在试图获取它的物品：" + str);
+                RcRPGMain.getInstance().getLogger().warning("你没有使用 MagicItem 插件却在试图获取它的物品：" + str);
                 return Item.AIR_ITEM;
             }
             LinkedHashMap<String, ItemBean> items = MagicItem.getItemsMap();
@@ -54,7 +54,7 @@ public class Utils {
                 item.setCompoundTag(Tools.hexStringToBytes(otherItemArr[3]));
                 return item;
             } else {
-                Main.getInstance().getLogger().warning("MagicItem物品不存在：" + args[1]);
+                RcRPGMain.getInstance().getLogger().warning("MagicItem物品不存在：" + args[1]);
             }
         } else if (arr[0].equals("item")) {
             String[] args = arr[1].split(" ");
@@ -68,7 +68,7 @@ public class Utils {
             return item;
         } else if (arr[0].equals("nweapon") || arr[0].equals("rcrpg")) {
             if (Server.getInstance().getPluginManager().getPlugin("RcRPG") == null) {
-                Main.getInstance().getLogger().warning("你没有使用 RcRPG、NWeapon 插件却在试图获取它的物品：" + str);
+                RcRPGMain.getInstance().getLogger().warning("你没有使用 RcRPG、NWeapon 插件却在试图获取它的物品：" + str);
                 return Item.AIR_ITEM;
             }
             String[] args = arr[1].split(" ");//Main.loadWeapon
@@ -85,14 +85,14 @@ public class Utils {
                 case "防具":
                 case "armour":
                 case "armor": {
-                    if (Main.loadArmour.containsKey(itemName)) {
+                    if (RcRPGMain.loadArmour.containsKey(itemName)) {
                         return Armour.getItem(itemName, count);
                     }
                     break;
                 }
                 case "武器":
                 case "weapon": {
-                    if (Main.loadWeapon.containsKey(itemName)) {
+                    if (RcRPGMain.loadWeapon.containsKey(itemName)) {
                         return Weapon.getItem(itemName, count);
                     }
                     break;
@@ -100,7 +100,7 @@ public class Utils {
                 case "宝石":
                 case "stone":
                 case "gem": {
-                    if (Main.loadStone.containsKey(itemName)) {
+                    if (RcRPGMain.loadStone.containsKey(itemName)) {
                         return Stone.getItem(itemName, count);
                     }
                     break;
@@ -108,7 +108,7 @@ public class Utils {
                 case "饰品":
                 case "ornament":
                 case "jewelry": {
-                    if (Main.loadOrnament.containsKey(itemName)) {
+                    if (RcRPGMain.loadOrnament.containsKey(itemName)) {
                         return Ornament.getItem(itemName, count);
                     }
                     break;
@@ -126,7 +126,7 @@ public class Utils {
             return Item.AIR_ITEM;
             //return nWeapon.onlyNameGetItem(args[0], args[1], args[2], null);
         } else {
-            Main.getInstance().getLogger().warning("物品配置有误：" + str);
+            RcRPGMain.getInstance().getLogger().warning("物品配置有误：" + str);
         }
         return Item.AIR_ITEM;
     }

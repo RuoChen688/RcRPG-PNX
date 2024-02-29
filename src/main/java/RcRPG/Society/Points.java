@@ -1,7 +1,7 @@
 package RcRPG.Society;
 
 import RcRPG.Handle;
-import RcRPG.Main;
+import RcRPG.RcRPGMain;
 import cn.nukkit.Player;
 import cn.nukkit.utils.Config;
 import net.player.api.Point;
@@ -9,7 +9,7 @@ import net.player.api.Point;
 public class Points {
 
     public static int getPoint(Player player){
-        if(!Main.point){
+        if(!RcRPGMain.point){
             String name = player.getName();
             if(Handle.getPlayerConfig(name) != null){
                 Config config = Handle.getPlayerConfig(name);
@@ -22,14 +22,14 @@ public class Points {
     }
 
     public static boolean addPoint(Player player,int point){
-        if(!Main.point){
+        if(!RcRPGMain.point){
             String name = player.getName();
             if(Handle.getPlayerConfig(name) != null){
                 Config config = Handle.getPlayerConfig(name);
                 config.set("点券",config.getInt("点券") + point);
                 config.save();
-                if(!Main.instance.config.getString("点券增加提示").equals("")){
-                    String text = Main.instance.config.getString("点券增加提示");
+                if(!RcRPGMain.instance.config.getString("点券增加提示").equals("")){
+                    String text = RcRPGMain.instance.config.getString("点券增加提示");
                     if(text.contains("@player")) text = text.replace("@player",name);
                     if(text.contains("@point")) text = text.replace("@point",String.valueOf(point));
                     player.sendMessage(text);
@@ -44,7 +44,7 @@ public class Points {
     }
 
     public static boolean delPoint(Player player,int point){
-        if(!Main.point){
+        if(!RcRPGMain.point){
             String name = player.getName();
             if(Handle.getPlayerConfig(name) != null){
                 Config config = Handle.getPlayerConfig(name);

@@ -1,7 +1,7 @@
 package RcRPG.Form;
 
 import RcRPG.Handle;
-import RcRPG.Main;
+import RcRPG.RcRPGMain;
 import RcRPG.RPG.Armour;
 import RcRPG.RPG.Stone;
 import RcRPG.RPG.Weapon;
@@ -35,10 +35,10 @@ public class inlayForm {
         handItem = item;
         //Object state;
         if (Weapon.isWeapon(item)) {
-            weaponItem = Main.loadWeapon.get(item.getNamedTag().getString("name"));
+            weaponItem = RcRPGMain.loadWeapon.get(item.getNamedTag().getString("name"));
             //state = weaponItem;
         } else if (Armour.isArmour(item)) {
-            armourItem = Main.loadArmour.get(item.getNamedTag().getString("name"));
+            armourItem = RcRPGMain.loadArmour.get(item.getNamedTag().getString("name"));
             //state = armourItem;
         } else {
             return;

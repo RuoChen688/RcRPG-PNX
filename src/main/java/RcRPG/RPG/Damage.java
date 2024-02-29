@@ -1,7 +1,7 @@
 package RcRPG.RPG;
 
 import RcRPG.Handle;
-import RcRPG.Main;
+import RcRPG.RcRPGMain;
 import cn.nukkit.Player;
 import cn.nukkit.entity.Entity;
 import cn.nukkit.event.entity.EntityDamageEvent;
@@ -36,7 +36,7 @@ public class Damage {
     public static void onDamage(Player damager, Entity entity){
         Item item = damager.getInventory().getItemInHand();
         if (!item.isNull() && Weapon.isWeapon(item)) {
-            Weapon weapon = Main.loadWeapon.get(item.getNamedTag().getString("name"));
+            Weapon weapon = RcRPGMain.loadWeapon.get(item.getNamedTag().getString("name"));
             if(entity instanceof Player) {// 当受害者是玩家时
                 if (weapon.getFireRound() != 0) {// 火焰
                     if (Handle.random(1, 100) <= weapon.getFireRound()) {

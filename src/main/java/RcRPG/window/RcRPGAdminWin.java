@@ -1,6 +1,6 @@
 package RcRPG.window;
 
-import RcRPG.Main;
+import RcRPG.RcRPGMain;
 import cn.nukkit.Player;
 import cn.nukkit.event.Listener;
 import cn.nukkit.form.element.ElementButton;
@@ -13,11 +13,11 @@ public class RcRPGAdminWin implements Listener {
 
     public RcRPGAdminWin(Player player) {
         LangCode langCode = player.getLanguageCode();
-        FormWindowSimple form = new FormWindowSimple(Main.getI18n().tr(langCode, "rcrpg.window.main.title"), Main.getI18n().tr(langCode, "rcrpg.window.select_config_manage"));
-        form.addButton(new ElementButton(Main.getI18n().tr(langCode, "rcrpg.window.main.button1")));
-        form.addButton(new ElementButton(Main.getI18n().tr(langCode, "rcrpg.window.main.button2")));
-        form.addButton(new ElementButton(Main.getI18n().tr(langCode, "rcrpg.window.main.button3")));
-        form.addButton(new ElementButton(Main.getI18n().tr(langCode, "rcrpg.window.main.button4")));
+        FormWindowSimple form = new FormWindowSimple(RcRPGMain.getI18n().tr(langCode, "rcrpg.window.main.title"), RcRPGMain.getI18n().tr(langCode, "rcrpg.window.select_config_manage"));
+        form.addButton(new ElementButton(RcRPGMain.getI18n().tr(langCode, "rcrpg.window.main.button1")));
+        form.addButton(new ElementButton(RcRPGMain.getI18n().tr(langCode, "rcrpg.window.main.button2")));
+        form.addButton(new ElementButton(RcRPGMain.getI18n().tr(langCode, "rcrpg.window.main.button3")));
+        form.addButton(new ElementButton(RcRPGMain.getI18n().tr(langCode, "rcrpg.window.main.button4")));
 
         form.addHandler(FormResponseHandler.withoutPlayer(ignored -> {
             if (form.wasClosed()) {

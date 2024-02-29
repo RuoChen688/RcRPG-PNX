@@ -1,6 +1,6 @@
 package RcRPG.window;
 
-import RcRPG.Main;
+import RcRPG.RcRPGMain;
 import RcRPG.RPG.Weapon;
 import cn.nukkit.Player;
 import cn.nukkit.event.Listener;
@@ -14,8 +14,8 @@ public class SendWeaponAdminWin implements Listener { //一般实际开发中不
 
     public SendWeaponAdminWin(Player player) {
         LangCode langCode = player.getLanguageCode();
-        FormWindowSimple form = new FormWindowSimple(Main.getI18n().tr(langCode, "rcrpg.window.weapon.title"), Main.getI18n().tr(langCode, "rcrpg.window.select_config_manage"));
-        for (String key : Main.loadWeapon.keySet()) {
+        FormWindowSimple form = new FormWindowSimple(RcRPGMain.getI18n().tr(langCode, "rcrpg.window.weapon.title"), RcRPGMain.getI18n().tr(langCode, "rcrpg.window.select_config_manage"));
+        for (String key : RcRPGMain.loadWeapon.keySet()) {
             form.addButton(new ElementButton(key));
         }
         form.addHandler(FormResponseHandler.withoutPlayer(ignored -> {
@@ -30,7 +30,7 @@ public class SendWeaponAdminWin implements Listener { //一般实际开发中不
     }
 
     public void SendWeaponOptionsWin(Player player, String weaponKey) {
-        Weapon weapon = Main.loadWeapon.get(weaponKey);
+        Weapon weapon = RcRPGMain.loadWeapon.get(weaponKey);
 
         FormWindowSimple form = new FormWindowSimple("RcRPG管理 - " + weaponKey,
                 "显示名称: " + weapon.getShowName() +

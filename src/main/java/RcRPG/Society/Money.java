@@ -1,7 +1,7 @@
 package RcRPG.Society;
 
 import RcRPG.Handle;
-import RcRPG.Main;
+import RcRPG.RcRPGMain;
 import cn.nukkit.Player;
 import cn.nukkit.utils.Config;
 import me.onebone.economyapi.EconomyAPI;
@@ -9,7 +9,7 @@ import me.onebone.economyapi.EconomyAPI;
 public class Money {
 
     public static int getMoney(Player player){
-        if(!Main.money){
+        if(!RcRPGMain.money){
             String name = player.getName();
             if(Handle.getPlayerConfig(name) != null){
                 Config config = Handle.getPlayerConfig(name);
@@ -22,14 +22,14 @@ public class Money {
     }
 
     public static boolean addMoney(Player player,int money){
-        if(!Main.money){
+        if(!RcRPGMain.money){
             String name = player.getName();
             if(Handle.getPlayerConfig(name) != null){
                 Config config = Handle.getPlayerConfig(name);
                 config.set("金币",config.getInt("金币") + money);
                 config.save();
-                if(!Main.instance.config.getString("金币增加提示").equals("")){
-                    String text = Main.instance.config.getString("金币增加提示");
+                if(!RcRPGMain.instance.config.getString("金币增加提示").equals("")){
+                    String text = RcRPGMain.instance.config.getString("金币增加提示");
                     if(text.contains("@player")) text = text.replace("@player",name);
                     if(text.contains("@money")) text = text.replace("@money",String.valueOf(money));
                     player.sendMessage(text);
@@ -45,7 +45,7 @@ public class Money {
     }
 
     public static boolean delMoney(Player player,int money){
-        if(!Main.money){
+        if(!RcRPGMain.money){
             String name = player.getName();
             if(Handle.getPlayerConfig(name) != null){
                 Config config = Handle.getPlayerConfig(name);

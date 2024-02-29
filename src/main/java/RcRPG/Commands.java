@@ -17,23 +17,21 @@ import cn.nukkit.command.CommandSender;
 import cn.nukkit.command.PluginCommand;
 import cn.nukkit.command.data.CommandParamType;
 import cn.nukkit.command.data.CommandParameter;
-import cn.nukkit.command.tree.ParamList;
-import cn.nukkit.command.tree.node.PlayersNode;
-import cn.nukkit.command.utils.CommandLogger;
 import cn.nukkit.item.Item;
+import cn.nukkit.lang.PluginI18n;
 import cn.nukkit.utils.Config;
-import cn.nukkit.utils.StringUtils;
+import cn.nukkit.utils.TextFormat;
 
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
-import static RcRPG.Main.disablePrefix;
+import static RcRPG.RcRPGMain.disablePrefix;
 
-public class Commands extends PluginCommand<Main> {
-
+public class Commands extends PluginCommand<RcRPGMain> {
+    protected RcRPGMain api;
+    protected PluginI18n i18n;
     public Commands(String cmdName) {
-        super(cmdName, "RPG指令", Main.getInstance());
+        super(cmdName, RcRPGMain.getInstance());
+        this.setDescription("RcRPG指令");
         this.setPermission("plugin.rcrpg");
         this.commandParameters.clear();
         ArrayList<String> society = new ArrayList<>(){{
@@ -67,7 +65,7 @@ public class Commands extends PluginCommand<Main> {
         this.addCommandParameters("check",new CommandParameter[]{
                 CommandParameter.newEnum("check", new String[]{"check"}),
                 CommandParameter.newEnum("type",new String[]{"attr"}),
-                CommandParameter.newType("player", CommandParamType.TARGET, new PlayersNode()),
+                CommandParameter.newType("player", CommandParamType.TARGET),
         });
         this.addCommandParameters("guild",new CommandParameter[]{
                 CommandParameter.newEnum("guild",new String[]{"guild"})
@@ -97,12 +95,12 @@ public class Commands extends PluginCommand<Main> {
                 this.addCommandParameters(name + "_add",new CommandParameter[]{
                         CommandParameter.newEnum(name,new String[]{name}),
                         CommandParameter.newEnum("add",new String[]{"add"}),
-                        CommandParameter.newType(StringUtils.capitalize(name),CommandParamType.STRING)
+                        CommandParameter.newType(name.toLowerCase(),CommandParamType.STRING)
                 });
                 this.addCommandParameters(name + "_del",new CommandParameter[]{
                         CommandParameter.newEnum(name,new String[]{name}),
                         CommandParameter.newEnum("del",new String[]{"del"}),
-                        CommandParameter.newType(StringUtils.capitalize(name),CommandParamType.STRING)
+                        CommandParameter.newType(name.toLowerCase(),CommandParamType.STRING)
                 });
                 this.addCommandParameters(name + "_help",new CommandParameter[]{
                         CommandParameter.newEnum(name,new String[]{name}),
@@ -112,21 +110,21 @@ public class Commands extends PluginCommand<Main> {
                         CommandParameter.newEnum(name,new String[]{name}),
                         CommandParameter.newEnum("give",new String[]{"give", "drop"}),
                         CommandParameter.newType("PlayerName",CommandParamType.STRING),
-                        CommandParameter.newType(StringUtils.capitalize(name),CommandParamType.STRING),
-                        CommandParameter.newType("Count",CommandParamType.INT)
+                        CommandParameter.newType(name.toLowerCase(),CommandParamType.STRING),
+                        CommandParameter.newType("Count",true,CommandParamType.INT)
                 });
             }else if(name.equals("prefix")){
                 this.addCommandParameters(name + "_give",new CommandParameter[]{
                         CommandParameter.newEnum(name,new String[]{name}),
                         CommandParameter.newEnum("give",new String[]{"give"}),
-                        CommandParameter.newType("player", CommandParamType.TARGET, new PlayersNode()),
-                        CommandParameter.newType(StringUtils.capitalize(name),CommandParamType.STRING)
+                        CommandParameter.newType("player", CommandParamType.TARGET),
+                        CommandParameter.newType(name.toLowerCase(),CommandParamType.STRING)
                 });
                 this.addCommandParameters(name + "_remove",new CommandParameter[]{
                         CommandParameter.newEnum(name,new String[]{name}),
                         CommandParameter.newEnum("remove",new String[]{"remove"}),
-                        CommandParameter.newType("player", CommandParamType.TARGET, new PlayersNode()),
-                        CommandParameter.newType(StringUtils.capitalize(name),CommandParamType.STRING)
+                        CommandParameter.newType("player", CommandParamType.TARGET),
+                        CommandParameter.newType(name.toLowerCase(),CommandParamType.STRING)
                 });
                 this.addCommandParameters(name + "_help",new CommandParameter[]{
                         CommandParameter.newEnum(name,new String[]{name}),
@@ -136,18 +134,18 @@ public class Commands extends PluginCommand<Main> {
                         CommandParameter.newEnum(name,new String[]{name}),
                         CommandParameter.newEnum("my",new String[]{"my"})
                 });
-            } else if(society.contains(name)) {
+            } else if(society.contains(name)) {// money, point
                 this.addCommandParameters(name + "_add",new CommandParameter[]{
                         CommandParameter.newEnum(name,new String[]{name}),
                         CommandParameter.newEnum("add",new String[]{"add"}),
-                        CommandParameter.newType("player", CommandParamType.TARGET, new PlayersNode()),
-                        CommandParameter.newType(StringUtils.capitalize(name),CommandParamType.INT)
+                        CommandParameter.newType("player", CommandParamType.TARGET),
+                        CommandParameter.newType(name.toLowerCase(),CommandParamType.INT)
                 });
                 this.addCommandParameters(name + "_del",new CommandParameter[]{
                         CommandParameter.newEnum(name,new String[]{name}),
                         CommandParameter.newEnum("del",new String[]{"del"}),
                         CommandParameter.newType("PlayerName",CommandParamType.STRING),
-                        CommandParameter.newType(StringUtils.capitalize(name),CommandParamType.INT)
+                        CommandParameter.newType(name.toLowerCase(),CommandParamType.INT)
                 });
                 this.addCommandParameters(name + "_help",new CommandParameter[]{
                         CommandParameter.newEnum(name,new String[]{name}),
@@ -159,21 +157,22 @@ public class Commands extends PluginCommand<Main> {
                 });
             }
         }
-        this.enableParamTree();
+        api = RcRPGMain.getInstance();
+        i18n = RcRPGMain.getI18n();
     }
 
     @Override
-    public int execute(CommandSender sender, String commandLabel, Map.Entry<String, ParamList> result, CommandLogger log) {
+    public boolean execute(CommandSender sender, String label, String[] args) {
         if(!sender.isOp()){
-            log.addError("权限不足").output();
-            return 0;
+            sender.sendMessage(TextFormat.RED+"权限不足");
+            return false;
         }
-        var args = result.getValue();
-        String arg1 = "";
-        if (args.hasResult(1)) {
-            arg1 = args.getResult(1);
+
+        if (args.length < 1) {
+            sender.sendMessage(TextFormat.RED+"缺少参数");
+            return false;
         }
-        switch((String) args.getResult(0)) {
+        switch(args[0]) {
             case "help":
                 sender.sendMessage("/rpg check attr [playerName]   查询属性命令");
                 sender.sendMessage("/rpg inlay   镶嵌宝石的命令 (GUI)");
@@ -193,124 +192,130 @@ public class Commands extends PluginCommand<Main> {
                 break;
             case "admin": {
                 if (!sender.isPlayer()) {
-                    log.addError("本命令必须是玩家执行").output();
-                    return 0;
+                    sender.sendMessage(TextFormat.RED+"本命令必须是玩家执行");
+                    return false;
                 }
                 new RcRPGAdminWin((Player) sender);
-                return 1;
+                return true;
             }
             case "reload": {
-                Main.getInstance().init();
-                log.addSuccess("rpg.commands.reloaded").output();
-                return 1;
+                RcRPGMain.getInstance().init();
+                sender.sendMessage(TextFormat.GREEN+"rpg.commands.reloaded");
+                return true;
             }
             case "dismantle": {
                 if (!sender.isPlayer()) {
-                    log.addError("本命令必须是玩家执行").output();
-                    return 0;
+                    sender.sendMessage(TextFormat.RED+"本命令必须是玩家执行");
+                    return false;
                 }
                 DismantlePanel panel = new DismantlePanel();
                 panel.sendPanel((Player) sender);
-                return 1;
+                return true;
             }
             case "inlay": {
                 if (!sender.isPlayer()) {
-                    log.addError("本命令必须是玩家执行").output();
-                    return 0;
+                    sender.sendMessage(TextFormat.RED+"本命令必须是玩家执行");
+                    return false;
                 }
                 Item item = ((Player) sender).getInventory().getItemInHand();
                 if (item.isNull()) {
-                    log.addError("未手持装备").output();
-                    return 0;
+                    sender.sendMessage(TextFormat.RED+"未手持装备");
+                    return false;
                 }
                 if (!Weapon.isWeapon(item) && !Armour.isArmour(item)) {
-                    log.addError("请手持有效装备").output();
-                    return 0;
+                    sender.sendMessage(TextFormat.RED+"请手持有效装备");
+                    return false;
                 }
                 new inlayForm().makeInlayForm((Player) sender, item);
-                return 1;
+                return true;
             }
             case "check":
                 if (!(sender instanceof Player)) {
-                    log.addError("仅允许玩家执行").output();
-                    return 0;
+                    sender.sendMessage(TextFormat.RED+"仅允许玩家执行");
+                    return false;
                 }
-                if (args.hasResult(1)) {
-                    if (args.getResult(1).equals("attr")) {
-                        if (args.hasResult(2)) {
-                            List<Player> players = args.getResult(2);
-                            if (players.isEmpty()) {
-                                log.addNoTargetMatch().output();
-                                return 0;
-                            }
-                            Player player = players.get(0);
-                            PlayerAttr pAttr = PlayerAttr.getPlayerAttr((Player) sender);
-                            if (pAttr == null) {
-                                return 0;
-                            }
-                            pAttr.showAttrWindow(player);
-                            return 1;
-                        }
+
+                if (args.length < 2) {
+                    sender.sendMessage(TextFormat.RED+"缺少第2个参数");
+                    return false;
+                }
+                if (args[1].equals("attr")) {
+
+                    if (args.length < 3) {
+                        sender.sendMessage(TextFormat.RED+"缺少第3个参数");
+                        return false;
                     }
-                    return 0;
+                    Player player = api.getServer().getPlayer(args[2]);
+                    if (!player.isValid()) {
+                        sender.sendMessage("没有匹配的目标");
+                        return false;
+                    }
+                    PlayerAttr pAttr = PlayerAttr.getPlayerAttr((Player) sender);
+                    if (pAttr == null) {
+                        return false;
+                    }
+                    pAttr.showAttrWindow(player);
+                    return true;
                 }
             case "guild":
                 guildForm.make_one((Player) sender);
                 break;
             case "shop":
-                if(args.size() != 2){
-                    sender.sendMessage("参数错误");
-                    return 0;
+                if (args.length < 2) {
+                    sender.sendMessage(TextFormat.RED+"缺少第2个参数");
+                    return false;
                 }
-                if(arg1.equals("help")){
-                    sender.sendMessage("/rpg shop [Name] 创建一个名为Name的商店");
-                    return 1;
+                if(args[1].equals("help")){
+                    sender.sendMessage("/rpg shop [Name]   创建一个名为Name的商店");
+                    return true;
                 }
-                Events.playerShop.put((Player) sender, args.getResult(1));
+                Events.playerShop.put((Player) sender, args[1]);
                 sender.sendMessage("点击一个木牌");
                 break;
             case "exp":
-                if(arg1.equals("give")){
-                    if(args.size() != 4){
-                        sender.sendMessage("参数错误");
-                        return 0;
+                switch (args[1]) {
+                    case "help" -> {
+                        sender.sendMessage("/rpg exp give [Player] [Exp] 给予玩家经验");
                     }
-                    Player player = Server.getInstance().getPlayer((String) args.getResult(2));
-                    if(player == null) return 0;
-                    int expValue = args.getResult(3);
-                    if(Level.addExp(player, expValue)){
-                        if(sender.isPlayer()) sender.sendMessage("给予成功");
-                    } else {
-                        if(sender.isPlayer()) sender.sendMessage("给予失败");
+                    case "give" -> {
+                        if (args.length < 4) {
+                            sender.sendMessage(TextFormat.RED + "缺少第4个参数");
+                            return false;
+                        }
+                        Player player = Server.getInstance().getPlayer(args[2]);
+                        if (player == null) return false;
+                        int expValue = Integer.parseInt(args[3]);
+                        if (Level.addExp(player, expValue)) {
+                            if (sender.isPlayer()) sender.sendMessage("给予成功");
+                        } else {
+                            if (sender.isPlayer()) sender.sendMessage("给予失败");
+                        }
                     }
-                } else if (arg1.equals("help")) {
-                    sender.sendMessage("/rpg exp give [Player] [Exp] 给予玩家经验");
                 }
-                break;
+                sender.sendMessage(TextFormat.RED+"错误的命令，请使用：/rpg help");
+                return false;
             case "money": {
-                if (!args.hasResult(1)) {
-                    return 0;
+                if (args.length < 2) {
+                    sender.sendMessage(TextFormat.RED+"缺少第2个参数");
+                    return false;
                 }
-                String arg = args.getResult(1);
-                Player player = null;
-                if (args.hasResult(2)) {
-                    List<Player> players = args.getResult(2);
-                    if (!players.isEmpty()) {
-                        player = players.get(0);
-                    }
+                Player player = api.getServer().getPlayer(args[2]);
+                if (!player.isValid()) {
+                    sender.sendMessage("没有匹配的目标");
+                    return false;
                 }
                 int money = 0;
-                if (args.hasResult(3)) {
-                    money = args.getResult(3);
+                if (args.length > 3) {
+                    money = Integer.parseInt(args[3]);
                 }
-                switch (arg) {
+                switch (args[1]) {
                     case "help" -> {
                         sender.sendMessage("/rpg money add [Player] [Money] 给予玩家金币");
                         sender.sendMessage("/rpg money del [Player] [Money] 扣除玩家金币");
                         sender.sendMessage("/rpg money my 查看自身金币");
                     }
                     case "add" -> {
-                        if (player == null) return 0;
+                        if (player == null) return false;
                         if (Money.addMoney(player, money)) {
                             if (sender.isPlayer()) sender.sendMessage("给予成功");
                         } else {
@@ -329,22 +334,23 @@ public class Commands extends PluginCommand<Main> {
                 break;
             }
             case "point": {
-                if (!args.hasResult(1)) {
-                    return 0;
+                if (args.length < 2) {
+                    sender.sendMessage(TextFormat.RED+"缺少第2个参数");
+                    return false;
                 }
-                String arg = args.getResult(1);
                 Player player = null;
-                if (args.hasResult(2)) {
-                    List<Player> players = args.getResult(2);
-                    if (!players.isEmpty()) {
-                        player = players.get(0);
+                if (args.length > 2) {
+                    player = api.getServer().getPlayer(args[2]);
+                    if (!player.isValid()) {
+                        sender.sendMessage("没有匹配的目标");
+                        return false;
                     }
                 }
                 int point = 0;
-                if (args.hasResult(3)) {
-                    point = args.getResult(3);
+                if (args.length > 3) {
+                    point = Integer.parseInt(args[3]);
                 }
-                switch (arg) {
+                switch (args[1]) {
                     case "help" -> {
                         sender.sendMessage("/rpg point add [Player] [Point] 给予玩家点券");
                         sender.sendMessage("/rpg point del [Player] [Point] 扣除玩家点券");
@@ -369,38 +375,36 @@ public class Commands extends PluginCommand<Main> {
                 break;
             }
             case "prefix": {
-                if (!args.hasResult(1)) {
-                    return 0;
+                if (args.length < 2) {
+                    sender.sendMessage(TextFormat.RED+"缺少第2个参数");
+                    return false;
                 }
                 if (disablePrefix) {
-                    log.addError("RcRPG 称号已被禁用").output();
-                    return 0;
+                    sender.sendMessage(TextFormat.RED+"RcRPG 称号已被禁用");
+                    return false;
                 }
-                String arg = args.getResult(1);
                 Player player = null;
-                if (args.hasResult(2)) {
-                    List<Player> players = args.getResult(2);
-                    if (players.isEmpty()) {
-                        log.addNoTargetMatch().output();
-                        return 0;
-                    } else {
-                        player = players.get(0);
+                if (args.length > 2) {
+                    player = api.getServer().getPlayer(args[2]);
+                    if (!player.isValid()) {
+                        sender.sendMessage("没有匹配的目标");
+                        return false;
                     }
                 }
                 String prefix = "";
-                if (args.hasResult(3)) {
-                    prefix = args.getResult(3);
+                if (args.length > 3) {
+                    prefix = args[3];
                 }
-                switch (arg) {
+                switch (args[1]) {
                     case "help" -> {
                         sender.sendMessage("/rpg prefix give [Player] [Prefix] 给予玩家称号");
                         sender.sendMessage("/rpg prefix remove [Player] [Prefix] 扣除玩家称号");
                         sender.sendMessage("/rpg prefix my 查看自身称号");
                     }
                     case "give" -> {
-                        if (args.size() != 4) {
+                        if (args.length < 4) {
                             sender.sendMessage("参数错误");
-                            return 0;
+                            return false;
                         }
                         if (Prefix.givePrefix(player, prefix)) {
                             sender.sendMessage("给予成功");
@@ -409,9 +413,9 @@ public class Commands extends PluginCommand<Main> {
                         }
                     }
                     case "remove" -> {
-                        if (args.size() != 4) {
+                        if (args.length < 4) {
                             sender.sendMessage("参数错误");
-                            return 0;
+                            return false;
                         }
                         if (Prefix.delPrefix(player, prefix)) {
                             sender.sendMessage("移除成功");
@@ -424,8 +428,11 @@ public class Commands extends PluginCommand<Main> {
                 break;
             }
             case "weapon": {
-                String arg = args.getResult(1);
-                switch (arg) {
+                if (args.length < 2) {
+                    sender.sendMessage(TextFormat.RED+"缺少第2个参数");
+                    return false;
+                }
+                switch (args[1]) {
                     case "help" -> {
                         sender.sendMessage("/rpg weapon admin 管理武器列表");
                         sender.sendMessage("/rpg weapon add [Name] 创建一个名为Name的武器配置");
@@ -435,15 +442,15 @@ public class Commands extends PluginCommand<Main> {
                     }
                     case "admin" -> {
                         if (!sender.isPlayer()) {
-                            log.addError("本命令必须是玩家执行").output();
-                            return 0;
+                            sender.sendMessage(TextFormat.RED+"本命令必须是玩家执行");
+                            return false;
                         }
                         new SendWeaponAdminWin((Player) sender);
                     }
                     case "add" -> {
-                        if (args.size() != 3) {
+                        if (args.length < 3) {
                             sender.sendMessage("参数错误");
-                            return 0;
+                            return false;
                         }
                         Item item = ((Player) sender).getInventory().getItemInHand();
                         String id;
@@ -453,45 +460,41 @@ public class Commands extends PluginCommand<Main> {
                             id = item.getNamespaceId();
                         }
                         Config config;
-                        String weaponName = args.getResult(2);
+                        String weaponName = args[2];
                         if ((config = Weapon.addWeaponConfig(weaponName, id)) != null) {
                             Weapon weapon = Weapon.loadWeapon(weaponName, config);
-                            Main.loadWeapon.put(weaponName, weapon);
+                            RcRPGMain.loadWeapon.put(weaponName, weapon);
                             sender.sendMessage("添加成功");
                         } else {
                             sender.sendMessage("添加失败");
                         }
                     }
                     case "del" -> {
-                        if (args.size() != 3) {
+                        if (args.length < 3) {
                             sender.sendMessage("参数错误");
-                            return 0;
+                            return false;
                         }
-                        String weaponName = args.getResult(2);
+                        String weaponName = args[2];
                         if (Weapon.delWeaponConfig(weaponName)) {
-                            Main.loadWeapon.remove(weaponName);
+                            RcRPGMain.loadWeapon.remove(weaponName);
                             sender.sendMessage("删除成功");
                         } else {
                             sender.sendMessage("删除失败");
                         }
                     }
                     case "drop", "give" -> {
-                        if (args.size() != 5) {
-                            sender.sendMessage("参数错误");
-                            return 0;
-                        }
-                        String playerName = args.getResult(2);
-                        String weaponName = args.getResult(3);
-                        int count = args.getResult(4);
-                        Player player = Main.instance.getServer().getPlayer(playerName);
+                        String playerName = args[2];
+                        String weaponName = args[3];
+                        int count = args.length > 4 ? Integer.parseInt(args[4]) : 1;
+                        Player player = RcRPGMain.instance.getServer().getPlayer(playerName);
                         if (!player.isOnline()) {
                             sender.sendMessage("玩家不在线");
-                            return 0;
+                            return false;
                         }
-                        if (arg.equals("drop")) {
+                        if (args[1].equals("drop")) {
                             Item item = Weapon.getItem(weaponName, count);
                             if (item == null) {
-                                Main.getInstance().getLogger().warning("weapon drop失败："+weaponName);
+                                RcRPGMain.getInstance().getLogger().warning("weapon drop失败："+weaponName);
                             } else {
                                 player.getLevel().dropItem(player.getPosition(), item);
                             }
@@ -507,8 +510,11 @@ public class Commands extends PluginCommand<Main> {
                 break;
             }
             case "armour": {
-                String arg = args.getResult(1);
-                switch (arg) {
+                if (args.length < 2) {
+                    sender.sendMessage(TextFormat.RED+"缺少第2个参数");
+                    return false;
+                }
+                switch (args[1]) {
                     case "help" -> {
                         sender.sendMessage("/rpg armour admin 管理盔甲列表");
                         sender.sendMessage("/rpg armour add [Name] 创建一个名为Name的盔甲配置");
@@ -518,15 +524,15 @@ public class Commands extends PluginCommand<Main> {
                     }
                     case "admin" -> {
                         if (!sender.isPlayer()) {
-                            log.addError("本命令必须是玩家执行").output();
-                            return 0;
+                            sender.sendMessage(TextFormat.RED+"本命令必须是玩家执行");
+                            return false;
                         }
                         new SendArmourAdminWin((Player) sender);
                     }
                     case "add" -> {
-                        if (args.size() != 3) {
+                        if (args.length < 3) {
                             sender.sendMessage("参数错误");
-                            return 0;
+                            return false;
                         }
                         Item item = ((Player) sender).getInventory().getItemInHand();
                         String id;
@@ -536,45 +542,41 @@ public class Commands extends PluginCommand<Main> {
                             id = item.getNamespaceId();
                         }
                         Config config;
-                        String armorName = args.getResult(2);
+                        String armorName = args[2];
                         if ((config = Armour.addArmourConfig(armorName, id)) != null) {
                             Armour armour = Armour.loadArmour(armorName, config);
-                            Main.loadArmour.put(armorName, armour);
+                            RcRPGMain.loadArmour.put(armorName, armour);
                             sender.sendMessage("添加成功");
                         } else {
                             sender.sendMessage("添加失败");
                         }
                     }
                     case "del" -> {
-                        if (args.size() != 3) {
+                        if (args.length < 3) {
                             sender.sendMessage("参数错误");
-                            return 0;
+                            return false;
                         }
-                        String armorName = args.getResult(2);
+                        String armorName = args[2];
                         if (Armour.delArmourConfig(armorName)) {
-                            Main.loadArmour.remove(armorName);
+                            RcRPGMain.loadArmour.remove(armorName);
                             sender.sendMessage("删除成功");
                         } else {
                             sender.sendMessage("删除失败");
                         }
                     }
                     case "drop", "give" -> {
-                        if (args.size() != 5) {
-                            sender.sendMessage("参数错误");
-                            return 0;
-                        }
-                        String playerName = args.getResult(2);
-                        String armorName = args.getResult(3);
-                        int count = args.getResult(4);
-                        Player player = Main.instance.getServer().getPlayer(playerName);
+                        String playerName = args[2];
+                        String armorName = args[3];
+                        int count = args.length > 4 ? Integer.parseInt(args[4]) : 1;
+                        Player player = RcRPGMain.instance.getServer().getPlayer(playerName);
                         if (!player.isOnline()) {
                             sender.sendMessage("玩家不在线");
-                            return 0;
+                            return false;
                         }
-                        if (arg.equals("drop")) {
+                        if (args[1].equals("drop")) {
                             Item item = Armour.getItem(armorName, count);
                             if (item == null) {
-                                Main.getInstance().getLogger().warning("armour drop失败："+armorName);
+                                RcRPGMain.getInstance().getLogger().warning("armour drop失败："+armorName);
                             } else {
                                 player.getLevel().dropItem(player.getPosition(), item);
                             }
@@ -590,8 +592,11 @@ public class Commands extends PluginCommand<Main> {
                 break;
             }
             case "stone": {
-                String arg = args.getResult(1);
-                switch (arg) {
+                if (args.length < 2) {
+                    sender.sendMessage(TextFormat.RED+"缺少第2个参数");
+                    return false;
+                }
+                switch (args[1]) {
                     case "help" -> {
                         sender.sendMessage("/rpg stone admin 管理宝石列表");
                         sender.sendMessage("/rpg stone add [Name] 创建一个名为Name的宝石配置");
@@ -600,15 +605,15 @@ public class Commands extends PluginCommand<Main> {
                     }
                     case "admin" -> {
                         if (!sender.isPlayer()) {
-                            log.addError("本命令必须是玩家执行").output();
-                            return 0;
+                            sender.sendMessage(TextFormat.RED+"本命令必须是玩家执行");
+                            return false;
                         }
                         new SendStoneAdminWin((Player) sender);
                     }
                     case "add" -> {
-                        if (args.size() != 3) {
+                        if (args.length < 3) {
                             sender.sendMessage("参数错误");
-                            return 0;
+                            return false;
                         }
                         Item item = ((Player) sender).getInventory().getItemInHand();
                         String id;
@@ -617,41 +622,37 @@ public class Commands extends PluginCommand<Main> {
                         } else {
                             id = item.getNamespaceId();
                         }
-                        String stoneName = args.getResult(2);
+                        String stoneName = args[2];
                         Config config;
                         if ((config = Stone.addStoneConfig(stoneName, id)) != null) {
                             Stone stone = Stone.loadStone(stoneName, config);
-                            Main.loadStone.put(stoneName, stone);
+                            RcRPGMain.loadStone.put(stoneName, stone);
                             sender.sendMessage("添加成功");
                         } else {
                             sender.sendMessage("添加失败");
                         }
                     }
                     case "del" -> {
-                        if (args.size() != 3) {
+                        if (args.length < 3) {
                             sender.sendMessage("参数错误");
-                            return 0;
+                            return false;
                         }
-                        String stoneName = args.getResult(2);
+                        String stoneName = args[2];
                         if (Stone.delStoneConfig(stoneName)) {
-                            Main.loadStone.remove(stoneName);
+                            RcRPGMain.loadStone.remove(stoneName);
                             sender.sendMessage("删除成功");
                         } else {
                             sender.sendMessage("删除失败");
                         }
                     }
                     case "give" -> {
-                        if (args.size() != 5) {
-                            sender.sendMessage("参数错误");
-                            return 0;
-                        }
-                        String playerName = args.getResult(2);
-                        String stoneName = args.getResult(3);
-                        int count = args.getResult(4);
-                        Player player = Main.instance.getServer().getPlayer(playerName);
+                        String playerName = args[2];
+                        String stoneName = args[3];
+                        int count = args.length > 4 ? Integer.parseInt(args[4]) : 1;
+                        Player player = RcRPGMain.instance.getServer().getPlayer(playerName);
                         if (!player.isOnline()) {
                             sender.sendMessage("玩家不在线");
-                            return 0;
+                            return false;
                         }
                         if (Stone.giveStone(player, stoneName, count)) {
                             if (sender.isPlayer()) sender.sendMessage("给予成功");
@@ -663,8 +664,11 @@ public class Commands extends PluginCommand<Main> {
                 break;
             }
             case "magic": {
-                String arg = args.getResult(1);
-                switch (arg) {
+                if (args.length < 2) {
+                    sender.sendMessage(TextFormat.RED+"缺少第2个参数");
+                    return false;
+                }
+                switch (args[1]) {
                     case "help" -> {
                         sender.sendMessage("/rpg magic admin 管理魔法物品");
                         sender.sendMessage("/rpg magic add [Name] 创建一个名为Name的魔法物品配置");
@@ -672,9 +676,9 @@ public class Commands extends PluginCommand<Main> {
                         sender.sendMessage("/rpg magic give [Player] [Name] [Count] 给予玩家一定数量的魔法物品");
                     }
                     case "add" -> {
-                        if (args.size() != 3) {
+                        if (args.length < 3) {
                             sender.sendMessage("参数错误");
-                            return 0;
+                            return false;
                         }
                         Item item = ((Player) sender).getInventory().getItemInHand();
                         String id;
@@ -683,41 +687,37 @@ public class Commands extends PluginCommand<Main> {
                         } else {
                             id = item.getNamespaceId();
                         }
-                        String magicName = args.getResult(2);
+                        String magicName = args[2];
                         Config config;
                         if ((config = Magic.addMagicConfig(magicName, id)) != null) {
                             Magic magic = Magic.loadMagic(magicName, config);
-                            Main.loadMagic.put(magicName, magic);
+                            RcRPGMain.loadMagic.put(magicName, magic);
                             sender.sendMessage("添加成功");
                         } else {
                             sender.sendMessage("添加失败");
                         }
                     }
                     case "del" -> {
-                        if (args.size() != 3) {
+                        if (args.length < 3) {
                             sender.sendMessage("参数错误");
-                            return 0;
+                            return false;
                         }
-                        String magicName = args.getResult(2);
+                        String magicName = args[2];
                         if (Magic.delMagicConfig(magicName)) {
-                            Main.loadMagic.remove(magicName);
+                            RcRPGMain.loadMagic.remove(magicName);
                             sender.sendMessage("删除成功");
                         } else {
                             sender.sendMessage("删除失败");
                         }
                     }
                     case "give" -> {
-                        if (args.size() != 5) {
-                            sender.sendMessage("参数错误");
-                            return 0;
-                        }
-                        String playerName = args.getResult(2);
-                        String magicName = args.getResult(3);
-                        int count = args.getResult(4);
-                        Player player = Main.instance.getServer().getPlayer(playerName);
+                        String playerName = args[2];
+                        String magicName = args[3];
+                        int count = args.length > 4 ? Integer.parseInt(args[4]) : 1;
+                        Player player = RcRPGMain.instance.getServer().getPlayer(playerName);
                         if (!player.isOnline()) {
                             sender.sendMessage("玩家不在线");
-                            return 0;
+                            return false;
                         }
                         if (Magic.giveMagic(player, magicName, count)) {
                             if (sender.isPlayer()) sender.sendMessage("给予成功");
@@ -729,17 +729,20 @@ public class Commands extends PluginCommand<Main> {
                 break;
             }
             case "box": {
-                String arg = args.getResult(1);
-                switch (arg) {
+                if (args.length < 2) {
+                    sender.sendMessage(TextFormat.RED+"缺少第2个参数");
+                    return false;
+                }
+                switch (args[1]) {
                     case "help" -> {
                         sender.sendMessage("/rpg box add [Name] 创建一个名为Name的箱子配置");
                         sender.sendMessage("/rpg box del [Name] 删除一个名为Name的箱子配置");
                         sender.sendMessage("/rpg box give [Player] [Name] [Count] 给予玩家一定数量的箱子");
                     }
                     case "add" -> {
-                        if (args.size() != 3) {
+                        if (args.length < 3) {
                             sender.sendMessage("参数错误");
-                            return 0;
+                            return false;
                         }
                         Item item = ((Player) sender).getInventory().getItemInHand();
                         String id;
@@ -748,41 +751,37 @@ public class Commands extends PluginCommand<Main> {
                         } else {
                             id = item.getNamespaceId();
                         }
-                        String boxName = args.getResult(2);
+                        String boxName = args[2];
                         Config config;
                         if ((config = Box.addBoxConfig(boxName, id)) != null) {
                             Box box = Box.loadBox(boxName, config);
-                            Main.loadBox.put(boxName, box);
+                            RcRPGMain.loadBox.put(boxName, box);
                             sender.sendMessage("添加成功");
                         } else {
                             sender.sendMessage("添加失败");
                         }
                     }
                     case "del" -> {
-                        if (args.size() != 3) {
+                        if (args.length < 3) {
                             sender.sendMessage("参数错误");
-                            return 0;
+                            return false;
                         }
-                        String boxName = args.getResult(2);
+                        String boxName = args[2];
                         if (Box.delBoxConfig(boxName)) {
-                            Main.loadBox.remove(boxName);
+                            RcRPGMain.loadBox.remove(boxName);
                             sender.sendMessage("删除成功");
                         } else {
                             sender.sendMessage("删除失败");
                         }
                     }
                     case "give" -> {
-                        if (args.size() != 5) {
-                            sender.sendMessage("参数错误");
-                            return 0;
-                        }
-                        String playerName = args.getResult(2);
-                        String boxName = args.getResult(3);
-                        int count = args.getResult(4);
-                        Player player = Main.instance.getServer().getPlayer(playerName);
+                        String playerName = args[2];
+                        String boxName = args[3];
+                        int count = args.length > 4 ? Integer.parseInt(args[4]) : 1;
+                        Player player = RcRPGMain.instance.getServer().getPlayer(playerName);
                         if (!player.isOnline()) {
                             sender.sendMessage("玩家不在线");
-                            return 0;
+                            return false;
                         }
                         if (Box.giveBox(player, boxName, count)) {
                             if (sender.isPlayer()) sender.sendMessage("给予成功");
@@ -794,8 +793,11 @@ public class Commands extends PluginCommand<Main> {
                 break;
             }
             case "ornament": {
-                String arg = args.getResult(1);
-                switch (arg) {
+                if (args.length < 2) {
+                    sender.sendMessage(TextFormat.RED+"缺少第2个参数");
+                    return false;
+                }
+                switch (args[1]) {
                     case "help" -> {
                         sender.sendMessage("/rpg ornament add [Name] 创建一个名为Name的饰品配置");
                         sender.sendMessage("/rpg ornament del [Name] 删除一个名为Name的饰品配置");
@@ -804,23 +806,23 @@ public class Commands extends PluginCommand<Main> {
                     }
                     case "admin" -> {
                         if (!sender.isPlayer()) {
-                            log.addError("本命令必须是玩家执行").output();
-                            return 0;
+                            sender.sendMessage(TextFormat.RED+"本命令必须是玩家执行");
+                            return false;
                         }
                         new SendOrnamentAdminWin((Player) sender);
                     }
                     case "my" -> {
-                        if (args.size() != 2) {
+                        if (args.length < 2) {
                             sender.sendMessage("参数错误");
-                            return 0;
+                            return false;
                         }
                         OrnamentPanel panel = new OrnamentPanel();
                         panel.sendPanel((Player) sender);
                     }
                     case "add" -> {
-                        if (args.size() != 3) {
+                        if (args.length < 3) {
                             sender.sendMessage("参数错误");
-                            return 0;
+                            return false;
                         }
                         Item item = ((Player) sender).getInventory().getItemInHand();
                         String id;
@@ -829,41 +831,37 @@ public class Commands extends PluginCommand<Main> {
                         } else {
                             id = item.getNamespaceId();
                         }
-                        String ornamentName = args.getResult(2);
+                        String ornamentName = args[2];
                         Config config;
                         if ((config = Ornament.addOrnamentConfig(ornamentName,id)) != null) {
                             Ornament ornament = Ornament.loadOrnament(ornamentName,config);
-                            Main.loadOrnament.put(ornamentName,ornament);
+                            RcRPGMain.loadOrnament.put(ornamentName,ornament);
                             sender.sendMessage("添加成功");
                         } else {
                             sender.sendMessage("添加失败");
                         }
                     }
                     case "del" -> {
-                        if (args.size() != 3) {
+                        if (args.length < 3) {
                             sender.sendMessage("参数错误");
-                            return 0;
+                            return false;
                         }
-                        String ornamentName = args.getResult(2);
+                        String ornamentName = args[2];
                         if (Ornament.delOrnamentConfig(ornamentName)) {
-                            Main.loadOrnament.remove(ornamentName);
+                            RcRPGMain.loadOrnament.remove(ornamentName);
                             sender.sendMessage("删除成功");
                         } else {
                             sender.sendMessage("删除失败");
                         }
                     }
                     case "give" -> {
-                        if (args.size() != 5) {
-                            sender.sendMessage("参数错误");
-                            return 0;
-                        }
-                        String playerName = args.getResult(2);
-                        String ornamentName = args.getResult(3);
-                        int count = args.getResult(4);
-                        Player player = Main.instance.getServer().getPlayer(playerName);
+                        String playerName = args[2];
+                        String ornamentName = args[3];
+                        int count = args.length > 4 ? Integer.parseInt(args[4]) : 1;
+                        Player player = RcRPGMain.instance.getServer().getPlayer(playerName);
                         if (!player.isOnline()) {
                             sender.sendMessage("玩家不在线");
-                            return 0;
+                            return false;
                         }
                         if (Ornament.giveOrnament(player, ornamentName, count)) {
                             if (sender.isPlayer()) sender.sendMessage("给予成功");
@@ -875,7 +873,7 @@ public class Commands extends PluginCommand<Main> {
                 break;
             }
         }
-        return 0;
+        return false;
     }
 
 }

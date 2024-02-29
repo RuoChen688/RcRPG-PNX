@@ -2,10 +2,9 @@ package RcRPG.RPG;
 
 import RcRPG.AttrManager.ItemAttr;
 import RcRPG.Handle;
-import RcRPG.Main;
+import RcRPG.RcRPGMain;
 import cn.nukkit.Player;
 import cn.nukkit.item.Item;
-import cn.nukkit.item.RuntimeItems;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.nbt.tag.ListTag;
 import cn.nukkit.nbt.tag.StringTag;
@@ -94,7 +93,7 @@ public class Weapon extends ItemAttr {
 
             weapon.setLabel(config.getString("标签"));
             weapon.setShowName(config.getString("显示名称"));
-            weapon.setItem(RuntimeItems.getRuntimeMapping().getItemByNamespaceId(config.getString("物品ID"),1));
+            weapon.setItem(Item.fromString(config.getString("物品ID")));
             weapon.setUnBreak(config.getBoolean("无限耐久"));
             weapon.setOffHand(config.getBoolean("可副手"));
             weapon.setLevel(config.getInt("最低使用等级"));
@@ -140,13 +139,13 @@ public class Weapon extends ItemAttr {
             weapon.setServerMessage(config.getString("全服通知"));
             return weapon;
         }catch(Exception e){
-            Main.instance.getLogger().error("加载武器"+name+"配置文件失败");
+            RcRPGMain.instance.getLogger().error("加载武器"+name+"配置文件失败");
             return null;
         }
     }
 
     public static Config getWeaponConfig(String name){
-        File file = new File(Main.instance.getDataFolder()+"/Weapon/"+name+".yml");
+        File file = new File(RcRPGMain.instance.getDataFolder()+"/Weapon/"+name+".yml");
         Config config;
         if(file.exists()){
             config = new Config(file,Config.YAML);
@@ -158,8 +157,8 @@ public class Weapon extends ItemAttr {
 
     public static Config addWeaponConfig(String name,String id){
         if(getWeaponConfig(name) == null){
-            Main.instance.saveResource("Weapon.yml","/Weapon/"+name+".yml",false);
-            Config config = new Config(Main.instance.getWeaponFile()+"/"+name+".yml");
+            RcRPGMain.instance.saveResource("Weapon.yml","/Weapon/"+name+".yml",false);
+            Config config = new Config(RcRPGMain.instance.getWeaponFile()+"/"+name+".yml");
             config.set("物品ID",id);
             config.save();
             return config;
@@ -169,7 +168,7 @@ public class Weapon extends ItemAttr {
 
     public static boolean delWeaponConfig(String name){
         if(getWeaponConfig(name) != null){
-            File file = new File(Main.instance.getWeaponFile(),"/"+name+".yml");
+            File file = new File(RcRPGMain.instance.getWeaponFile(),"/"+name+".yml");
             file.delete();
             return true;
         }
@@ -177,7 +176,7 @@ public class Weapon extends ItemAttr {
     }
 
     public static Item getItem(String name,int count) {
-        Weapon weapon = Main.loadWeapon.get(name);
+        Weapon weapon = RcRPGMain.loadWeapon.get(name);
         Item item = weapon.getItem();
         item.setCount(count);
         CompoundTag tag = item.getNamedTag();
@@ -198,10 +197,10 @@ public class Weapon extends ItemAttr {
     }
 
     public static boolean giveWeapon(Player player,String name,int count){
-        if(!Main.loadWeapon.containsKey(name)) {
+        if(!RcRPGMain.loadWeapon.containsKey(name)) {
             return false;
         }
-        Weapon weapon = Main.loadWeapon.get(name);
+        Weapon weapon = RcRPGMain.loadWeapon.get(name);
         player.getInventory().addItem(getItem(name, count));
         if(!weapon.getMyMessage().equals("")){
             String text = weapon.getMyMessage();
@@ -213,7 +212,7 @@ public class Weapon extends ItemAttr {
             String text = weapon.getServerMessage();
             if(text.contains("@player")) text = text.replace("@player", player.getName());
             if(text.contains("@item")) text = text.replace("@item", weapon.getLabel());
-            Main.instance.getServer().broadcastMessage(text);
+            RcRPGMain.instance.getServer().broadcastMessage(text);
         }
         return true;
     }
@@ -235,7 +234,7 @@ public class Weapon extends ItemAttr {
         for(StringTag tag : tags.getAll()){
             list.add(Handle.getStoneViaName(tag.parseValue()));
         }
-        Weapon weapon = Main.loadWeapon.get(item.getNamedTag().getString("name"));
+        Weapon weapon = RcRPGMain.loadWeapon.get(item.getNamedTag().getString("name"));
         while(list.size() < weapon.getStone()){
             list.add(null);
         }
@@ -254,7 +253,7 @@ public class Weapon extends ItemAttr {
     @Deprecated
     public static boolean canInlay(Item item){
         if(Weapon.isWeapon(item)){
-            Weapon weapon = Main.loadWeapon.get(item.getNamedTag().getString("name"));
+            Weapon weapon = RcRPGMain.loadWeapon.get(item.getNamedTag().getString("name"));
             return Weapon.getStoneSize(item) < weapon.getStone();
         }else{
             return false;
@@ -301,7 +300,7 @@ public class Weapon extends ItemAttr {
 
     public static Item setWeaponLore(Item item){
         if(Weapon.isWeapon(item)){
-            Weapon weapon = Main.loadWeapon.get(item.getNamedTag().getString("name"));
+            Weapon weapon = RcRPGMain.loadWeapon.get(item.getNamedTag().getString("name"));
             ArrayList<String> lore;
             lore = (ArrayList<String>) weapon.getLoreList().clone();
             for (int i = 0;i < lore.size();i++) {

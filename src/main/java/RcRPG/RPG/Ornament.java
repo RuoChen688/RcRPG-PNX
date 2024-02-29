@@ -1,10 +1,9 @@
 package RcRPG.RPG;
 
 import RcRPG.AttrManager.ItemAttr;
-import RcRPG.Main;
+import RcRPG.RcRPGMain;
 import cn.nukkit.Player;
 import cn.nukkit.item.Item;
-import cn.nukkit.item.RuntimeItems;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.utils.Config;
 import lombok.Getter;
@@ -73,7 +72,7 @@ public class Ornament extends ItemAttr {
 
             ornament.setLabel(config.getString("标签"));
             ornament.setShowName(config.getString("显示名称"));
-            ornament.setItem(RuntimeItems.getRuntimeMapping().getItemByNamespaceId(config.getString("物品ID"),1));
+            ornament.setItem(Item.fromString(config.getString("物品ID")));
             ornament.setLevel(config.getInt("最低使用等级"));
 
             if (config.exists("属性")) {
@@ -96,13 +95,13 @@ public class Ornament extends ItemAttr {
             ornament.setEffectiveSlot(config.getInt("生效槽", -1));
             return ornament;
         }catch(Exception e){
-            Main.instance.getLogger().error("加载饰品"+name+"配置文件失败");
+            RcRPGMain.instance.getLogger().error("加载饰品"+name+"配置文件失败");
             return null;
         }
     }
 
     public static Config getOrnamentConfig(String name){
-        File file = new File(Main.instance.getDataFolder()+"/Ornament/"+name+".yml");
+        File file = new File(RcRPGMain.instance.getDataFolder()+"/Ornament/"+name+".yml");
         Config config;
         if(file.exists()){
             config = new Config(file,Config.YAML);
@@ -114,8 +113,8 @@ public class Ornament extends ItemAttr {
 
     public static Config addOrnamentConfig(String name,String id){
         if(getOrnamentConfig(name) == null){
-            Main.instance.saveResource("Ornament.yml","/Ornament/"+name+".yml",false);
-            Config config = new Config(Main.instance.getOrnamentFile()+"/"+name+".yml");
+            RcRPGMain.instance.saveResource("Ornament.yml","/Ornament/"+name+".yml",false);
+            Config config = new Config(RcRPGMain.instance.getOrnamentFile()+"/"+name+".yml");
             config.set("物品ID",id);
             config.save();
             return config;
@@ -125,7 +124,7 @@ public class Ornament extends ItemAttr {
 
     public static boolean delOrnamentConfig(String name){
         if(getOrnamentConfig(name) != null){
-            File file = new File(Main.instance.getOrnamentFile(),"/"+name+".yml");
+            File file = new File(RcRPGMain.instance.getOrnamentFile(),"/"+name+".yml");
             file.delete();
             return true;
         }
@@ -133,7 +132,7 @@ public class Ornament extends ItemAttr {
     }
 
     public static Item getItem(String name, int count) {
-        Ornament ornament = Main.loadOrnament.get(name);
+        Ornament ornament = RcRPGMain.loadOrnament.get(name);
         if (ornament == null) return Item.AIR_ITEM;
         Item item = ornament.getItem();
         item.setCount(count);
@@ -152,10 +151,10 @@ public class Ornament extends ItemAttr {
     }
 
     public static boolean giveOrnament(Player player, String name, int count){
-        if(!Main.loadOrnament.containsKey(name)) {
+        if(!RcRPGMain.loadOrnament.containsKey(name)) {
             return false;
         }
-        Ornament ornament = Main.loadOrnament.get(name);
+        Ornament ornament = RcRPGMain.loadOrnament.get(name);
         player.getInventory().addItem(getItem(name, count));
         if(!ornament.getMyMessage().equals("")){
             String text = ornament.getMyMessage();
@@ -167,7 +166,7 @@ public class Ornament extends ItemAttr {
             String text = ornament.getServerMessage();
             if(text.contains("@player")) text = text.replace("@player", player.getName());
             if(text.contains("@item")) text = text.replace("@item", ornament.getLabel());
-            Main.instance.getServer().broadcastMessage(text);
+            RcRPGMain.instance.getServer().broadcastMessage(text);
         }
         return true;
     }
@@ -184,7 +183,7 @@ public class Ornament extends ItemAttr {
 
     public static Item setOrnamentLore(Item item){
         if(Ornament.isOrnament(item)){
-            Ornament ornament = Main.loadOrnament.get(item.getNamedTag().getString("name"));
+            Ornament ornament = RcRPGMain.loadOrnament.get(item.getNamedTag().getString("name"));
             ArrayList<String> lore;
             lore = (ArrayList<String>) ornament.getLoreList().clone();
             for (int i = 0;i < lore.size();i++) {

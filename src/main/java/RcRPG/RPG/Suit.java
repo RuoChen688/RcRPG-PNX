@@ -1,7 +1,7 @@
 package RcRPG.RPG;
 
 import RcRPG.AttrManager.ItemAttr;
-import RcRPG.Main;
+import RcRPG.RcRPGMain;
 import cn.nukkit.utils.Config;
 import cn.nukkit.utils.ConfigSection;
 import lombok.Getter;
@@ -15,9 +15,9 @@ public class Suit {
     public static Map<String, SuitConfig> suitInfo = new HashMap<>();
 
     public static void init() {
-        Config cfg = new Config(Main.getInstance().getDataFolder() + "/SuitPlan.yml");
+        Config cfg = new Config(RcRPGMain.getInstance().getDataFolder() + "/SuitPlan.yml");
         cfg.getAll().keySet().forEach(suitName -> {
-            Main.getInstance().getLogger().info("suitName: "+suitName);
+            RcRPGMain.getInstance().getLogger().info("suitName: "+suitName);
             suitInfo.put(suitName, new SuitConfig(cfg.getSection(suitName)));
         });
     }

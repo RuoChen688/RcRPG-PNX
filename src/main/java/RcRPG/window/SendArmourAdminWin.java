@@ -1,6 +1,6 @@
 package RcRPG.window;
 
-import RcRPG.Main;
+import RcRPG.RcRPGMain;
 import RcRPG.RPG.Armour;
 import cn.nukkit.Player;
 import cn.nukkit.event.Listener;
@@ -14,8 +14,8 @@ public class SendArmourAdminWin implements Listener {
 
     public SendArmourAdminWin(Player player) {
         LangCode langCode = player.getLanguageCode();
-        FormWindowSimple form = new FormWindowSimple(Main.getI18n().tr(langCode, "rcrpg.window.armour.title"), Main.getI18n().tr(langCode, "rcrpg.window.select_config_manage"));
-        for (String key : Main.loadArmour.keySet()) {
+        FormWindowSimple form = new FormWindowSimple(RcRPGMain.getI18n().tr(langCode, "rcrpg.window.armour.title"), RcRPGMain.getI18n().tr(langCode, "rcrpg.window.select_config_manage"));
+        for (String key : RcRPGMain.loadArmour.keySet()) {
             form.addButton(new ElementButton(key));
         }
         form.addHandler(FormResponseHandler.withoutPlayer(ignored -> {
@@ -30,7 +30,7 @@ public class SendArmourAdminWin implements Listener {
     }
 
     public void SendArmourOptionsWin(Player player, String armourKey) {
-        Armour armour = Main.loadArmour.get(armourKey);
+        Armour armour = RcRPGMain.loadArmour.get(armourKey);
 
         FormWindowSimple form = new FormWindowSimple("RcRPG管理 - " + armourKey,
                 "显示名称: " + armour.getShowName() +

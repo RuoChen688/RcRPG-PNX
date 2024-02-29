@@ -1,6 +1,6 @@
 package RcRPG.AttrManager;
 
-import RcRPG.Main;
+import RcRPG.RcRPGMain;
 import RcRPG.RPG.*;
 import RcRPG.panel.ornament.OrnamentPanel;
 import cn.nukkit.Player;
@@ -34,8 +34,8 @@ public class PlayerAttr extends Manager {
 
     public void update() {
         // 等级加点
-        if (Main.instance.config.exists("等级增加血量")) {
-            String[] s = Main.instance.config.getString("等级增加血量").split(":");
+        if (RcRPGMain.instance.config.exists("等级增加血量")) {
+            String[] s = RcRPGMain.instance.config.getString("等级增加血量").split(":");
             int lvAddHealth;
             if (Level.enable) {
                 lvAddHealth = Level.getLevel(player) / Integer.parseInt(s[0]) * Integer.parseInt(s[1]);
@@ -47,7 +47,7 @@ public class PlayerAttr extends Manager {
                 Map<String, float[]> attr = new HashMap<>();
                 attr.put("血量值", new float[]{lvAddHealth, lvAddHealth});
                 if (pAttr != null) {
-                    pAttr.setItemAttrConfig(Main.getI18n().tr(player.getLanguageCode(), "rcrpg.playerattr.lv"), attr);
+                    pAttr.setItemAttrConfig(RcRPGMain.getI18n().tr(player.getLanguageCode(), "rcrpg.playerattr.lv"), attr);
                 }
             }
         }
@@ -64,7 +64,7 @@ public class PlayerAttr extends Manager {
         itemList.add(player.getOffhandInventory().getItem(0));
         for (Item rcItem : itemList) {
             if (rcItem.getNamedTag() == null) continue;
-            Weapon weapon = Main.loadWeapon.get(rcItem.getNamedTag().getString("name"));
+            Weapon weapon = RcRPGMain.loadWeapon.get(rcItem.getNamedTag().getString("name"));
             if (weapon == null) continue;
 
             if (!weapon.getSuit().isEmpty()) {
@@ -81,7 +81,7 @@ public class PlayerAttr extends Manager {
         // 护甲栏
         for (Item rcItem : player.getInventory().getArmorContents()) {
             if (rcItem.getNamedTag() == null) continue;
-            Armour armour = Main.loadArmour.get(rcItem.getNamedTag().getString("name"));
+            Armour armour = RcRPGMain.loadArmour.get(rcItem.getNamedTag().getString("name"));
             if (armour == null) continue;
             setItemAttrConfig(armour.getLabel(), armour.getMainAttr());
             checkItemStoneAttr(armour.getLabel(), Armour.getStones(rcItem), beforeLabel, labelList);
@@ -98,9 +98,9 @@ public class PlayerAttr extends Manager {
         Map<Integer,Item> map = OrnamentPanel.getPanel(player);
         if (!map.isEmpty()) {
             Map<String, float[]> attr = new HashMap<>();
-            for(int i = 0; i < Math.min(Main.getInstance().config.getInt("饰品生效格数"), map.size()); i++){
+            for(int i = 0; i < Math.min(RcRPGMain.getInstance().config.getInt("饰品生效格数"), map.size()); i++){
                 if (!map.get(i).hasCompoundTag()) continue;
-                Ornament ornament = Main.loadOrnament.get(map.get(i).getNamedTag().getString("name"));
+                Ornament ornament = RcRPGMain.loadOrnament.get(map.get(i).getNamedTag().getString("name"));
                 if (ornament == null) continue;
                 if (!ornament.isValidSlot(i)) continue;
                 OverAttr(attr,ornament.getMainAttr());
@@ -121,10 +121,10 @@ public class PlayerAttr extends Manager {
             int count = suitMap.get(name);
             ItemAttr suitAttr = Suit.getSuitAttr(name, count);
             if (suitAttr == null) return;
-            String label = Main.getI18n().tr(player.getLanguageCode(), "rcrpg.playerattr.suit.label", name, count);
+            String label = RcRPGMain.getI18n().tr(player.getLanguageCode(), "rcrpg.playerattr.suit.label", name, count);
             setItemAttrConfig(label, suitAttr.getMainAttr());
             if (!beforeLabel.contains(label)) {
-                player.sendActionBar(Main.getI18n().tr(player.getLanguageCode(), "rcrpg.playerattr.set_suit_message", name, count));
+                player.sendActionBar(RcRPGMain.getI18n().tr(player.getLanguageCode(), "rcrpg.playerattr.set_suit_message", name, count));
             }
             beforeLabel.remove(label);
             labelList.add(label);
@@ -204,7 +204,7 @@ public class PlayerAttr extends Manager {
                     attrMap.put(key, floatValue);
                 }
             } else {
-                Main.instance.getLogger().warning(key + "不知道是啥类型");
+                RcRPGMain.instance.getLogger().warning(key + "不知道是啥类型");
             }
         }
 
@@ -254,7 +254,7 @@ public class PlayerAttr extends Manager {
             } else if (value instanceof float[]){
                 attrMap.put(key, (float[]) value);
             } else {
-                Main.instance.getLogger().warning(key + "不知道是啥类型");
+                RcRPGMain.instance.getLogger().warning(key + "不知道是啥类型");
             }
         }
         Map<String, float[]> mainAttrMap = myAttr.get("Main");
@@ -389,7 +389,7 @@ public class PlayerAttr extends Manager {
       */
 
     public static String valueToString(float[] data, String attribute) {
-        List<String> attrDisplayPercent = Main.instance.attrDisplayPercentConfig;
+        List<String> attrDisplayPercent = RcRPGMain.instance.attrDisplayPercentConfig;
         String back = "";
         if (data.length == 2 && data[0] == data[1]) {
             data = new float[]{data[0]};

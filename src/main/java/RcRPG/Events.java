@@ -1,9 +1,10 @@
 package RcRPG;
 
-import RcEntity.entity.entity.BaseEntity;
-import RcEntity.entity.npc.NPC;
 import RcNPC.NPC.RcNPC;
-import RcRPG.AttrManager.*;
+import RcRPG.AttrManager.LittleMonsterAttr;
+import RcRPG.AttrManager.Manager;
+import RcRPG.AttrManager.PlayerAttr;
+import RcRPG.AttrManager.RcNPCAttr;
 import RcRPG.Form.guildForm;
 import RcRPG.RPG.*;
 import RcRPG.Society.Money;
@@ -11,8 +12,6 @@ import RcRPG.Society.Prefix;
 import RcRPG.Society.Shop;
 import RcRPG.Task.removeFloatingText;
 import RcRPG.guild.Guild;
-import RcRPG.panel.dismantle.DismantleInventory;
-import RcRPG.panel.ornament.OrnamentInventory;
 import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.block.Block;
@@ -24,14 +23,10 @@ import cn.nukkit.event.block.BlockBreakEvent;
 import cn.nukkit.event.entity.EntityDamageByEntityEvent;
 import cn.nukkit.event.entity.EntityDamageEvent;
 import cn.nukkit.event.entity.EntityRegainHealthEvent;
-import cn.nukkit.event.inventory.InventoryTransactionEvent;
 import cn.nukkit.event.player.*;
 import cn.nukkit.form.response.FormResponseCustom;
 import cn.nukkit.form.response.FormResponseData;
 import cn.nukkit.form.response.FormResponseSimple;
-import cn.nukkit.inventory.Inventory;
-import cn.nukkit.inventory.transaction.InventoryTransaction;
-import cn.nukkit.inventory.transaction.action.InventoryAction;
 import cn.nukkit.item.Item;
 import cn.nukkit.level.Location;
 import cn.nukkit.level.Sound;
@@ -44,7 +39,10 @@ import healthapi.PlayerHealth;
 
 import java.io.File;
 import java.text.DecimalFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.List;
 
 import static RcRPG.Handle.getProbabilisticResults;
 
@@ -70,7 +68,7 @@ public class Events implements Listener {
         Item item = event.getItem();
 
         if (event.getAction() == PlayerInteractEvent.Action.RIGHT_CLICK_AIR && Ornament.isOrnament(item)) {
-            player.sendActionBar(Main.getI18n().tr(player.getLanguageCode(), "rcrpg.event.item_consume"));
+            player.sendActionBar(RcRPGMain.getI18n().tr(player.getLanguageCode(), "rcrpg.event.item_consume"));
             event.setCancelled();
         }
 
@@ -85,7 +83,7 @@ public class Events implements Listener {
             Events.playerShop.remove(player);
             player.sendMessage("创建成功");
         }
-        if(Handle.getShopByPos(block) != null){
+        if (Handle.getShopByPos(block) != null) {
             Shop shop = Handle.getShopByPos(block);
             if(Events.playerMessage.containsKey(player)){
                 if(Shop.costPlayer(player,shop)) {
@@ -113,7 +111,7 @@ public class Events implements Listener {
             }
             Shop shop = Handle.getShopByPos(block);
             Shop.delShopConfig(shop.getName());
-            Main.loadShop.remove(shop.getName());
+            RcRPGMain.loadShop.remove(shop.getName());
             player.sendMessage("拆除成功");
         }
     }
@@ -125,12 +123,12 @@ public class Events implements Listener {
         if (item.isNull() || !Weapon.isWeapon(item)) {
             return;
         }
-        Weapon weapon = Main.loadWeapon.get(item.getNamedTag().getString("name"));
+        Weapon weapon = RcRPGMain.loadWeapon.get(item.getNamedTag().getString("name"));
 
         if (weapon == null) return;// TODO: 可能要做无效装备的清除？
 
         if (Level.enable ? Level.getLevel(player) < weapon.getLevel() : player.getExperienceLevel() < weapon.getLevel()) {
-            player.sendMessage(Main.getI18n().tr(player.getLanguageCode(), "rcrpg.events.insufficient_level_for_weapon"));
+            player.sendMessage(RcRPGMain.getI18n().tr(player.getLanguageCode(), "rcrpg.events.insufficient_level_for_weapon"));
             event.setCancelled();
         }
     }
@@ -167,7 +165,7 @@ public class Events implements Listener {
                     if (Handle.getGuilds().contains(response10.getInputResponse(1))) {
                         guildForm.create_failed(player);
                     } else {
-                        if (Money.getMoney(player) < Main.instance.config.getInt("公会创建初始资金")) {
+                        if (Money.getMoney(player) < RcRPGMain.instance.config.getInt("公会创建初始资金")) {
                             guildForm.create_failed(player);
                         } else {
                             Guild.addGuild(player, response10.getInputResponse(1));
@@ -304,16 +302,16 @@ public class Events implements Listener {
             DAttr = PlayerAttr.getPlayerAttr((Player) damager);
         } else if (hasLittleMonster && damager instanceof LittleNpc) {
             DAttr = new LittleMonsterAttr(((LittleNpc) damager).getConfig());
-        } else if (hasRcEntity && damager instanceof BaseEntity) {
-            String name = ((BaseEntity) damager).getName();
-            if (RcEntity.Main.getInstance().loadEntity.containsKey(name)) {
-                DAttr = new RcEntityAttr(RcEntity.Main.getInstance().loadEntity.get(name).getMonsterAttrMap());
-            }
-        } else if (hasRcEntity && damager instanceof NPC) {
-            String name = ((NPC) damager).getName();
-            if (RcEntity.Main.getInstance().loadEntity.containsKey(name)) {
-                DAttr = new RcEntityAttr(RcEntity.Main.getInstance().loadEntity.get(name).getMonsterAttrMap());
-            }
+//        } else if (hasRcEntity && damager instanceof BaseEntity) {
+//            String name = ((BaseEntity) damager).getName();
+//            if (RcEntity.Main.getInstance().loadEntity.containsKey(name)) {
+//                DAttr = new RcEntityAttr(RcEntity.Main.getInstance().loadEntity.get(name).getMonsterAttrMap());
+//            }
+//        } else if (hasRcEntity && damager instanceof NPC) {
+//            String name = ((NPC) damager).getName();
+//            if (RcEntity.Main.getInstance().loadEntity.containsKey(name)) {
+//                DAttr = new RcEntityAttr(RcEntity.Main.getInstance().loadEntity.get(name).getMonsterAttrMap());
+//            }
         } else if (hasRcNPC && damager instanceof RcNPC) {
             DAttr = new RcNPCAttr(((RcNPC) damager).getConfig());
         }
@@ -322,16 +320,16 @@ public class Events implements Listener {
             WAttr = PlayerAttr.getPlayerAttr((Player) wounded);
         } else if (hasLittleMonster && wounded instanceof LittleNpc) {
             WAttr = new LittleMonsterAttr(((LittleNpc) wounded).getConfig());
-        } else if (hasRcEntity && wounded instanceof BaseEntity) {
-            String name = ((BaseEntity) wounded).getName();
-            if (RcEntity.Main.getInstance().loadEntity.containsKey(name)) {
-                WAttr = new RcEntityAttr(RcEntity.Main.getInstance().loadEntity.get(name).getMonsterAttrMap());
-            }
-        } else if (hasRcEntity && wounded instanceof NPC) {
-            String name = ((NPC) wounded).getName();
-            if (RcEntity.Main.getInstance().loadEntity.containsKey(name)) {
-                WAttr = new RcEntityAttr(RcEntity.Main.getInstance().loadEntity.get(name).getMonsterAttrMap());
-            }
+//        } else if (hasRcEntity && wounded instanceof BaseEntity) {
+//            String name = ((BaseEntity) wounded).getName();
+//            if (RcEntity.Main.getInstance().loadEntity.containsKey(name)) {
+//                WAttr = new RcEntityAttr(RcEntity.Main.getInstance().loadEntity.get(name).getMonsterAttrMap());
+//            }
+//        } else if (hasRcEntity && wounded instanceof NPC) {
+//            String name = ((NPC) wounded).getName();
+//            if (RcEntity.Main.getInstance().loadEntity.containsKey(name)) {
+//                WAttr = new RcEntityAttr(RcEntity.Main.getInstance().loadEntity.get(name).getMonsterAttrMap());
+//            }
         } else if (hasRcNPC && wounded instanceof RcNPC) {
             WAttr = new RcNPCAttr(((RcNPC) wounded).getConfig());
         }
@@ -376,11 +374,11 @@ public class Events implements Listener {
         if (getProbabilisticResults(dodge - DAttr.hitChance)) {
             if (woundedIsPlayer) {
                 wounded.getLevel().addSound(wounded, Sound.valueOf("GAME_PLAYER_ATTACK_NODAMAGE"));
-                ((Player) wounded).sendMessage(Main.getI18n().tr(((Player) wounded).getLanguageCode(), "rcrpg.events.dodge_message_you_evaded", damagerName));
+                ((Player) wounded).sendMessage(RcRPGMain.getI18n().tr(((Player) wounded).getLanguageCode(), "rcrpg.events.dodge_message_you_evaded", damagerName));
             }
             if (damagerIsPlayer) {
                 damager.getLevel().addSound(damager, Sound.valueOf("GAME_PLAYER_ATTACK_NODAMAGE"));
-                ((Player) damager).sendMessage(Main.getI18n().tr(((Player) damager).getLanguageCode(), "rcrpg.events.dodge_message_enemy_evaded", woundedName));
+                ((Player) damager).sendMessage(RcRPGMain.getI18n().tr(((Player) damager).getLanguageCode(), "rcrpg.events.dodge_message_enemy_evaded", woundedName));
             }
             event.setCancelled(true);
             return;
@@ -531,7 +529,7 @@ public class Events implements Listener {
                     damager.heal(new EntityRegainHealthEvent(damager, (float) lifeSteal, RegainHealthEnum.LifeSteal.getCode()));
                 }
                 if (damagerIsPlayer) {
-                    ((Player) damager).sendMessage(Main.getI18n().tr(((Player) damager).getLanguageCode(), "rcrpg.events.life_steal_message", lifeSteal));
+                    ((Player) damager).sendMessage(RcRPGMain.getI18n().tr(((Player) damager).getLanguageCode(), "rcrpg.events.life_steal_message", lifeSteal));
                 }
             }
         }
@@ -551,7 +549,7 @@ public class Events implements Listener {
             Damage.onDamage((Player) damager, wounded);
 
             if (crtDamage > 0) {
-                ((Player) damager).sendMessage(Main.getI18n().tr(((Player) damager).getLanguageCode(), "rcrpg.events.critical_damage_message", woundedName, crtDamage));
+                ((Player) damager).sendMessage(RcRPGMain.getI18n().tr(((Player) damager).getLanguageCode(), "rcrpg.events.critical_damage_message", woundedName, crtDamage));
             }
 
             // 击杀提示
@@ -559,7 +557,7 @@ public class Events implements Listener {
                 finalDamage = (int) wounded.getHealth();
                 Item item = ((Player) damager).getInventory().getItemInHand();
                 if (!item.isNull() && Weapon.isWeapon(item)) {
-                    Weapon weapon = Main.loadWeapon.get(item.getNamedTag().getString("name"));
+                    Weapon weapon = RcRPGMain.loadWeapon.get(item.getNamedTag().getString("name"));
                     if (!weapon.getKillMessage().equals("")) {
                         String text = weapon.getKillMessage();
                         if(text.contains("@damager"))  text = text.replace("@damager", damagerName);
@@ -574,7 +572,7 @@ public class Events implements Listener {
             Vector3 go = Damage.go(damager.yaw, damager.pitch,2);
             FloatingText floatingText = new FloatingText(new Location(damager.x + go.x, damager.y+1, damager.z+ go.z, damager.level), "§c-"+finalDamage);
             floatingText.spawnToAll();
-            Main.instance.getServer().getScheduler().scheduleDelayedTask(new removeFloatingText(Main.instance, floatingText),15);
+            RcRPGMain.instance.getServer().getScheduler().scheduleDelayedTask(new removeFloatingText(RcRPGMain.instance, floatingText),15);
         }
     }
     @EventHandler
@@ -584,7 +582,7 @@ public class Events implements Listener {
         PlayerAttr attr = PlayerAttr.getPlayerAttr(player);
         if (attr == null) return;
         float speedAddition = attr.movementSpeedMultiplier;// 处理移速加成
-        if (speedAddition > 0) player.sendMovementSpeed(speedAddition);
+        //TODO: if (speedAddition > 0) player.sendMovementSpeed(speedAddition);
     }
 
     @EventHandler
@@ -602,12 +600,12 @@ public class Events implements Listener {
 
     @EventHandler
     public void chatEvent(PlayerChatEvent event){
-        if (Main.instance.disableChatStyle) return;
+        if (RcRPGMain.instance.disableChatStyle) return;
         Player player = event.getPlayer();
         String name = player.getName();
         String message = event.getMessage();
         event.setCancelled();
-        String text = Main.instance.config.getString("聊天显示");
+        String text = RcRPGMain.instance.config.getString("聊天显示");
         if(text.contains("@name")) text = text.replace("@name", player.getName());
         if(text.contains("@hp")) text = text.replace("@hp",String.valueOf(player.getHealth()));
         if(text.contains("@maxhp")) text = text.replace("@maxhp",String.valueOf(player.getMaxHealth()));
@@ -627,20 +625,20 @@ public class Events implements Listener {
 
         PlayerAttr.setPlayerAttr(player);
 
-        File file = new File(Main.instance.getDataFolder()+"/Players/"+name+".yml");
+        File file = new File(RcRPGMain.instance.getDataFolder()+"/Players/"+name+".yml");
         if(!file.exists()){
-            Main.instance.saveResource("Player.yml","/Players/"+name+".yml",false);
-            Config config = new Config(Main.instance.getPlayerFile()+"/"+name+".yml");
+            RcRPGMain.instance.saveResource("Player.yml","/Players/"+name+".yml",false);
+            Config config = new Config(RcRPGMain.instance.getPlayerFile()+"/"+name+".yml");
             config.set("名称",name);
-            config.set("公会",Main.instance.config.getString("初始公会"));
-            config.set("称号",Main.instance.config.getString("初始称号"));
+            config.set("公会", RcRPGMain.instance.config.getString("初始公会"));
+            config.set("称号", RcRPGMain.instance.config.getString("初始称号"));
             ArrayList<String> list = (ArrayList<String>) config.getStringList("称号列表");
-            list.add(Main.instance.config.getString("初始称号"));
+            list.add(RcRPGMain.instance.config.getString("初始称号"));
             config.set("称号列表",list);
             config.save();
         }
-        if (Main.instance.config.exists("顶部显示") && !Main.instance.config.getString("顶部显示").equals("")) {
-            String text = Main.instance.config.getString("顶部显示");
+        if (RcRPGMain.instance.config.exists("顶部显示") && !RcRPGMain.instance.config.getString("顶部显示").equals("")) {
+            String text = RcRPGMain.instance.config.getString("顶部显示");
             if (text.contains("@name")) text = text.replace("@name", player.getName());
             if (text.contains("@hp")) text = text.replace("@hp", String.valueOf(player.getHealth()));
             if (text.contains("@maxhp")) text = text.replace("@maxhp", String.valueOf(player.getMaxHealth()));
@@ -660,45 +658,18 @@ public class Events implements Listener {
 
     @EventHandler
     public void deathEvent(PlayerDeathEvent event) {
-        if ("death.attack.mob".equals(event.getTranslationDeathMessage().getText())) {
-            if (event.getTranslationDeathMessage().getParameter(1).isEmpty()) {
-                return;
-            }
-            event.getTranslationDeathMessage().setParameter(1, event.getTranslationDeathMessage().getParameter(1).split("\n")[0]+"§r§f");
-        } else if ("death.attack.arrow".equals(event.getTranslationDeathMessage().getText())) {
-            if (event.getTranslationDeathMessage().getParameter(1).isEmpty()) {
-                return;
-            }
-            event.getTranslationDeathMessage().setParameter(1, event.getTranslationDeathMessage().getParameter(1).split("\n")[0]+"§r§f");
-        }
-    }
-
-    @EventHandler
-    public void onOrnament(InventoryTransactionEvent event){
-        InventoryTransaction transaction = event.getTransaction();
-        for (InventoryAction action : transaction.getActions()) {
-            Item sourceItem = action.getSourceItem();
-            Item targetItem = action.getTargetItem();
-            for (Inventory inventory : transaction.getInventories()) {
-                if (inventory instanceof OrnamentInventory) {// 饰品箱子
-                    if (!Ornament.isOrnament(sourceItem) && !Ornament.isOrnament(targetItem)) {
-                        event.setCancelled();
-                    }
-                } else if (inventory instanceof DismantleInventory) {// 分解炉
-                    if (sourceItem.isNull()) {// 放装备至炉子
-                        if (!Armour.isArmour(targetItem) && !Weapon.isWeapon(targetItem)) {
-                            event.setCancelled();
-                            return;
-                        }
-                    } else {
-                        if (!Armour.isArmour(sourceItem) && !Weapon.isWeapon(sourceItem)) {
-                            event.setCancelled();
-                            return;
-                        }
-                    }
-                }
-            }
-        }
+        RcRPGMain.getInstance().getLogger().info(event.getDeathMessage().getText());
+//        if ("death.attack.mob".equals(event.getTranslationDeathMessage().getText())) {
+//            if (event.getTranslationDeathMessage().getParameter(1).isEmpty()) {
+//                return;
+//            }
+//            event.getTranslationDeathMessage().setParameter(1, event.getTranslationDeathMessage().getParameter(1).split("\n")[0]+"§r§f");
+//        } else if ("death.attack.arrow".equals(event.getTranslationDeathMessage().getText())) {
+//            if (event.getTranslationDeathMessage().getParameter(1).isEmpty()) {
+//                return;
+//            }
+//            event.getTranslationDeathMessage().setParameter(1, event.getTranslationDeathMessage().getParameter(1).split("\n")[0]+"§r§f");
+//        }
     }
 }
 

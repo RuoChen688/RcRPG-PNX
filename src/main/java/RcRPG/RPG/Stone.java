@@ -1,10 +1,9 @@
 package RcRPG.RPG;
 
 import RcRPG.AttrManager.ItemAttr;
-import RcRPG.Main;
+import RcRPG.RcRPGMain;
 import cn.nukkit.Player;
 import cn.nukkit.item.Item;
-import cn.nukkit.item.RuntimeItems;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.utils.Config;
 import lombok.Getter;
@@ -59,7 +58,7 @@ public class Stone extends ItemAttr {
 
             stone.setLabel(config.getString("标签"));
             stone.setShowName(config.getString("显示名称"));
-            stone.setItem(RuntimeItems.getMapping().getItemByNamespaceId(config.getString("物品ID"),1));
+            stone.setItem(Item.fromString(config.getString("物品ID")));
             stone.setType(config.getString("宝石类型"));
             if (config.exists("属性")) {
                 stone.setAttr(config.get("属性"));
@@ -78,13 +77,13 @@ public class Stone extends ItemAttr {
 
             return stone;
         }catch(Exception e){
-            Main.instance.getLogger().error("加载宝石"+name+"配置文件失败");
+            RcRPGMain.instance.getLogger().error("加载宝石"+name+"配置文件失败");
             return null;
         }
     }
 
     public static Config getStoneConfig(String name){
-        File file = new File(Main.instance.getDataFolder()+"/Stone/"+name+".yml");
+        File file = new File(RcRPGMain.instance.getDataFolder()+"/Stone/"+name+".yml");
         Config config;
         if(file.exists()){
             config = new Config(file,Config.YAML);
@@ -96,8 +95,8 @@ public class Stone extends ItemAttr {
 
     public static Config addStoneConfig(String name,String id){
         if(getStoneConfig(name) == null){
-            Main.instance.saveResource("Stone.yml","/Stone/"+name+".yml",false);
-            Config config = new Config(Main.instance.getStoneFile()+"/"+name+".yml");
+            RcRPGMain.instance.saveResource("Stone.yml","/Stone/"+name+".yml",false);
+            Config config = new Config(RcRPGMain.instance.getStoneFile()+"/"+name+".yml");
             config.set("物品ID",id);
             config.save();
             return config;
@@ -107,7 +106,7 @@ public class Stone extends ItemAttr {
 
     public static boolean delStoneConfig(String name){
         if(getStoneConfig(name) != null){
-            File file = new File(Main.instance.getStoneFile(),"/"+name+".yml");
+            File file = new File(RcRPGMain.instance.getStoneFile(),"/"+name+".yml");
             file.delete();
             return true;
         }
@@ -116,7 +115,7 @@ public class Stone extends ItemAttr {
 
     public static Item setStoneLore(Item item) {
         if (Stone.isStone(item)) {
-            Stone stone = Main.loadStone.get(item.getNamedTag().getString("name"));
+            Stone stone = RcRPGMain.loadStone.get(item.getNamedTag().getString("name"));
             ArrayList<String> lore;
             lore = (ArrayList<String>) stone.getLoreList().clone();
             for (int i = 0;i < lore.size();i++) {
@@ -130,9 +129,9 @@ public class Stone extends ItemAttr {
         return item;
     }
     public static Item getItem(String name, int count) {
-        if(Main.loadStone.containsKey(name)) {
-            Stone stone = Main.loadStone.get(name);
-            Item item = Main.loadStone.get(name).getItem();
+        if(RcRPGMain.loadStone.containsKey(name)) {
+            Stone stone = RcRPGMain.loadStone.get(name);
+            Item item = RcRPGMain.loadStone.get(name).getItem();
             item.setCount(count);
             CompoundTag tag = item.getNamedTag();
             if (tag == null) {
@@ -149,14 +148,14 @@ public class Stone extends ItemAttr {
         return null;
     }
     public static boolean giveStone(Player player, String name, int count){
-        if (!Main.loadStone.containsKey(name)) {
+        if (!RcRPGMain.loadStone.containsKey(name)) {
             return false;
         }
         Item item = getItem(name, count);
         if (item == null) {
             return false;
         }
-        Stone stone = Main.loadStone.get(name);
+        Stone stone = RcRPGMain.loadStone.get(name);
         player.getInventory().addItem(item);
         if(!stone.getMyMessage().equals("")){
             String text = stone.getMyMessage();
@@ -168,7 +167,7 @@ public class Stone extends ItemAttr {
             String text = stone.getServerMessage();
             if(text.contains("@player")) text = text.replace("@player", player.getName());
             if(text.contains("@item")) text = text.replace("@item", stone.getLabel());
-            Main.instance.getServer().broadcastMessage(text);
+            RcRPGMain.instance.getServer().broadcastMessage(text);
         }
         return true;
     }
@@ -196,7 +195,7 @@ public class Stone extends ItemAttr {
             item = player.getInventory().getItem(i);
             if(Stone.isStone(item)){
                 if(!list.contains(item.getNamedTag().getString("name")) &&
-                        Main.loadStone.get(item.getNamedTag().getString("name")).getType().equals(type)
+                        RcRPGMain.loadStone.get(item.getNamedTag().getString("name")).getType().equals(type)
                 ){
                     list.add(item.getNamedTag().getString("name"));
                 }
